@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-primary: #FAF7F2;
+  --color-etniko-dark: #1D2820;
+  --color-etniko-gold: #B68D40;
+  --color-etniko-cream: #FAF7F2;
+  --color-etniko-cream-alt: #F2EEE9;
+  --color-secondary: #D9C7A3;
+  --color-accent-gold: #B68D40;
+  --color-border-custom: #ECECEC;
+  --color-success: #3E7C59;
+  --color-error: #B42318;
+  --color-text-custom: #181818;
+  --color-background-custom: #FFFFFF;
+  --font-sans: 'Poppins', -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-text-custom font-sans antialiased selection:bg-accent-gold selection:text-white transition-colors duration-300;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-medium;
+  }
+}
+
+@layer components {
+  .btn-luxury {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5 border border-text-custom text-xs uppercase tracking-widest transition-all duration-500 bg-transparent text-text-custom hover:bg-text-custom hover:text-primary focus:outline-none overflow-hidden;
+  }
+  .btn-luxury-solid {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5 bg-text-custom text-primary text-xs uppercase tracking-widest transition-all duration-500 hover:bg-accent-gold hover:border-accent-gold focus:outline-none;
+  }
+  .btn-luxury-secondary {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5 border border-accent-gold text-xs uppercase tracking-widest transition-all duration-500 bg-transparent text-accent-gold hover:bg-accent-gold hover:text-primary focus:outline-none;
+  }
+  .card-premium {
+    @apply bg-white border border-border-custom transition-all duration-500 hover:shadow-md;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .look-shop-video {
+    @apply w-full h-[500px] object-cover rounded-none transition-transform duration-[2000ms] hover:scale-105;
+  }
+}
+
+.page-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F8F6F2;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #D9C7A3;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #B68D40;
+}
