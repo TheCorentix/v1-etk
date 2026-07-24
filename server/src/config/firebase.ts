@@ -2,19 +2,12 @@ import admin from 'firebase-admin';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import path from 'path';
-import fs from 'fs';
-import { env } from './env';
-
-const serviceAccountPath = path.isAbsolute(env.FIREBASE_SERVICE_ACCOUNT_PATH)
-  ? env.FIREBASE_SERVICE_ACCOUNT_PATH
-  : path.resolve(process.cwd(), env.FIREBASE_SERVICE_ACCOUNT_PATH);
 
 let firestoreInstance: any;
 let authInstance: any;
 
-if (!fs.existsSync(serviceAccountPath)) {
-  console.warn(`⚠️ Warning: Firebase service account file not found at: ${serviceAccountPath}`);
+if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+  console.warn('⚠️ Warning: FIREBASE_SERVICE_ACCOUNT environment variable is not set.');
   console.warn('⚠️ Server will run in OFFLINE MOCK MODE. Database operations will use local in-memory stores.');
 
   // Create a minimal in-memory mock Firestore client to avoid credential load failures
@@ -210,10 +203,9 @@ if (!fs.existsSync(serviceAccountPath)) {
 } else {
   try {
     if (getApps().length === 0) {
-      const credential = cert(JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8')));
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
       initializeApp({
-        credential,
-        projectId: env.FIREBASE_PROJECT_ID,
+        credential: cert(serviceAccount),
       });
     }
 
