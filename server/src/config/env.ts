@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const envSchema = z.object({
   PORT: z.string().default('5000').transform((val) => parseInt(val, 10)),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CLIENT_URL: z.string().url().default('http://localhost:5173'),
+  CLIENT_URL: z.string().default('http://localhost:5173'),
   JWT_SECRET: z.string().min(8, 'JWT_SECRET must be at least 8 characters long').default('your_super_secret_key'),
   CLOUDINARY_CLOUD_NAME: z.string().default('placeholder'),
   CLOUDINARY_API_KEY: z.string().default('placeholder'),
