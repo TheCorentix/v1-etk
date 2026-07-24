@@ -36,18 +36,35 @@ const app = express();
 // ----------------------
 app.use(helmet());
 
-const allowedOrigins = [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5174'];
+// ==========================================
+// CORS Configuration
+// ==========================================
+
+const allowedOrigins = env.CLIENT_URL.split(",").map((url) => url.trim());
+
+console.log("✅ Allowed Origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      console.log("🌍 Incoming Origin:", origin);
+
+      // Allow requests without Origin (Postman, curl, server-to-server)
+      if (!origin) {
+        return callback(null, true);
       }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.error("❌ Blocked Origin:", origin);
+
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
