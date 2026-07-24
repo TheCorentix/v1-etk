@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Scissors, Ruler, DollarSign, Calendar, FileText, Check, ArrowRight, ArrowLeft, Upload, CheckCircle, Shirt, MapPin, Venus, Mars, Baby, Layers } from 'lucide-react';
+import { Scissors, Ruler, DollarSign, Calendar, FileText, Check, ArrowRight, ArrowLeft, Upload, CheckCircle, Shirt, Venus, Mars, Baby, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
@@ -19,7 +19,7 @@ const STEPS_BY_SUBCATEGORY = {
   tailoring: [
     { id: 1, label: "Silhouettes", icon: Scissors },
     { id: 2, label: "Measurements", icon: Ruler },
-    { id: 3, label: "Budget & Dates", icon: Calendar },
+    { id: 3, label: "Contact & Dates", icon: Calendar },
     { id: 4, label: "Review & Submit", icon: Check }
   ]
 };
@@ -81,6 +81,8 @@ export default function Customize() {
     garmentType: "Saree",
     fabric: "Chanderi Silk",
     color: "Gold",
+    // Tailoring Customize path — free-text fabric details replace the swatch/color pickers
+    fabricDetails: "",
     // Product Customize path
     size: "M",
     needsAlteration: false,
@@ -94,12 +96,27 @@ export default function Customize() {
       shoulder: "",
       custom: ""
     },
-    fittingPreference: "Studio Visit",
+    fittingPreference: "Measurements Only",
+    // Tailoring Customize path — sender contact details
+    senderName: "",
+    senderPhone: "",
+    senderAddress: "",
     specialRequests: "",
     budget: "₹10,000 – ₹20,000",
     preferredDate: "",
     referenceImage: null
   });
+
+  // Pre-fill sender contact details from the signed-in profile when available.
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        senderName: prev.senderName || user.name || "",
+        senderPhone: prev.senderPhone || user.phone || "",
+      }));
+    }
+  }, [user]);
 
   const handleSubcategoryChange = (next) => {
     setSubcategory(next);
@@ -107,6 +124,23 @@ export default function Customize() {
   };
 
   const handleNext = () => {
+    // Tailoring Step 2: all core body measurements are mandatory before continuing.
+    if (step === 2 && subcategory === "tailoring") {
+      const { bust, waist, hips, height, shoulder } = formData.measurements;
+      const missing = [
+        ["Bust", bust],
+        ["Waist", waist],
+        ["Hips", hips],
+        ["Shoulders", shoulder],
+        ["Height", height],
+      ].filter(([, val]) => !String(val).trim());
+
+      if (missing.length > 0) {
+        toast.error(`Please enter all measurements: ${missing.map(([k]) => k).join(", ")}.`);
+        return;
+      }
+    }
+
     if (step < 4) setStep(prev => prev + 1);
   };
 
@@ -121,22 +155,41 @@ export default function Customize() {
       return;
     }
 
-    setLoading(true);
-
     const isTailoring = subcategory === "tailoring";
 
+    // Tailoring: sender contact details are mandatory.
+    if (isTailoring) {
+      if (!formData.senderName.trim()) {
+        toast.error("Please enter the sender's name.");
+        return;
+      }
+      if (formData.senderPhone.replace(/\D/g, "").length < 10) {
+        toast.error("Please enter a valid 10-digit contact number.");
+        return;
+      }
+      if (!formData.senderAddress.trim()) {
+        toast.error("Please enter the sender's address.");
+        return;
+      }
+    }
+
+    setLoading(true);
+
     const requestPayload = {
-      customerName: user.name || "Client",
-      phone: user.phone || "9999999999", // Fallback standard required 10-digit phone
+      customerName: isTailoring ? formData.senderName : (user.name || "Client"),
+      phone: isTailoring ? formData.senderPhone : (user.phone || "9999999999"), // 10-digit contact
       email: user.email,
       category: formData.garmentType,
       occasion: isTailoring ? "Bespoke Custom Tailoring" : "Silhouettes Customization",
-      fabricPref: formData.fabric,
-      colorPref: formData.color,
-      budgetRange: formData.budget,
+      // Tailoring uses a free-text fabric description; product uses the selected swatch.
+      fabricPref: isTailoring ? formData.fabricDetails : formData.fabric,
+      // Color preference and budget are omitted for tailoring.
+      colorPref: isTailoring ? "" : formData.color,
+      budgetRange: isTailoring ? "" : formData.budget,
+      address: isTailoring ? formData.senderAddress : "",
       deliveryDate: formData.preferredDate,
       notes: isTailoring
-        ? `Bust: ${formData.measurements.bust} | Waist: ${formData.measurements.waist} | Hips: ${formData.measurements.hips} | Height: ${formData.measurements.height} | Shoulder: ${formData.measurements.shoulder} | Custom Notes: ${formData.measurements.custom || 'None'} | Preference: ${formData.fittingPreference}`
+        ? `Bust: ${formData.measurements.bust} | Waist: ${formData.measurements.waist} | Hips: ${formData.measurements.hips} | Height: ${formData.measurements.height} | Shoulder: ${formData.measurements.shoulder} | Custom Notes: ${formData.measurements.custom || 'None'}`
         : `Selected Standard Size: ${formData.size} | Alterations: ${formData.needsAlteration ? 'Yes' : 'No'} (${formData.alterationNotes || 'None'})`,
       images: formData.referenceImage ? [formData.referenceImage] : [],
     };
@@ -349,58 +402,75 @@ export default function Customize() {
                         </div>
                       </div>
 
-                      {/* Base Fabric Swatch — card grid */}
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Base Fabric Swatch</label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {FABRIC_OPTIONS.map((fab) => {
-                            const selected = formData.fabric === fab;
-                            return (
-                              <button
-                                key={fab}
-                                type="button"
-                                onClick={() => setFormData({ ...formData, fabric: fab })}
-                                className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
-                                  selected
-                                    ? 'bg-[#B68D40] border-[#B68D40] text-white font-semibold'
-                                    : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
-                                }`}
-                              >
-                                <Layers className="w-3.5 h-3.5 shrink-0" />
-                                {fab}
-                              </button>
-                            );
-                          })}
+                      {/* Base Fabric — swatch grid for Product Customize, free-text details for Tailoring */}
+                      {subcategory === "product" ? (
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Base Fabric Swatch</label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {FABRIC_OPTIONS.map((fab) => {
+                              const selected = formData.fabric === fab;
+                              return (
+                                <button
+                                  key={fab}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, fabric: fab })}
+                                  className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
+                                    selected
+                                      ? 'bg-[#B68D40] border-[#B68D40] text-white font-semibold'
+                                      : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                  }`}
+                                >
+                                  <Layers className="w-3.5 h-3.5 shrink-0" />
+                                  {fab}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5" /> Fabric Details
+                          </label>
+                          <textarea
+                            rows={3}
+                            placeholder="Describe the fabric you'd like: type, weave, weight, color, GSM, or any swatch reference..."
+                            value={formData.fabricDetails}
+                            onChange={(e) => setFormData({ ...formData, fabricDetails: e.target.value })}
+                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          />
+                        </div>
+                      )}
 
-                      {/* Color Preference — card grid with swatch dot */}
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Color Preference</label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {COLOR_OPTIONS.map((c) => {
-                            const selected = formData.color === c.label;
-                            return (
-                              <button
-                                key={c.label}
-                                type="button"
-                                onClick={() => setFormData({ ...formData, color: c.label })}
-                                className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
-                                  selected
-                                    ? 'border-[#B68D40] bg-[#B68D40]/10 text-[#B68D40] font-semibold'
-                                    : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
-                                }`}
-                              >
-                                <span
-                                  className="w-4 h-4 rounded-full border border-neutral-400 shrink-0"
-                                  style={{ backgroundColor: c.hex }}
-                                />
-                                {c.label}
-                              </button>
-                            );
-                          })}
+                      {/* Color Preference — Product Customize only (Tailoring captures color within fabric details) */}
+                      {subcategory === "product" && (
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Color Preference</label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {COLOR_OPTIONS.map((c) => {
+                              const selected = formData.color === c.label;
+                              return (
+                                <button
+                                  key={c.label}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, color: c.label })}
+                                  className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
+                                    selected
+                                      ? 'border-[#B68D40] bg-[#B68D40]/10 text-[#B68D40] font-semibold'
+                                      : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                  }`}
+                                >
+                                  <span
+                                    className="w-4 h-4 rounded-full border border-neutral-400 shrink-0"
+                                    style={{ backgroundColor: c.hex }}
+                                  />
+                                  {c.label}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -588,51 +658,71 @@ export default function Customize() {
                         className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
                       />
                     </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Fitting Preference</label>
-                      <div className="flex flex-wrap gap-2">
-                        {["Studio Visit", "Home Visit", "Measurements Only"].map((opt) => (
-                          <button
-                            key={opt}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, fittingPreference: opt })}
-                            className={`flex items-center gap-1.5 px-3.5 py-2 text-[10px] uppercase tracking-widest font-sans font-bold border transition-all duration-200 ${
-                              formData.fittingPreference === opt
-                                ? 'bg-[#B68D40] border-[#B68D40] text-white'
-                                : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-neutral-500 hover:border-[#B68D40]'
-                            }`}
-                          >
-                            <MapPin className="w-3 h-3" />
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 )}
 
-                {/* STEP 3: BUDGET & DELIVERIES (shared, reference image required for tailoring) */}
+                {/* STEP 3: BUDGET/CONTACT & DELIVERIES (shared, reference image required for tailoring) */}
                 {step === 3 && (
                   <div className="space-y-6">
                     <h3 className="font-serif text-lg tracking-wider border-b border-neutral-100 pb-3 uppercase text-[#B68D40]">
-                      Budget & Timeline Guidelines
+                      {subcategory === "tailoring" ? "Contact & Timeline" : "Budget & Timeline Guidelines"}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Estimated Budget Range</label>
-                        <select
-                          value={formData.budget}
-                          onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
-                        >
-                          <option value="₹5,000 – ₹10,000">₹5,000 – ₹10,000</option>
-                          <option value="₹10,000 – ₹20,000">₹10,000 – ₹20,000</option>
-                          <option value="₹20,000 – ₹35,000">₹20,000 – ₹35,000</option>
-                          <option value="Above ₹35,000">Above ₹35,000 (Luxury couture)</option>
-                        </select>
-                      </div>
+                      {/* Sender contact details — Tailoring only */}
+                      {subcategory === "tailoring" && (
+                        <>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Sender's Name <span className="text-[#B68D40]">*</span></label>
+                            <input
+                              type="text"
+                              placeholder="Full name"
+                              value={formData.senderName}
+                              onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Contact Number <span className="text-[#B68D40]">*</span></label>
+                            <input
+                              type="tel"
+                              placeholder="10-digit mobile number"
+                              value={formData.senderPhone}
+                              onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
+                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            />
+                          </div>
+
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Address <span className="text-[#B68D40]">*</span></label>
+                            <textarea
+                              rows={2}
+                              placeholder="Full postal address for pickup / delivery correspondence..."
+                              value={formData.senderAddress}
+                              onChange={(e) => setFormData({ ...formData, senderAddress: e.target.value })}
+                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {/* Estimated budget — Product Customize only */}
+                      {subcategory === "product" && (
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Estimated Budget Range</label>
+                          <select
+                            value={formData.budget}
+                            onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          >
+                            <option value="₹5,000 – ₹10,000">₹5,000 – ₹10,000</option>
+                            <option value="₹10,000 – ₹20,000">₹10,000 – ₹20,000</option>
+                            <option value="₹20,000 – ₹35,000">₹20,000 – ₹35,000</option>
+                            <option value="Above ₹35,000">Above ₹35,000 (Luxury couture)</option>
+                          </select>
+                        </div>
+                      )}
 
                       <div className="space-y-1">
                         <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Target Delivery Date</label>
@@ -705,17 +795,39 @@ export default function Customize() {
                         </h4>
                         <div className="space-y-1">
                           <p><span className="text-neutral-400">Garment Type:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.garmentType} ({formData.category})</span></p>
-                          <p><span className="text-neutral-400">Fabric Swatch:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.fabric}</span></p>
-                          <p><span className="text-neutral-400">Color Choice:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.color}</span></p>
+                          {subcategory === "tailoring" ? (
+                            <p><span className="text-neutral-400">Fabric Details:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.fabricDetails || "—"}</span></p>
+                          ) : (
+                            <>
+                              <p><span className="text-neutral-400">Fabric Swatch:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.fabric}</span></p>
+                              <p><span className="text-neutral-400">Color Choice:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.color}</span></p>
+                            </>
+                          )}
                         </div>
 
-                        <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1 pt-2">
-                          Budget & Schedule
-                        </h4>
-                        <div className="space-y-1">
-                          <p><span className="text-neutral-400">Estimate Budget:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.budget}</span></p>
-                          <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.preferredDate || "Open Timeline"}</span></p>
-                        </div>
+                        {subcategory === "tailoring" ? (
+                          <>
+                            <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1 pt-2">
+                              Contact & Schedule
+                            </h4>
+                            <div className="space-y-1">
+                              <p><span className="text-neutral-400">Name:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderName || "—"}</span></p>
+                              <p><span className="text-neutral-400">Contact:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderPhone || "—"}</span></p>
+                              <p><span className="text-neutral-400">Address:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderAddress || "—"}</span></p>
+                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.preferredDate || "Open Timeline"}</span></p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1 pt-2">
+                              Budget & Schedule
+                            </h4>
+                            <div className="space-y-1">
+                              <p><span className="text-neutral-400">Estimate Budget:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.budget}</span></p>
+                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.preferredDate || "Open Timeline"}</span></p>
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="space-y-4">
@@ -756,9 +868,6 @@ export default function Customize() {
                                 <span className="font-bold text-text-custom dark:text-primary">{formData.measurements.hips || "—"}</span>
                               </div>
                             </div>
-                            <p className="text-[10px] text-neutral-500">
-                              Fitting: <span className="font-bold text-text-custom dark:text-primary">{formData.fittingPreference}</span>
-                            </p>
                             {formData.measurements.custom && (
                               <p className="text-[10px] text-neutral-500 italic mt-1">"{formData.measurements.custom}"</p>
                             )}

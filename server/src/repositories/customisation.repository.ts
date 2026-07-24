@@ -17,9 +17,10 @@ export interface CustomisationDocument {
   whatsappNumber?: string | null;
   category: string; // e.g. "Saree", "Lehenga"
   occasion: string; // e.g. "Bridal Wedding"
-  fabricPref?: string | null;
+  fabricPref?: string | null; // For tailoring, stores free-text fabric details
   colorPref?: string | null;
   budgetRange?: string | null;
+  address?: string | null; // Sender's postal address (used by bespoke tailoring requests)
   deliveryDate?: string | null;
   images: string[]; // Cloudinary secure URLs of design sketches/inspiration photos
   notes?: string | null; // Measurement values and stylist summary details

@@ -15,9 +15,10 @@ export const createCustomisationSchema = z.object({
     occasion: z.string({
       message: 'Occasion details are required',
     }).min(1, 'Occasion cannot be empty'),
-    fabricPref: z.string().optional().nullable(),
+    fabricPref: z.string().optional().nullable(), // For tailoring, free-text fabric details
     colorPref: z.string().optional().nullable(),
     budgetRange: z.string().optional().nullable(),
+    address: z.string().optional().nullable(), // Sender's postal address (bespoke tailoring)
     deliveryDate: z.string().optional().nullable(),
     notes: z.string().optional().nullable(), // Stores measurement details and styling notes
   }),

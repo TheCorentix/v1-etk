@@ -252,39 +252,7 @@ export default function Navbar({ onOpenCart }) {
                 <div className="fixed left-0 right-0 top-[8.75rem] bg-[#FFFDFC] text-[#181818] border border-[#E6DCCF] rounded-b-2xl shadow-xl p-8 z-50 transition-opacity duration-300 ease-out">
                   <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-8">
 
-                    {/* Column 1: MEN */}
-                    <div className="col-span-3 space-y-6 flex flex-col justify-between text-left">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 border-b border-[#E6DCCF] pb-2">
-                          <svg className="w-5 h-5 text-[#B68D40]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M6 3L12 8L18 3M12 8V21M6 3H9M18 3H15" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M4 8H20" strokeLinecap="round"/>
-                          </svg>
-                          <h3 className="font-serif text-sm tracking-widest uppercase font-bold text-[#181818]">MEN</h3>
-                        </div>
-
-                        <div className="flex flex-col space-y-2 text-xs text-[#6E6E6E] font-sans font-semibold">
-                          <Link to="/shop?category=MEN&subcategory=Kurtas" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
-                            <span>Kurtas</span>
-                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
-                          </Link>
-                          <Link to="/shop?category=MEN&subcategory=Sherwanis" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
-                            <span>Sherwanis</span>
-                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
-                          </Link>
-                          <Link to="/shop?category=MEN" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
-                            <span>Dhotis</span>
-                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div className="aspect-[1.5/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
-                        <img src={menSherwaniSun} alt="Men's collection" className="w-full h-full object-cover object-top" loading="lazy" />
-                      </div>
-                    </div>
-
-                    {/* Column 2: WOMEN */}
+                    {/* Column 1: WOMEN */}
                     <div className="col-span-3 space-y-6 flex flex-col justify-between text-left">
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 border-b border-[#E6DCCF] pb-2">
@@ -324,6 +292,38 @@ export default function Navbar({ onOpenCart }) {
 
                       <div className="aspect-[2.3/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
                         <img src={womenMaroonLehenga} alt="Women's collection" className="w-full h-full object-cover object-center" loading="lazy" />
+                      </div>
+                    </div>
+
+                    {/* Column 2: MEN */}
+                    <div className="col-span-3 space-y-6 flex flex-col justify-between text-left">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 border-b border-[#E6DCCF] pb-2">
+                          <svg className="w-5 h-5 text-[#B68D40]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M6 3L12 8L18 3M12 8V21M6 3H9M18 3H15" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M4 8H20" strokeLinecap="round"/>
+                          </svg>
+                          <h3 className="font-serif text-sm tracking-widest uppercase font-bold text-[#181818]">MEN</h3>
+                        </div>
+
+                        <div className="flex flex-col space-y-2 text-xs text-[#6E6E6E] font-sans font-semibold">
+                          <Link to="/shop?category=MEN&subcategory=Kurtas" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
+                            <span>Kurtas</span>
+                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
+                          </Link>
+                          <Link to="/shop?category=MEN&subcategory=Sherwanis" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
+                            <span>Sherwanis</span>
+                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
+                          </Link>
+                          <Link to="/shop?category=MEN" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
+                            <span>Dhotis</span>
+                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                      <div className="aspect-[1.5/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
+                        <img src={menSherwaniSun} alt="Men's collection" className="w-full h-full object-cover object-top" loading="lazy" />
                       </div>
                     </div>
 
@@ -519,19 +519,7 @@ export default function Navbar({ onOpenCart }) {
                   id="mobile-shop-menu"
                   className="mt-5 ml-4 flex flex-col space-y-2 max-h-[45vh] overflow-y-auto pr-2"
                 >
-                  <p className="text-[#B68D40] font-bold">MEN</p>
-
-                  <Link to="/shop?category=MEN&subcategory=Kurtas" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
-                    Kurtas
-                  </Link>
-                  <Link to="/shop?category=MEN&subcategory=Sherwanis" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
-                    Sherwanis
-                  </Link>
-                  <Link to="/shop?category=MEN" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
-                    Dhotis
-                  </Link>
-
-                  <p className="pt-3 text-[#B68D40] font-bold">WOMEN</p>
+                  <p className="text-[#B68D40] font-bold">WOMEN</p>
 
                   <Link to="/shop?category=WOMEN&subcategory=Sarees" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
                     Sarees
@@ -550,6 +538,18 @@ export default function Navbar({ onOpenCart }) {
                   </Link>
                   <Link to="/shop?category=WOMEN&subcategory=Anarkalis" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
                     Frocks
+                  </Link>
+
+                  <p className="pt-3 text-[#B68D40] font-bold">MEN</p>
+
+                  <Link to="/shop?category=MEN&subcategory=Kurtas" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
+                    Kurtas
+                  </Link>
+                  <Link to="/shop?category=MEN&subcategory=Sherwanis" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
+                    Sherwanis
+                  </Link>
+                  <Link to="/shop?category=MEN" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
+                    Dhotis
                   </Link>
 
                   <p className="pt-3 text-[#B68D40] font-bold">KIDS</p>

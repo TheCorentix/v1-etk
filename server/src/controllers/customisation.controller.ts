@@ -22,6 +22,7 @@ export class CustomisationController {
         fabricPref,
         colorPref,
         budgetRange,
+        address,
         deliveryDate,
         notes,
       } = req.body;
@@ -41,6 +42,7 @@ export class CustomisationController {
           fabricPref: fabricPref || null,
           colorPref: colorPref || null,
           budgetRange: budgetRange || null,
+          address: address || null,
           deliveryDate: deliveryDate || null,
           notes: notes || null,
         },
