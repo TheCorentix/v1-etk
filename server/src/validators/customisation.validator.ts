@@ -47,7 +47,7 @@ export const addNoteSchema = z.object({
 // Schema for transitioning status
 export const updateCustomisationStatusSchema = z.object({
   body: z.object({
-    status: z.enum(['NEW', 'IN_DISCUSSION', 'CONFIRMED', 'IN_PRODUCTION', 'READY', 'DELIVERED'], {
+    status: z.enum(['NEW', 'ORDER_TAKEN', 'SHIPPED', 'DELIVERED'], {
       message: 'Invalid status value. Must match the customisation status workflow.',
     }),
   }),

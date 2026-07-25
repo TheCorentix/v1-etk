@@ -15,6 +15,8 @@ const envSchema = z.object({
   FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
+  // Comma-separated list of emails that should be granted the ADMIN role on login/register.
+  ADMIN_EMAILS: z.string().default('admin@etniko.studio'),
 });
 const parseEnv = () => {
   const result = envSchema.safeParse(process.env);

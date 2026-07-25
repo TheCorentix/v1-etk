@@ -406,7 +406,7 @@ export default function ProductDetails() {
                 className="flex-grow btn-luxury-solid py-4 flex items-center justify-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>{added ? "ADDED TO COUTURE BAG" : "ADD TO COUTURE BAG"}</span>
+                <span>{added ? "ADDED TO BAG" : "ADD TO BAG"}</span>
               </button>
             ) : (
               <button
@@ -430,7 +430,7 @@ export default function ProductDetails() {
           {product.customizationAvailable && (
             <div className="bg-[#F8F6F2] dark:bg-neutral-900 border border-[#D9C7A3] p-4 space-y-2">
               <h5 className="text-[10px] font-sans font-semibold tracking-wider text-[#B68D40] uppercase">
-                Bespoke Sizing & Styling Available
+                Custom Sizing & Styling Available
               </h5>
               <p className="text-[10px] font-sans text-neutral-500 leading-relaxed text-justify">
                 This designer garment can be tailored according to your custom measurements. Access our custom draping request flow to submit styling notes.

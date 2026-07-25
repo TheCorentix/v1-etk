@@ -13,7 +13,8 @@ export class ProductService {
    */
   async createProduct(
     productData: Omit<ProductDocument, 'slug' | 'sku' | 'images'>,
-    localImagePaths: string[]
+    localImagePaths: string[],
+    existingImageUrls: string[] = []
   ): Promise<ProductDocument> {
     try {
       // 1. Generate unique URL lookup slug
@@ -27,18 +28,20 @@ export class ProductService {
       const nextSequence = await this.productRepository.getNextSequence();
       const sku = generateSku(productData.category, productData.fabric, nextSequence);
 
-      // 3. Upload gallery pictures to Cloudinary products folder
-      const imageUrls: string[] = [];
+      // 3. Upload gallery pictures to Cloudinary products folder, then merge with
+      //    any URLs already picked from the media library.
+      const uploadedUrls: string[] = [];
       for (const path of localImagePaths) {
         const uploadResult = await uploadToCloudinary(path, 'products');
-        imageUrls.push(uploadResult.secureUrl);
+        uploadedUrls.push(uploadResult.secureUrl);
       }
+      const images = [...existingImageUrls, ...uploadedUrls];
 
       const newProduct: ProductDocument = {
         ...productData,
         slug,
         sku,
-        images: imageUrls,
+        images,
       };
 
       const createdProduct = await this.productRepository.create(newProduct);

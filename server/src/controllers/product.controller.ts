@@ -25,6 +25,8 @@ export class ProductController {
         type,
         status,
         care,
+        imageUrls,
+        weight,
       } = req.body;
 
       // Extract local files paths populated by Multer
@@ -36,6 +38,8 @@ export class ProductController {
       const parsedDiscountPrice = discountPrice ? (typeof discountPrice === 'string' ? parseInt(discountPrice, 10) : discountPrice) : null;
       const parsedColors = typeof colors === 'string' ? JSON.parse(colors) : colors;
       const parsedSizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
+      const parsedImageUrls = typeof imageUrls === 'string' ? JSON.parse(imageUrls) : (imageUrls || []);
+      const parsedWeight = weight !== undefined && weight !== '' ? parseFloat(weight) : undefined;
 
       const product = await this.productService.createProduct(
         {
@@ -47,13 +51,15 @@ export class ProductController {
           description,
           story: story || null,
           fabric,
+          weight: parsedWeight,
           colors: parsedColors || [],
           sizes: parsedSizes || {},
           type,
           status: status || 'DRAFT',
           care: care || null,
         },
-        localImagePaths
+        localImagePaths,
+        parsedImageUrls
       );
 
       sendSuccess(res, { product }, 'Product registered successfully.', 201);
@@ -82,6 +88,7 @@ export class ProductController {
         type,
         status,
         care,
+        weight,
       } = req.body;
 
       const files = req.files as Express.Multer.File[] || [];
@@ -97,6 +104,7 @@ export class ProductController {
       if (description) parsedFields.description = description;
       if (story !== undefined) parsedFields.story = story || null;
       if (fabric) parsedFields.fabric = fabric;
+      if (weight !== undefined && weight !== '') parsedFields.weight = parseFloat(weight);
       if (colors) parsedFields.colors = typeof colors === 'string' ? JSON.parse(colors) : colors;
       if (sizes) parsedFields.sizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
       if (type) parsedFields.type = type;

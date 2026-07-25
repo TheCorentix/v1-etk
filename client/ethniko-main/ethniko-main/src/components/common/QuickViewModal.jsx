@@ -126,7 +126,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                       className="flex-grow btn-luxury-solid flex items-center justify-center gap-2"
                     >
                       <ShoppingBag className="w-4 h-4" />
-                      <span>{added ? "ADDED TO BAG" : "ADD TO COUTURE BAG"}</span>
+                      <span>{added ? "ADDED TO BAG" : "ADD TO BAG"}</span>
                     </button>
                   ) : (
                     <button

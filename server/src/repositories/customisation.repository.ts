@@ -24,7 +24,7 @@ export interface CustomisationDocument {
   deliveryDate?: string | null;
   images: string[]; // Cloudinary secure URLs of design sketches/inspiration photos
   notes?: string | null; // Measurement values and stylist summary details
-  status: 'NEW' | 'IN_DISCUSSION' | 'CONFIRMED' | 'IN_PRODUCTION' | 'READY' | 'DELIVERED';
+  status: 'NEW' | 'ORDER_TAKEN' | 'SHIPPED' | 'DELIVERED';
   adminNotes: AdminNote[];
   createdAt?: string;
   updatedAt?: string;
@@ -32,7 +32,7 @@ export interface CustomisationDocument {
 
 export interface CustomisationFilters {
   userId?: string;
-  status?: 'NEW' | 'IN_DISCUSSION' | 'CONFIRMED' | 'IN_PRODUCTION' | 'READY' | 'DELIVERED';
+  status?: 'NEW' | 'ORDER_TAKEN' | 'SHIPPED' | 'DELIVERED';
 }
 
 export class CustomisationRepository {

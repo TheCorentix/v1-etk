@@ -23,8 +23,17 @@ export interface OrderDocument {
   items: OrderItem[];
   subtotal: number; // In Paise
   gst: number; // In Paise
-  shipping: number; // In Paise
+  shipping: number; // In Paise (charged in INR)
   total: number; // In Paise
+  // International shipping / currency display (payment is always INR)
+  shippingWeightKg?: number;
+  shippingMethod?: string; // 'domestic' | 'economy' | 'express' | 'bulk'
+  shippingEta?: string;
+  currencyCode?: string; // Destination currency for display
+  currencySymbol?: string;
+  conversionRate?: number; // INR -> destination currency
+  shippingConverted?: number; // shipping in destination currency
+  totalConverted?: number; // order total in destination currency
   razorpayOrderId: string | null;
   razorpayPaymentId: string | null;
   razorpaySignature: string | null;

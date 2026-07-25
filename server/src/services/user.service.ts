@@ -2,6 +2,15 @@ import { auth } from '../config/firebase';
 import { UserRepository, UserDocument, UserAddress } from '../repositories/user.repository';
 import { generateToken } from '../utils/jwt';
 import { logger } from '../config/logger';
+import { env } from '../config/env';
+
+// Emails configured (via ADMIN_EMAILS) to receive the ADMIN role automatically.
+const ADMIN_EMAILS = new Set(
+  env.ADMIN_EMAILS.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
+);
+
+const resolveRole = (email: string): UserDocument['role'] =>
+  ADMIN_EMAILS.has(email.toLowerCase()) ? 'ADMIN' : 'CUSTOMER';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -32,12 +41,12 @@ export class UserService {
         throw new Error('User account is already registered in our system.');
       }
 
-      // 3. Persist profile document to database (default role: CUSTOMER)
+      // 3. Persist profile document to database (role elevated for configured admin emails)
       const newUser: Omit<UserDocument, 'id'> = {
         email: email.toLowerCase(),
         name,
         phone,
-        role: 'CUSTOMER',
+        role: resolveRole(email),
         addresses: [],
       };
 
@@ -83,11 +92,15 @@ export class UserService {
           email: email.toLowerCase(),
           name: name || 'Couture Client',
           phone: '',
-          role: 'CUSTOMER',
+          role: resolveRole(email),
           addresses: [],
         };
         userDoc = await this.userRepository.save(uid, newUser);
-        logger.info(`👤 Auto-created missing user document for: ${email}`);
+        logger.info(`👤 Auto-created missing user document for: ${email} (role: ${newUser.role})`);
+      } else if (resolveRole(email) === 'ADMIN' && userDoc.role !== 'ADMIN') {
+        // Elevate an existing account whose email is now configured as an admin.
+        userDoc = (await this.userRepository.save(uid, { ...userDoc, role: 'ADMIN' })) || userDoc;
+        logger.info(`👤 Elevated existing account to ADMIN: ${email}`);
       }
 
       // 4. Issue custom JWT token

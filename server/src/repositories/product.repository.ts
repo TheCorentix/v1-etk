@@ -15,6 +15,7 @@ export interface ProductDocument {
   description: string;
   story?: string | null;
   fabric: string;
+  weight?: number; // Product weight in kilograms (used for international shipping)
   colors: string[];
   sizes: { [size: string]: number }; // Inventory map (e.g. { S: 10, M: 5 })
   images: string[];

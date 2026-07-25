@@ -11,13 +11,13 @@ import toast from 'react-hot-toast';
 // "Tailoring Customize" needs full body measurements.
 const STEPS_BY_SUBCATEGORY = {
   product: [
-    { id: 1, label: "Silhouettes", icon: Scissors },
+    { id: 1, label: "Garment", icon: Scissors },
     { id: 2, label: "Size", icon: Ruler },
     { id: 3, label: "Budget & Dates", icon: Calendar },
     { id: 4, label: "Review & Submit", icon: Check }
   ],
   tailoring: [
-    { id: 1, label: "Silhouettes", icon: Scissors },
+    { id: 1, label: "Garment", icon: Scissors },
     { id: 2, label: "Measurements", icon: Ruler },
     { id: 3, label: "Contact & Dates", icon: Calendar },
     { id: 4, label: "Review & Submit", icon: Check }
@@ -29,9 +29,9 @@ const STANDARD_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 // Card-based option data for Step 1 (used by both Product Customize and
 // Tailoring Customize, since Step 1 is shared between the two paths).
 const SEGMENT_OPTIONS = [
-  { value: "WOMEN", label: "Women's Couture", icon: Venus },
-  { value: "MEN", label: "Men's Couture", icon: Mars },
-  { value: "KIDS", label: "Kids Couture", icon: Baby }
+  { value: "WOMEN", label: "Women", icon: Venus },
+  { value: "MEN", label: "Men", icon: Mars },
+  { value: "KIDS", label: "Kids", icon: Baby }
 ];
 
 const GARMENT_OPTIONS = {
@@ -180,7 +180,7 @@ export default function Customize() {
       phone: isTailoring ? formData.senderPhone : (user.phone || "9999999999"), // 10-digit contact
       email: user.email,
       category: formData.garmentType,
-      occasion: isTailoring ? "Bespoke Custom Tailoring" : "Silhouettes Customization",
+      occasion: isTailoring ? "Custom Tailoring" : "Product Customization",
       // Tailoring uses a free-text fabric description; product uses the selected swatch.
       fabricPref: isTailoring ? formData.fabricDetails : formData.fabric,
       // Color preference and budget are omitted for tailoring.
@@ -231,7 +231,7 @@ export default function Customize() {
           </div>
           <h3 className="font-serif text-2xl text-text-custom dark:text-primary tracking-wider">REQUEST SUBMITTED</h3>
           <p className="text-xs text-neutral-500 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
-            Your {subcategory === "tailoring" ? "bespoke tailoring" : "customized"} dossier has been registered at the ETNIKO Atelier under reference:
+            Your {subcategory === "tailoring" ? "tailoring" : "customized"} request has been registered at ETNIKO under reference:
           </p>
           <span className="font-mono text-sm font-semibold text-[#B68D40] tracking-widest bg-white dark:bg-neutral-800 px-6 py-2.5 border border-[#D9C7A3] inline-block">
             {requestId}
@@ -292,7 +292,7 @@ export default function Customize() {
           <p className="text-center text-[11px] text-neutral-400 -mt-6 font-sans">
             {subcategory === "product"
               ? "Start from an existing ETNIKO design and personalise fabric, color and size."
-              : "Fully bespoke — made from scratch to your own measurements."}
+              : "Fully custom — made from scratch to your own measurements."}
           </p>
 
           {/* Progress Indicator line */}
@@ -344,13 +344,13 @@ export default function Customize() {
                 {step === 1 && (
                   <div className="space-y-6">
                     <h3 className="font-serif text-lg tracking-wider border-b border-neutral-100 pb-3 uppercase text-[#B68D40]">
-                      Garment & Swatch Options
+                      Garment & Fabric
                     </h3>
 
                     <div className="space-y-6">
                       {/* Client Segment — card grid */}
                       <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Client Segment</label>
+                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Category</label>
                         <div className="grid grid-cols-3 gap-3">
                           {SEGMENT_OPTIONS.map((opt) => {
                             const Icon = opt.icon;
@@ -380,7 +380,7 @@ export default function Customize() {
 
                       {/* Garment Silhouette — card grid, options depend on segment */}
                       <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Garment Silhouette</label>
+                        <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Garment Type</label>
                         <div className="grid grid-cols-2 gap-3">
                           {GARMENT_OPTIONS[formData.category].map((opt) => {
                             const selected = formData.garmentType === opt.value;
@@ -405,7 +405,7 @@ export default function Customize() {
                       {/* Base Fabric — swatch grid for Product Customize, free-text details for Tailoring */}
                       {subcategory === "product" ? (
                         <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Base Fabric Swatch</label>
+                          <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Fabric</label>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {FABRIC_OPTIONS.map((fab) => {
                               const selected = formData.fabric === fab;
@@ -761,7 +761,7 @@ export default function Customize() {
 
                         {formData.referenceImage && (
                           <p className="text-[10px] uppercase tracking-widest text-[#3E7C59] font-bold text-center">
-                            ✓ Reference Selected: {formData.referenceImage}
+                            ✓ Reference Selected: {formData.referenceImage.name}
                           </p>
                         )}
                       </div>
@@ -913,7 +913,7 @@ export default function Customize() {
                 disabled={loading}
                 className="btn-luxury-solid flex items-center gap-2"
               >
-                <span>{loading ? "REGISTERING DESIGN WIZARD..." : "FINALIZE ATELIER Dossier"}</span>
+                <span>{loading ? "SUBMITTING..." : "SUBMIT REQUEST"}</span>
               </button>
             )}
           </div>

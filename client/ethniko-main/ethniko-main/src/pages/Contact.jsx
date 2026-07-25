@@ -156,7 +156,7 @@ export default function Contact() {
                 >
                   <option value="">Select a subject</option>
                   <option value="Consultation">Private Fitting</option>
-                  <option value="Sizing">Bespoke Custom sizing</option>
+                  <option value="Sizing">Custom sizing</option>
                   <option value="Collab">Designer Collaboration</option>
                 </select>
               </div>

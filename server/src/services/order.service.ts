@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { OrderRepository, OrderDocument, OrderItem } from '../repositories/order.repository';
 import { ProductService } from './product.service';
 import { getPaginationMetadata, PaginationMeta } from '../utils/pagination';
+import { computeShipping } from '../utils/shipping';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 
@@ -33,9 +34,10 @@ export class OrderService {
   ): Promise<OrderDocument> {
     try {
       let subtotal = 0;
+      let totalWeightKg = 0;
       const orderItems: OrderItem[] = [];
 
-      // 1. Validate product inventory and accumulate subtotal
+      // 1. Validate product inventory and accumulate subtotal + weight
       for (const item of itemsInput) {
         const product = await this.productService.getProductById(item.productId);
         if (!product) {
@@ -50,6 +52,8 @@ export class OrderService {
 
         const price = product.discountPrice || product.price;
         subtotal += price * item.quantity;
+        // Default to 0.5kg per unit when a product has no weight set.
+        totalWeightKg += (product.weight && product.weight > 0 ? product.weight : 0.5) * item.quantity;
 
         orderItems.push({
           id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9),
@@ -64,11 +68,14 @@ export class OrderService {
         });
       }
 
-      // 2. Calculate tax (12% GST) & Shipping (Free over ₹10k, else ₹150)
+      // 2. Calculate tax (12% GST) & Shipping.
+      //    Domestic (India): free over ₹10k, else ₹150.
+      //    International: weight-based per-kg rate, with INR->currency conversion.
       const gst = Math.round(subtotal * 0.12);
-      const tenThousandRupeesInPaise = 1000000;
-      const shipping = subtotal >= tenThousandRupeesInPaise ? 0 : 15000; // 15000 Paise = ₹150
+      const ship = computeShipping(totalWeightKg, shippingAddress?.country, subtotal);
+      const shipping = ship.shippingPaise;
       const total = subtotal + gst + shipping;
+      const totalConverted = +(((total / 100) * ship.conversionRate)).toFixed(2);
 
       // 3. Initiate payment gateway registration
       let razorpayOrderId: string | null = null;
@@ -99,6 +106,14 @@ export class OrderService {
         gst,
         shipping,
         total,
+        shippingWeightKg: ship.weightKg,
+        shippingMethod: ship.method,
+        shippingEta: ship.etaDays,
+        currencyCode: ship.currencyCode,
+        currencySymbol: ship.currencySymbol,
+        conversionRate: ship.conversionRate,
+        shippingConverted: ship.shippingConverted,
+        totalConverted,
         razorpayOrderId,
         razorpayPaymentId: null,
         razorpaySignature: null,

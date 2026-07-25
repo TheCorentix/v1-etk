@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, MapPin, Scissors, Settings, ChevronRight, Trash2 } from 'lucide-react';
+import { ShoppingBag, MapPin, Scissors, Settings, ChevronRight, Trash2, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +18,7 @@ export default function Profile() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
   const [authSubmitting, setAuthSubmitting] = useState(false);
@@ -24,8 +26,10 @@ export default function Profile() {
   // Address Add Form State
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", country: "India"
+    name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", country: ""
   });
+  const [addrErrors, setAddrErrors] = useState({});
+  const [addrSaving, setAddrSaving] = useState(false);
 
   // Settings Edit State
   const [settingsForm, setSettingsForm] = useState({ name: "", email: "", phone: "" });
@@ -81,17 +85,54 @@ export default function Profile() {
     }
   };
 
+  // Client-side validation mirroring the backend address schema.
+  const validateAddress = () => {
+    const e = {};
+    if (!newAddress.name || newAddress.name.trim().length < 2) e.name = "Name must be at least 2 characters.";
+    if ((newAddress.phone || "").replace(/\D/g, "").length < 10) e.phone = "Enter a valid 10-digit phone number.";
+    if (!newAddress.addressLine1 || newAddress.addressLine1.trim().length < 5) e.addressLine1 = "Address Line 1 must be at least 5 characters.";
+    if (!newAddress.city || newAddress.city.trim().length < 2) e.city = "City must be at least 2 characters.";
+    if (!newAddress.state || newAddress.state.trim().length < 2) e.state = "State must be at least 2 characters.";
+    const zip = (newAddress.postalCode || "").trim();
+    if (zip.length < 5 || zip.length > 10) e.postalCode = "Postal code must be 5–10 characters.";
+    if (!newAddress.country) e.country = "Please select a country.";
+    return e;
+  };
+
   const handleAddAddress = async (e) => {
     e.preventDefault();
-    if (!newAddress.name || !newAddress.phone || !newAddress.addressLine1 || !newAddress.city || !newAddress.postalCode) return;
 
+    const errors = validateAddress();
+    setAddrErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix the highlighted fields.");
+      return;
+    }
+
+    setAddrSaving(true);
     try {
       const updatedAddresses = await userService.addAddress(newAddress);
       setProfileState(prev => ({ ...prev, addresses: updatedAddresses }));
       setShowAddressForm(false);
-      setNewAddress({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", country: "India" });
+      setAddrErrors({});
+      setNewAddress({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", country: "" });
+      toast.success("Address saved successfully.");
     } catch (err) {
       console.error(err);
+      // Surface backend validation errors inline (api interceptor rejects with { errors: [{field, message}] })
+      if (err && Array.isArray(err.errors) && err.errors.length > 0) {
+        const mapped = {};
+        err.errors.forEach((er) => {
+          const field = (er.field || "").replace(/^body\./, "");
+          if (field) mapped[field] = er.message;
+        });
+        setAddrErrors((prev) => ({ ...prev, ...mapped }));
+        toast.error(err.errors[0].message || "Please fix the highlighted fields.");
+      } else {
+        toast.error(err?.message || "Failed to save address. Please try again.");
+      }
+    } finally {
+      setAddrSaving(false);
     }
   };
 
@@ -142,7 +183,7 @@ export default function Profile() {
               {isSignUp ? 'Create Account' : 'Client Sign In'}
             </h2>
             <p className="text-[10px] font-sans text-neutral-400 uppercase tracking-widest">
-              {isSignUp ? 'Register to manage bespoke couture orders' : 'Access your customized couture records'}
+              {isSignUp ? 'Register to manage your couture orders' : 'Access your customized couture records'}
             </p>
           </div>
 
@@ -185,13 +226,23 @@ export default function Profile() {
 
             <div className="space-y-1">
               <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Password</label>
-              <input
-                type="password"
-                required
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40]"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full bg-transparent border border-neutral-300 px-3 py-2 pr-10 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -494,36 +545,36 @@ export default function Profile() {
 
                 {/* Add form */}
                 {showAddressForm && (
-                  <form onSubmit={handleAddAddress} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-[#F8F6F2]">
+                  <form onSubmit={handleAddAddress} noValidate className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-[#F8F6F2]">
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Full Name</label>
                       <input
                         type="text"
-                        required
                         value={newAddress.name}
                         onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.name ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.name && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.name}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Phone Number</label>
                       <input
-                        type="text"
-                        required
+                        type="tel"
                         value={newAddress.phone}
                         onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.phone ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.phone && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.phone}</p>}
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Address Line 1</label>
                       <input
                         type="text"
-                        required
                         value={newAddress.addressLine1}
                         onChange={(e) => setNewAddress({ ...newAddress, addressLine1: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.addressLine1 ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.addressLine1 && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.addressLine1}</p>}
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Address Line 2 (Optional)</label>
@@ -538,43 +589,52 @@ export default function Profile() {
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">City</label>
                       <input
                         type="text"
-                        required
                         value={newAddress.city}
                         onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.city ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.city && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">State</label>
                       <input
                         type="text"
-                        required
                         value={newAddress.state}
                         onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.state ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.state && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.state}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Postal Code</label>
                       <input
                         type="text"
-                        required
                         value={newAddress.postalCode}
                         onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase"
+                        className={`w-full bg-white border px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] uppercase ${addrErrors.postalCode ? 'border-red-500' : 'border-neutral-300'}`}
                       />
+                      {addrErrors.postalCode && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.postalCode}</p>}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Country</label>
-                      <input
-                        type="text"
-                        disabled
+                      <select
                         value={newAddress.country}
-                        className="w-full bg-neutral-100 border border-neutral-300 px-3 py-2 text-xs font-sans text-neutral-400 focus:outline-none uppercase"
-                      />
+                        onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                        className={`w-full bg-white border px-3 py-2.5 text-xs font-sans text-[#181818] focus:outline-none focus:border-[#B68D40] ${addrErrors.country ? 'border-red-500' : 'border-neutral-300'}`}
+                      >
+                        <option value="">Select country…</option>
+                        <option value="India">India</option>
+                        <option value="USA">USA</option>
+                        <option value="UK">UK</option>
+                        <option value="Australia">Australia</option>
+                      </select>
+                      {addrErrors.country && <p className="text-[9px] text-red-500 font-sans normal-case">{addrErrors.country}</p>}
+                      <p className="text-[9px] text-neutral-400 font-sans normal-case">Shipping is free within India; international orders are charged by weight.</p>
                     </div>
                     <div className="md:col-span-2 pt-2">
-                      <button type="submit" className="btn-luxury-solid w-full">Save Address</button>
+                      <button type="submit" disabled={addrSaving} className="btn-luxury-solid w-full disabled:opacity-60">
+                        {addrSaving ? "Saving..." : "Save Address"}
+                      </button>
                     </div>
                   </form>
                 )}
@@ -609,7 +669,7 @@ export default function Profile() {
             {/* STYLING CUSTOMIZATIONS */}
             {activeTab === 'customizations' && (
               <div className="space-y-6">
-                <h3 className="font-serif text-lg tracking-wider border-b border-neutral-100 pb-3 uppercase">Bespoke Custom Styling Requests</h3>
+                <h3 className="font-serif text-lg tracking-wider border-b border-neutral-100 pb-3 uppercase">Custom Styling Requests</h3>
                 {customizations.length > 0 ? (
                   <div className="space-y-6">
                     {customizations.map((cust) => (

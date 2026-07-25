@@ -40,7 +40,9 @@ export const createOrderSchema = z.object({
         message: 'Postal ZIP Code is required',
       }).min(5, 'Postal code must be at least 5 digits long')
         .max(10, 'Postal code cannot exceed 10 characters'),
-      country: z.string().default('India'),
+      country: z.enum(['India', 'USA', 'UK', 'Australia'], {
+        message: 'Please select a country (India, USA, UK, or Australia)',
+      }),
     }),
     customerName: z.string().optional(),
     customerPhone: z.string().optional(),

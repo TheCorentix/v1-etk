@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Scissors, ShoppingBag, Plus, Edit, Trash2, Check, RefreshCw, BarChart2, Eye, Sliders, Users, FileText, Layers, Settings, Star, Globe, Truck, Heart, ArrowUp, ArrowDown } from 'lucide-react';
+import { LayoutDashboard, Scissors, ShoppingBag, Plus, Edit, Trash2, Check, RefreshCw, BarChart2, Eye, Sliders, Users, FileText, Layers, Settings, Star, Globe, Truck, Heart, ArrowUp, ArrowDown, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { productService } from '../services/productService';
 import { adminService } from '../services/adminService';
 import { homepageService } from '../services/homepageService';
 import MediaLibraryDialog from '../components/admin/MediaLibraryDialog';
 import VariantsMatrixBuilder from '../components/admin/VariantsMatrixBuilder';
-import HomepageSectionBuilder from '../components/admin/HomepageSectionBuilder';
+
+// Default avatars used for testimonials when no custom image is provided.
+const DEFAULT_AVATARS = [
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80',
+];
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -25,10 +32,13 @@ export default function Admin() {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "", sku: "", category: "WOMEN", subcategory: "Sarees", price: 10000,
-    fabric: "Mulberry Silk", occasion: "Festive & Pujas", color: "Gold", stock: 10,
-    description: "", story: "", images: [], video: ""
+    fabric: "Mulberry Silk", occasion: "Festive & Pujas", colors: "Gold", stock: 10,
+    weight: 0.5,
+    description: "", story: "", images: [], video: "",
+    type: "READY_TO_WEAR", status: "PUBLISHED"
   });
   const [productVariants, setProductVariants] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
 
   // Edit Product Stock State
   const [editingProdId, setEditingProdId] = useState(null);
@@ -37,10 +47,12 @@ export default function Admin() {
   // Active detail modal selectors
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedCustom, setSelectedCustom] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  // Customization sub-tab: 'customization' (product customize) vs 'tailoring' (bespoke)
+  const [customReqType, setCustomReqType] = useState('customization');
   
   // Status revision fields
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [stylistNote, setStylistNote] = useState("");
 
   // Selector dialog states
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -74,65 +86,111 @@ export default function Admin() {
   // Load Admin Data
   const loadAdminData = async () => {
     setLoading(true);
-    try {
-      const prodRes = await productService.getProducts({ page: 1, limit: 100 });
-      const ordRes = await adminService.getAllOrders();
-      const custRes = await adminService.getAllCustomizations();
 
-      // Retrieve CMS items
-      const catRes = await adminService.getCmsCategories(1, 100);
-      const colRes = await adminService.getCmsCollections(1, 100);
-      const testRes = await adminService.getCmsTestimonials(1, 100);
-      const bannerRes = await homepageService.getHeroSlides();
-      
-      // Load Settings splits
-      const storeRes = await adminService.getStoreSettings();
-      const seoRes = await adminService.getSeoSettings();
-      const shipRes = await adminService.getShippingSettings();
-      const footRes = await adminService.getFooterSettings();
-      const socRes = await adminService.getSocialSettings();
+    // Each section loads independently so a failure in one (e.g. an orders query
+    // that needs a Firestore index) can never hide the others — like the catalog.
+    const safe = async (fn, fallback) => {
+      try {
+        return await fn();
+      } catch (err) {
+        console.warn('Admin data: a section failed to load —', err?.message || err);
+        return fallback;
+      }
+    };
 
-      setProducts(prodRes.products);
-      setOrders(ordRes);
-      setCustomizations(custRes);
-      setCategories(catRes.items || []);
-      setCollections(colRes.items || []);
-      setTestimonials(testRes.items || []);
-      setBanners(bannerRes || []);
+    // Products (catalog) — always attempt first and set on its own.
+    const prodRes = await safe(() => productService.getProducts({ page: 1, limit: 100 }), { products: [] });
+    setProducts(prodRes.products || []);
 
-      if (storeRes) setStoreSettings(storeRes);
-      if (seoRes) setSeoSettings(seoRes);
-      if (shipRes) setShippingSettings(shipRes);
-      if (footRes) setFooterSettings(footRes);
-      if (socRes) setSocialSettings(socRes);
+    const ordRes = await safe(() => adminService.getAllOrders(), []);
+    setOrders(ordRes || []);
 
-      // Calculations for stats
-      const totalSales = ordRes.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + o.total, 0);
-      const uniqueCustomers = new Set(ordRes.map(o => o.customerEmail)).size + 3; // add padding
+    const custRes = await safe(() => adminService.getAllCustomizations(), []);
+    setCustomizations(custRes || []);
 
-      setStats({
-        sales: totalSales,
-        orders: ordRes.length,
-        customizations: custRes.filter(c => c.status !== 'Delivered').length,
-        customers: uniqueCustomers
-      });
-    } catch (err) {
-      console.error('Error loading admin details:', err);
-    } finally {
-      setLoading(false);
-    }
+    // CMS items
+    const catRes = await safe(() => adminService.getCmsCategories(1, 100), { items: [] });
+    setCategories(catRes.items || []);
+    const colRes = await safe(() => adminService.getCmsCollections(1, 100), { items: [] });
+    setCollections(colRes.items || []);
+    const testRes = await safe(() => adminService.getCmsTestimonials(1, 100), { items: [] });
+    setTestimonials(testRes.items || []);
+    const bannerRes = await safe(() => homepageService.getHeroSlides(), []);
+    setBanners(bannerRes || []);
+
+    // Settings splits
+    const storeRes = await safe(() => adminService.getStoreSettings(), null);
+    if (storeRes) setStoreSettings(storeRes);
+    const seoRes = await safe(() => adminService.getSeoSettings(), null);
+    if (seoRes) setSeoSettings(seoRes);
+    const shipRes = await safe(() => adminService.getShippingSettings(), null);
+    if (shipRes) setShippingSettings(shipRes);
+    const footRes = await safe(() => adminService.getFooterSettings(), null);
+    if (footRes) setFooterSettings(footRes);
+    const socRes = await safe(() => adminService.getSocialSettings(), null);
+    if (socRes) setSocialSettings(socRes);
+
+    // Stats (guard against missing order fields)
+    const orders = ordRes || [];
+    const custs = custRes || [];
+    const totalSales = orders.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
+    const uniqueCustomers = new Set(orders.map(o => o.customerEmail)).size + 3; // add padding
+
+    setStats({
+      sales: totalSales,
+      orders: orders.length,
+      customizations: custs.filter(c => c.status !== 'Delivered').length,
+      customers: uniqueCustomers
+    });
+
+    setLoading(false);
   };
 
   useEffect(() => {
     loadAdminData();
   }, []);
 
+  // Client-side validation mirroring the backend product schema so users get
+  // immediate, inline feedback before the request is even sent.
+  const validateNewProduct = () => {
+    const errors = {};
+    if (!newProduct.name || newProduct.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters.";
+    }
+    if (!newProduct.subcategory || !newProduct.subcategory.trim()) {
+      errors.subcategory = "Subcategory is required.";
+    }
+    const priceNum = parseFloat(newProduct.price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      errors.price = "Enter a valid price greater than 0.";
+    }
+    if (!newProduct.fabric || newProduct.fabric.trim().length < 2) {
+      errors.fabric = "Fabric must be at least 2 characters.";
+    }
+    if (!newProduct.description || newProduct.description.trim().length < 5) {
+      errors.description = "Description must be at least 5 characters.";
+    }
+    const colorList = (newProduct.colors || "").split(",").map((c) => c.trim()).filter(Boolean);
+    if (colorList.length === 0) {
+      errors.colors = "Enter at least one color (comma-separated).";
+    }
+    const stockNum = parseInt(newProduct.stock, 10);
+    if (isNaN(stockNum) || stockNum < 0) {
+      errors.stock = "Stock cannot be negative.";
+    }
+    return errors;
+  };
+
   const handleCreateProduct = async (e) => {
     e.preventDefault();
-    if (!newProduct.name || !newProduct.sku || !newProduct.description) {
-      toast.error("Please fill out required product fields.");
+
+    const errors = validateNewProduct();
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix the highlighted fields.");
       return;
     }
+
     try {
       const formattedVariants = productVariants.map(v => ({
         color: v.color,
@@ -144,34 +202,62 @@ export default function Admin() {
         images: v.images
       }));
 
-      // Gather sizes
-      const sizesArray = productVariants.length > 0 
+      // Determine the size list, then build the { size: stock } inventory map
+      // the backend expects (each size seeded with the initial stock count).
+      const sizesList = productVariants.length > 0
         ? Array.from(new Set(productVariants.map(v => v.size).filter(Boolean)))
         : (newProduct.category === "KIDS" ? ["2-4Y", "4-6Y", "6-8Y"] : ["XS", "S", "M", "L", "XL", "XXL"]);
+      const stockPerSize = parseInt(newProduct.stock, 10) || 0;
+      const sizesMap = sizesList.reduce((acc, size) => {
+        acc[size] = stockPerSize;
+        return acc;
+      }, {});
+
+      const colorList = newProduct.colors.split(",").map((c) => c.trim()).filter(Boolean);
 
       await productService.createProduct({
-        ...newProduct,
-        sizes: sizesArray,
-        price: Math.round(parseFloat(newProduct.price) * 100), // convert Rupees to Paise
-        stock: parseInt(newProduct.stock, 10) || 10,
-        status: "ACTIVE",
-        tags: ["New", "AdminAdded"],
+        name: newProduct.name,
+        category: newProduct.category,
+        subcategory: newProduct.subcategory,
+        price: Math.round(parseFloat(newProduct.price) * 100), // Rupees -> Paise
+        description: newProduct.description,
+        story: newProduct.story || "",
+        fabric: newProduct.fabric,
+        weight: parseFloat(newProduct.weight) || 0.5,
+        colors: colorList,
+        sizes: sizesMap,
+        type: newProduct.type || "READY_TO_WEAR",
+        status: newProduct.status || "PUBLISHED",
+        imageUrls: newProduct.images || [],
         variants: formattedVariants
       });
 
       toast.success("Product created successfully!");
       setShowAddProduct(false);
+      setFormErrors({});
       // Reset form
       setNewProduct({
         name: "", sku: "", category: "WOMEN", subcategory: "Sarees", price: 10000,
-        fabric: "Mulberry Silk", occasion: "Festive & Pujas", color: "Gold", stock: 10,
-        description: "", story: "", images: [], video: ""
+        fabric: "Mulberry Silk", occasion: "Festive & Pujas", colors: "Gold", stock: 10,
+        description: "", story: "", images: [], video: "",
+        type: "READY_TO_WEAR", status: "PUBLISHED"
       });
       setProductVariants([]);
       loadAdminData();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to save product.");
+      // Surface backend validation errors inline (api interceptor rejects with { errors: [{field, message}] })
+      if (err && Array.isArray(err.errors) && err.errors.length > 0) {
+        const mapped = {};
+        err.errors.forEach((er) => {
+          const field = (er.field || "").replace(/^body\./, "");
+          if (field) mapped[field] = er.message;
+        });
+        setFormErrors((prev) => ({ ...prev, ...mapped }));
+        toast.error(err.errors[0].message || "Validation failed. Check the highlighted fields.");
+      } else {
+        toast.error(err?.message || "Failed to save product.");
+      }
     }
   };
 
@@ -209,12 +295,14 @@ export default function Admin() {
 
   const handleUpdateCustomStatus = async (id, status) => {
     try {
-      const updated = await adminService.updateCustomizationStatus(id, status, stylistNote);
-      setSelectedCustom(updated);
-      setStylistNote("");
+      const updated = await adminService.updateCustomizationStatus(id, status);
+      // Keep the view popup in sync only if it's open for this request.
+      setSelectedCustom((prev) => (prev && prev.id === id ? updated : prev));
+      toast.success(`Marked as ${status.replace(/_/g, ' ')}.`);
       loadAdminData();
     } catch (err) {
       console.error(err);
+      toast.error(err?.message || 'Failed to update status.');
     }
   };
 
@@ -386,7 +474,18 @@ export default function Admin() {
   }
 
   const ORDER_STATUSES = ['New', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Returned/Cancelled'];
-  const CUSTOM_STATUSES = ['New', 'In Discussion', 'Confirmed', 'In Production', 'Ready', 'Delivered'];
+
+  // Customisation fulfilment workflow actions (map to backend status enum).
+  const CUSTOM_STATUS_ACTIONS = [
+    { label: 'Order Taken', value: 'ORDER_TAKEN' },
+    { label: 'Shipped', value: 'SHIPPED' },
+    { label: 'Delivered', value: 'DELIVERED' },
+  ];
+  const STATUS_LABELS = { NEW: 'New', ORDER_TAKEN: 'Order Taken', SHIPPED: 'Shipped', DELIVERED: 'Delivered' };
+  const isTailoringReq = (c) => (c?.occasion || '').toLowerCase().includes('tailoring');
+  const visibleCustomizations = customizations.filter((c) =>
+    customReqType === 'tailoring' ? isTailoringReq(c) : !isTailoringReq(c)
+  );
 
   return (
     <div 
@@ -481,7 +580,7 @@ export default function Admin() {
                   {[
                     { cat: "Women's Sarees & Lehengas", share: 65, val: "₹1,45,000" },
                     { cat: "Men's Heritage Sherwanis", share: 25, val: "₹56,200" },
-                    { cat: "Bespoke Custom Styling", share: 10, val: "₹24,500" }
+                    { cat: "Custom Styling", share: 10, val: "₹24,500" }
                   ].map(item => (
                     <div key={item.cat} className="space-y-1">
                       <div className="flex justify-between items-center text-[10px] uppercase font-sans text-neutral-500">
@@ -515,21 +614,37 @@ export default function Admin() {
               {/* Add Product form */}
               {showAddProduct && (
                 <form onSubmit={handleCreateProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900">
+                  {Object.keys(formErrors).length > 0 && (
+                    <div className="md:col-span-2 flex items-start gap-2.5 border border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800 px-4 py-3">
+                      <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest font-sans font-bold text-red-600 dark:text-red-400">
+                          Please fix {Object.keys(formErrors).length} {Object.keys(formErrors).length === 1 ? 'issue' : 'issues'} before saving
+                        </p>
+                        <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                          {Object.values(formErrors).map((msg, i) => (
+                            <li key={i} className="text-[10px] font-sans text-red-500">{msg}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Garment Name</label>
                     <input
-                      type="text" required
+                      type="text"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.name ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
                     />
+                    {formErrors.name && <p className="text-[9px] text-red-500 font-sans">{formErrors.name}</p>}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">SKU Code</label>
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">SKU Code <span className="text-neutral-400 normal-case">(auto-generated)</span></label>
                     <input
-                      type="text" required
+                      type="text"
                       value={newProduct.sku}
-                      placeholder="ETK-WOMEN-SAREE-999"
+                      placeholder="Auto-generated on save"
                       onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
                       className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
                     />
@@ -547,40 +662,99 @@ export default function Admin() {
                     </select>
                   </div>
                   <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Subcategory</label>
+                    <input
+                      type="text"
+                      value={newProduct.subcategory}
+                      placeholder="e.g. Sarees, Kurtas, Girls"
+                      onChange={(e) => setNewProduct({ ...newProduct, subcategory: e.target.value })}
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.subcategory ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                    />
+                    {formErrors.subcategory && <p className="text-[9px] text-red-500 font-sans">{formErrors.subcategory}</p>}
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Price (INR)</label>
                     <input
-                      type="number" required
+                      type="number"
                       value={newProduct.price}
                       onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.price ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
                     />
+                    {formErrors.price && <p className="text-[9px] text-red-500 font-sans">{formErrors.price}</p>}
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Fabric</label>
                     <input
-                      type="text" required
+                      type="text"
                       value={newProduct.fabric}
                       onChange={(e) => setNewProduct({ ...newProduct, fabric: e.target.value })}
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.fabric ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                    />
+                    {formErrors.fabric && <p className="text-[9px] text-red-500 font-sans">{formErrors.fabric}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Colors <span className="text-neutral-400 normal-case">(comma-separated)</span></label>
+                    <input
+                      type="text"
+                      value={newProduct.colors}
+                      placeholder="e.g. Gold, Ivory, Maroon"
+                      onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.colors ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                    />
+                    {formErrors.colors && <p className="text-[9px] text-red-500 font-sans">{formErrors.colors}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Initial Stock <span className="text-neutral-400 normal-case">(per size)</span></label>
+                    <input
+                      type="number"
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.stock ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                    />
+                    {formErrors.stock && <p className="text-[9px] text-red-500 font-sans">{formErrors.stock}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Weight <span className="text-neutral-400 normal-case">(kg — for international shipping)</span></label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={newProduct.weight}
+                      onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
                       className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Initial Stock</label>
-                    <input
-                      type="number" required
-                      value={newProduct.stock}
-                      onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
-                    />
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Garment Type</label>
+                    <select
+                      value={newProduct.type}
+                      onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
+                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                    >
+                      <option value="READY_TO_WEAR">Ready to Wear</option>
+                      <option value="CUSTOM_MADE">Custom Made</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">Publish Status</label>
+                    <select
+                      value={newProduct.status}
+                      onChange={(e) => setNewProduct({ ...newProduct, status: e.target.value })}
+                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                    >
+                      <option value="PUBLISHED">Published (visible in shop)</option>
+                      <option value="DRAFT">Draft (hidden)</option>
+                    </select>
                   </div>
                   <div className="space-y-1 md:col-span-2">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Garment Description</label>
                     <textarea
-                      rows={2} required
+                      rows={2}
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.description ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
                     />
+                    {formErrors.description && <p className="text-[9px] text-red-500 font-sans">{formErrors.description}</p>}
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block font-semibold">Garment Showcase Images</label>
@@ -622,7 +796,8 @@ export default function Admin() {
                   <thead>
                     <tr className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 font-semibold text-[#B68D40] tracking-wider">
                       <th className="p-3">IMAGE</th>
-                      <th className="p-3">NAME & SKU</th>
+                      <th className="p-3">NAME</th>
+                      <th className="p-3">SKU</th>
                       <th className="p-3">CATEGORY</th>
                       <th className="p-3">PRICE</th>
                       <th className="p-3">STOCK</th>
@@ -631,14 +806,25 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {products.map((p) => (
-                      <tr key={p.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300">
+                      <tr key={p.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors">
                         <td className="p-3">
-                          <img src={p.images[0]} alt="" className="w-8 aspect-[3/4] object-cover border" />
+                          <img
+                            src={p.images[0]}
+                            alt=""
+                            className="w-8 aspect-[3/4] object-cover border cursor-pointer"
+                            onClick={() => setSelectedProduct(p)}
+                          />
                         </td>
                         <td className="p-3">
-                          <span className="font-serif font-bold text-neutral-800 dark:text-primary block">{p.name}</span>
-                          <span className="font-mono text-[9px] text-neutral-400 block mt-0.5">{p.sku}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedProduct(p)}
+                            className="font-serif font-bold text-neutral-800 dark:text-primary block text-left hover:text-[#B68D40] transition-colors"
+                          >
+                            {p.name}
+                          </button>
                         </td>
+                        <td className="p-3 font-mono text-[10px] text-neutral-500 normal-case">{p.sku || '—'}</td>
                         <td className="p-3">{p.category}</td>
                         <td className="p-3">₹{p.price.toLocaleString()}</td>
                         <td className="p-3">
@@ -669,6 +855,13 @@ export default function Admin() {
                         </td>
                         <td className="p-3 text-right space-x-2">
                           <button
+                            onClick={() => setSelectedProduct(p)}
+                            className="p-1.5 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
+                            aria-label="View product details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleDeleteProduct(p.id)}
                             className="p-1.5 text-neutral-400 hover:text-[#B42318] focus:outline-none"
                             aria-label="Delete product"
@@ -678,9 +871,119 @@ export default function Admin() {
                         </td>
                       </tr>
                     ))}
+                    {products.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-neutral-400 text-xs font-sans normal-case">
+                          No products found. Click "Add Garment" to create your first product.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
+
+              {/* Product Detail Modal */}
+              {selectedProduct && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                  onClick={() => setSelectedProduct(null)}
+                >
+                  <div
+                    className="bg-white dark:bg-[#181818] border border-[#D9C7A3] dark:border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header */}
+                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-[#181818]">
+                      <div>
+                        <h3 className="font-serif text-lg tracking-wider text-neutral-900 dark:text-primary">{selectedProduct.name}</h3>
+                        <span className="font-mono text-[11px] text-[#B68D40]">{selectedProduct.sku || 'SKU —'}</span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedProduct(null)}
+                        className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-xl leading-none"
+                        aria-label="Close"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <div className="p-5 space-y-5">
+                      {/* Images */}
+                      {selectedProduct.images && selectedProduct.images.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                          {selectedProduct.images.map((img, i) => (
+                            <img key={i} src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200 dark:border-neutral-800" />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Detail grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs font-sans">
+                        {[
+                          ['SKU', selectedProduct.sku || '—'],
+                          ['Category', selectedProduct.category],
+                          ['Subcategory', selectedProduct.subcategory || '—'],
+                          ['Type', selectedProduct.type || '—'],
+                          ['Status', selectedProduct.status || '—'],
+                          ['Price', `₹${(selectedProduct.price || 0).toLocaleString('en-IN')}`],
+                          ['Discount', selectedProduct.discountPrice ? `₹${selectedProduct.discountPrice.toLocaleString('en-IN')}` : '—'],
+                          ['Total Stock', `${selectedProduct.stock ?? 0} units`],
+                          ['Fabric', selectedProduct.fabric || '—'],
+                        ].map(([label, value]) => (
+                          <div key={label} className="space-y-0.5">
+                            <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">{label}</span>
+                            <span className="font-semibold text-neutral-800 dark:text-primary break-words">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Sizes & colors */}
+                      <div className="grid grid-cols-2 gap-4 text-xs font-sans">
+                        <div className="space-y-1">
+                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Sizes</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {(selectedProduct.sizes && selectedProduct.sizes.length > 0)
+                              ? selectedProduct.sizes.map((s) => (
+                                  <span key={s} className="px-2 py-0.5 border border-neutral-300 dark:border-neutral-700 text-[10px] font-semibold">{s}</span>
+                                ))
+                              : <span className="text-neutral-400">—</span>}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Colors</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {(selectedProduct.colors && selectedProduct.colors.length > 0)
+                              ? selectedProduct.colors.map((c) => (
+                                  <span key={c} className="px-2 py-0.5 border border-neutral-300 dark:border-neutral-700 text-[10px] font-semibold">{c}</span>
+                                ))
+                              : <span className="text-neutral-400">—</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description & story */}
+                      {selectedProduct.description && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Description</span>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">{selectedProduct.description}</p>
+                        </div>
+                      )}
+                      {selectedProduct.story && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Story</span>
+                          <p className="text-xs text-neutral-500 italic leading-relaxed">{selectedProduct.story}</p>
+                        </div>
+                      )}
+
+                      {/* Slug / URL */}
+                      <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
+                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Storefront URL</span>
+                        <span className="font-mono text-[11px] text-neutral-500">/product/{selectedProduct.slug}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -724,6 +1027,13 @@ export default function Admin() {
                         </td>
                       </tr>
                     ))}
+                    {orders.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-neutral-400 text-xs font-sans normal-case">
+                          No orders yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -797,140 +1107,194 @@ export default function Admin() {
             </div>
           )}
 
-          {/* CUSTOMIZATIONS REQUESTS WORKSPACE */}
-          {activeTab === 'customizations' && !selectedCustom && (
+          {/* CUSTOMIZATIONS & TAILORING REQUESTS */}
+          {activeTab === 'customizations' && (
             <div className="space-y-6">
-              <h3 className="font-serif text-lg tracking-wider border-b pb-3 uppercase">Couture Tailoring Requests</h3>
-              
+              <div className="flex flex-wrap justify-between items-center gap-3 border-b pb-3">
+                <h3 className="font-serif text-lg tracking-wider uppercase">
+                  {customReqType === 'tailoring' ? 'Tailoring Requests' : 'Customization Requests'}
+                </h3>
+                {/* Sub-tab toggle: Customization vs Tailoring */}
+                <div className="inline-flex border border-[#D9C7A3] rounded-full p-1 gap-1">
+                  {[
+                    { key: 'customization', label: 'Customization' },
+                    { key: 'tailoring', label: 'Tailoring' },
+                  ].map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => setCustomReqType(t.key)}
+                      className={`rounded-full px-4 py-1.5 text-[9px] uppercase tracking-widest font-sans font-bold transition-all ${
+                        customReqType === t.key ? 'bg-[#B68D40] text-white shadow-sm' : 'text-neutral-400 hover:text-[#B68D40]'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-neutral-200 dark:border-neutral-800 text-left text-[10px] uppercase">
                   <thead>
                     <tr className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 font-semibold text-[#B68D40] tracking-wider">
                       <th className="p-3">REQUEST REFERENCE</th>
                       <th className="p-3">CLIENT INFO</th>
-                      <th className="p-3">GARMENT TYPE</th>
+                      <th className="p-3">GARMENT</th>
                       <th className="p-3">STATUS</th>
-                      <th className="p-3 text-right">ACTION</th>
+                      <th className="p-3 text-right">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {customizations.map((cust) => (
-                      <tr key={cust.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300">
+                    {visibleCustomizations.map((cust) => (
+                      <tr key={cust.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 align-top">
                         <td className="p-3 font-mono font-semibold text-neutral-800 dark:text-primary">{cust.id}</td>
                         <td className="p-3">
-                          <span className="font-bold text-neutral-800 dark:text-primary block">{cust.customerName}</span>
+                          <span className="font-bold text-neutral-800 dark:text-primary block normal-case">{cust.customerName}</span>
                           <span className="text-[9px] text-neutral-400 block mt-0.5">{cust.phone}</span>
                         </td>
-                        <td className="p-3 font-medium">{cust.productName}</td>
+                        <td className="p-3 font-medium normal-case">{cust.category || '—'}</td>
                         <td className="p-3">
-                          <span className="px-2 py-0.5 bg-[#B68D40] text-white border text-[8px] font-bold">
-                            {cust.status}
+                          <span className="px-2 py-0.5 bg-[#B68D40] text-white border text-[8px] font-bold whitespace-nowrap">
+                            {STATUS_LABELS[cust.status] || cust.status}
                           </span>
                         </td>
-                        <td className="p-3 text-right">
-                          <button
-                            onClick={() => setSelectedCustom(cust)}
-                            className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none"
-                          >
-                            Stylist Consult →
-                          </button>
+                        <td className="p-3">
+                          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                            {CUSTOM_STATUS_ACTIONS.map((a) => (
+                              <button
+                                key={a.value}
+                                onClick={() => handleUpdateCustomStatus(cust.id, a.value)}
+                                className={`px-2 py-1 border text-[8px] uppercase tracking-wider font-bold transition-colors ${
+                                  cust.status === a.value
+                                    ? 'bg-[#B68D40] text-white border-[#B68D40]'
+                                    : 'border-neutral-300 text-neutral-500 hover:border-[#B68D40] hover:text-[#B68D40]'
+                                }`}
+                              >
+                                {a.label}
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => setSelectedCustom(cust)}
+                              className="p-1.5 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
+                              aria-label="View request details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
+                    {visibleCustomizations.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-neutral-400 text-xs font-sans normal-case">
+                          No {customReqType === 'tailoring' ? 'tailoring' : 'customization'} requests yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
 
-          {/* ACTIVE CUSTOM DETAILS CONSULT WORKSPACE */}
-          {activeTab === 'customizations' && selectedCustom && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center border-b pb-3">
-                <button onClick={() => setSelectedCustom(null)} className="text-[9px] font-sans font-bold uppercase tracking-widest text-neutral-400 hover:text-black">
-                  ← Back to Customizations
-                </button>
-                <span className="font-mono text-xs font-semibold text-[#B68D40] tracking-wider">{selectedCustom.id}</span>
-              </div>
-
-              {/* Custom specs cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs font-sans text-neutral-600 dark:text-neutral-300">
-                <div className="space-y-3 p-4 border bg-neutral-50 dark:bg-neutral-900">
-                  <h4 className="text-[10px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1">Garment Specifications</h4>
-                  <p><span className="text-neutral-400">Garment Type:</span> <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.productName}</span></p>
-                  <p><span className="text-neutral-400">Client Phone:</span> <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.phone}</span></p>
-                  <p><span className="text-neutral-400">Client Email:</span> <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.email}</span></p>
-                  {selectedCustom.specialRequests && (
-                    <div className="pt-2">
-                      <span className="text-neutral-400 text-[8px] uppercase tracking-wider block">Special requests:</span>
-                      <p className="italic font-medium text-neutral-500">"{selectedCustom.specialRequests}"</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-3 p-4 border bg-neutral-50 dark:bg-neutral-900">
-                  <h4 className="text-[10px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1">Tailor Measurements</h4>
-                  <div className="grid grid-cols-3 gap-2 text-center bg-white dark:bg-neutral-800 p-2 border">
-                    <div>
-                      <span className="text-neutral-400 text-[8px] uppercase block">Bust</span>
-                      <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.measurements.bust || "—"}</span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-400 text-[8px] uppercase block">Waist</span>
-                      <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.measurements.waist || "—"}</span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-400 text-[8px] uppercase block">Hips</span>
-                      <span className="font-bold text-neutral-800 dark:text-primary">{selectedCustom.measurements.hips || "—"}</span>
-                    </div>
-                  </div>
-                  <p><span className="text-neutral-400">Height:</span> <span className="font-bold">{selectedCustom.measurements.height || "—"}</span></p>
-                  {selectedCustom.measurements.custom && (
-                    <p className="text-[10px] text-neutral-500 italic">"{selectedCustom.measurements.custom}"</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Status update actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border bg-primary dark:bg-neutral-900">
-                <div className="space-y-3">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-sans block">Revision status milestone</span>
-                  <div className="flex flex-wrap gap-2">
-                    {CUSTOM_STATUSES.map(st => (
+              {/* View Details Popup */}
+              {selectedCustom && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                  onClick={() => setSelectedCustom(null)}
+                >
+                  <div
+                    className="bg-white dark:bg-[#181818] border border-[#D9C7A3] dark:border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header */}
+                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-[#181818]">
+                      <div>
+                        <h3 className="font-serif text-lg tracking-wider text-neutral-900 dark:text-primary">
+                          {isTailoringReq(selectedCustom) ? 'Tailoring Request' : 'Customization Request'}
+                        </h3>
+                        <span className="font-mono text-[11px] text-[#B68D40]">{selectedCustom.id}</span>
+                      </div>
                       <button
-                        key={st}
-                        onClick={() => handleUpdateCustomStatus(selectedCustom.id, st)}
-                        className={`px-3 py-1.5 border text-[9px] tracking-wider uppercase font-sans focus:outline-none ${
-                          selectedCustom.status === st
-                            ? 'border-[#B68D40] bg-[#B68D40] text-white font-bold'
-                            : 'border-neutral-200 bg-white hover:border-[#B68D40] text-neutral-600'
-                        }`}
+                        onClick={() => setSelectedCustom(null)}
+                        className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-xl leading-none"
+                        aria-label="Close"
                       >
-                        {st}
+                        ×
                       </button>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-sans block">Boutique Stylist Log Note</span>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Add stylist review guidelines..."
-                      value={stylistNote}
-                      onChange={(e) => setStylistNote(e.target.value)}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
-                    />
-                    <button
-                      onClick={() => handleUpdateCustomStatus(selectedCustom.id, selectedCustom.status)}
-                      className="px-4 py-2 bg-neutral-900 text-white text-[9px] font-sans font-bold uppercase tracking-widest shrink-0"
-                    >
-                      Log Note
-                    </button>
+                    <div className="p-5 space-y-5 text-xs font-sans">
+                      {/* Status + actions */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[9px] uppercase tracking-wider text-neutral-400">Status:</span>
+                        <span className="px-2 py-0.5 bg-[#B68D40] text-white text-[9px] font-bold uppercase">{STATUS_LABELS[selectedCustom.status] || selectedCustom.status}</span>
+                        <div className="flex gap-1.5 ml-auto">
+                          {CUSTOM_STATUS_ACTIONS.map((a) => (
+                            <button
+                              key={a.value}
+                              onClick={() => handleUpdateCustomStatus(selectedCustom.id, a.value)}
+                              className={`px-2.5 py-1 border text-[8px] uppercase tracking-wider font-bold ${
+                                selectedCustom.status === a.value
+                                  ? 'bg-[#B68D40] text-white border-[#B68D40]'
+                                  : 'border-neutral-300 text-neutral-500 hover:border-[#B68D40] hover:text-[#B68D40]'
+                              }`}
+                            >
+                              {a.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* All form fields */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {[
+                          ['Customer Name', selectedCustom.customerName],
+                          ['Phone', selectedCustom.phone],
+                          ['Email', selectedCustom.email],
+                          ['WhatsApp', selectedCustom.whatsappNumber],
+                          ['Garment', selectedCustom.category],
+                          ['Request Type', selectedCustom.occasion],
+                          ['Fabric Details', selectedCustom.fabricPref],
+                          ['Color', selectedCustom.colorPref],
+                          ['Budget', selectedCustom.budgetRange],
+                          ['Delivery Date', selectedCustom.deliveryDate],
+                          ['Submitted', selectedCustom.createdAt ? new Date(selectedCustom.createdAt).toLocaleString() : null],
+                        ].map(([label, value]) => (
+                          <div key={label} className="space-y-0.5">
+                            <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">{label}</span>
+                            <span className="font-semibold text-neutral-800 dark:text-primary break-words">{value || '—'}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Address */}
+                      <div className="space-y-0.5">
+                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Address</span>
+                        <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">{selectedCustom.address || '—'}</p>
+                      </div>
+
+                      {/* Notes / measurements */}
+                      <div className="space-y-0.5">
+                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Measurements / Notes</span>
+                        <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap">{selectedCustom.notes || '—'}</p>
+                      </div>
+
+                      {/* Reference images */}
+                      {Array.isArray(selectedCustom.images) && selectedCustom.images.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Reference Images</span>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedCustom.images.map((img, i) => (
+                              <a key={i} href={img} target="_blank" rel="noreferrer">
+                                <img src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200 dark:border-neutral-800" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -1066,11 +1430,9 @@ export default function Admin() {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Sections Builder */}
-              <div className="pt-8 border-t">
-                <HomepageSectionBuilder />
+                {banners.length === 0 && (
+                  <p className="md:col-span-2 p-8 text-center text-neutral-400 text-xs font-sans">No hero slides added yet.</p>
+                )}
               </div>
             </div>
           )}
@@ -1163,6 +1525,9 @@ export default function Admin() {
                       </button>
                     </div>
                   ))}
+                  {categories.length === 0 && (
+                    <p className="p-6 text-center text-neutral-400 text-xs font-sans">No categories added yet.</p>
+                  )}
                 </div>
               </div>
 
@@ -1250,6 +1615,9 @@ export default function Admin() {
                       </button>
                     </div>
                   ))}
+                  {collections.length === 0 && (
+                    <p className="p-6 text-center text-neutral-400 text-xs font-sans">No collections added yet.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -1301,25 +1669,6 @@ export default function Admin() {
                       className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block font-bold">Customer Avatar URL</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newTestimonial.customerImageUrl}
-                        onChange={(e) => setNewTestimonial({ ...newTestimonial, customerImageUrl: e.target.value })}
-                        className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
-                        placeholder="Avatar image URL"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => { setMediaTarget({ type: 'testimonial' }); setMediaOpen(true); }}
-                        className="bg-neutral-900 hover:bg-[#B68D40] text-white hover:text-black px-4 py-2 text-xs font-bold uppercase tracking-wider shrink-0 transition-colors"
-                      >
-                        Select Avatar
-                      </button>
-                    </div>
-                  </div>
                   <div className="md:col-span-2 pt-2">
                     <button type="submit" className="btn-luxury-solid w-full font-bold">Save Testimonial</button>
                   </div>
@@ -1327,16 +1676,15 @@ export default function Admin() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {testimonials.map(item => (
+                {testimonials.map((item, idx) => (
                   <div key={item.id} className="border p-4 bg-white dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-850 rounded-lg flex flex-col justify-between space-y-3">
                     <div className="flex items-center gap-3">
-                      {item.customerImageUrl ? (
-                        <img src={item.customerImageUrl} alt="" className="w-10 h-10 rounded-full object-cover border" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center font-bold text-neutral-400 text-xs shrink-0">
-                          {item.customerName.charAt(0)}
-                        </div>
-                      )}
+                      <img
+                        src={item.customerImageUrl || DEFAULT_AVATARS[idx % DEFAULT_AVATARS.length]}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover border shrink-0"
+                      />
+
                       <div className="text-left">
                         <h4 className="font-serif text-sm font-semibold">{item.customerName}</h4>
                         <div className="flex text-yellow-500 gap-0.5 pt-0.5">
@@ -1355,6 +1703,9 @@ export default function Admin() {
                     </div>
                   </div>
                 ))}
+                {testimonials.length === 0 && (
+                  <p className="md:col-span-2 p-8 text-center text-neutral-400 text-xs font-sans">No testimonials added yet.</p>
+                )}
               </div>
             </div>
           )}

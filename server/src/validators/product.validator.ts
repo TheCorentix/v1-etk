@@ -49,6 +49,11 @@ export const createProductSchema = z.object({
     fabric: z.string({
       message: 'Fabric details are required',
     }).min(2, 'Fabric details must specify the weave'),
+    weight: z.preprocess((val) => {
+      if (val === '' || val === undefined || val === null) return undefined;
+      if (typeof val === 'string') { const n = parseFloat(val); return isNaN(n) ? val : n; }
+      return val;
+    }, z.number().min(0, 'Weight cannot be negative').optional()),
     colors: jsonStringPreprocess(z.array(z.string()).min(1, 'At least one color swatch is required')),
     sizes: jsonStringPreprocess(
       z.record(z.string(), z.number().int().min(0, 'Inventory stock cannot be negative'))
@@ -58,6 +63,8 @@ export const createProductSchema = z.object({
     }),
     status: z.enum(['PUBLISHED', 'DRAFT']).default('DRAFT'),
     care: z.string().optional().nullable(),
+    // Image URLs picked from the media library (files are handled separately via multer)
+    imageUrls: jsonStringPreprocess(z.array(z.string()).optional()).optional(),
   }),
 });
 
@@ -78,6 +85,11 @@ export const updateProductSchema = z.object({
     description: z.string().min(5).optional(),
     story: z.string().optional().nullable(),
     fabric: z.string().min(2).optional(),
+    weight: z.preprocess((val) => {
+      if (val === '' || val === undefined || val === null) return undefined;
+      if (typeof val === 'string') { const n = parseFloat(val); return isNaN(n) ? val : n; }
+      return val;
+    }, z.number().min(0).optional()),
     colors: jsonStringPreprocess(z.array(z.string()).min(1)).optional(),
     sizes: jsonStringPreprocess(
       z.record(z.string(), z.number().int().min(0))
@@ -85,6 +97,7 @@ export const updateProductSchema = z.object({
     type: z.enum(['READY_TO_WEAR', 'CUSTOM_MADE']).optional(),
     status: z.enum(['PUBLISHED', 'DRAFT']).optional(),
     care: z.string().optional().nullable(),
+    imageUrls: jsonStringPreprocess(z.array(z.string()).optional()).optional(),
   }),
 });
 

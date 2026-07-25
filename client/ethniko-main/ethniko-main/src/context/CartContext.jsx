@@ -49,6 +49,9 @@ export const CartProvider = ({ children }) => {
         price: product.price,
         discountPrice: product.discountPrice,
         image: product.images[0],
+        // Capture a color for the order payload (backend requires it per item)
+        color: (Array.isArray(product.colors) && product.colors[0]) || product.color || 'As Shown',
+        weight: product.weight && product.weight > 0 ? product.weight : 0.5,
         size,
         qty
       }];

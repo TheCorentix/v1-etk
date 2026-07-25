@@ -6,8 +6,22 @@ const mapProduct = (p) => {
   // Let's divide by 100 to get Rupees
   const price = p.price ? p.price / 100 : 0;
   const discountPrice = p.discountPrice ? p.discountPrice / 100 : null;
+
+  // `sizes` may arrive as an array (seed data) or a { size: stock } map (created
+  // products). Normalise to an array of size labels for the UI.
+  const sizesIsMap = p.sizes && !Array.isArray(p.sizes) && typeof p.sizes === 'object';
   const sizes = p.sizes ? (Array.isArray(p.sizes) ? p.sizes : Object.keys(p.sizes)) : [];
-  
+
+  // Derive a total stock count when the product has no explicit `stock` field
+  // (created products track inventory per-size inside the sizes map).
+  const stock = (p.stock !== undefined && p.stock !== null)
+    ? p.stock
+    : (sizesIsMap ? Object.values(p.sizes).reduce((sum, n) => sum + (Number(n) || 0), 0) : 0);
+
+  // Guard against missing arrays so the product grid never crashes on render.
+  const images = Array.isArray(p.images) ? p.images : [];
+  const fabric = p.fabric || '';
+
   const variants = p.variants ? p.variants.map(v => ({
     ...v,
     price: v.price ? v.price / 100 : 0,
@@ -19,6 +33,9 @@ const mapProduct = (p) => {
     price,
     discountPrice,
     sizes,
+    stock,
+    images,
+    fabric,
     variants
   };
 };
@@ -62,7 +79,8 @@ export const productService = {
     }
 
     const response = await api.get('/products', { params });
-    const rawProducts = response.data.products || [];
+    // Backend returns the catalog under `items` (with `pagination`).
+    const rawProducts = response.data.items || response.data.products || [];
     
     // Return standard success response data envelope
     return {
@@ -103,12 +121,19 @@ export const productService = {
     if (!(productData instanceof FormData)) {
       payload = new FormData();
       Object.keys(productData).forEach((key) => {
-        if (key === 'images' && Array.isArray(productData.images)) {
-          productData.images.forEach((file) => payload.append('images', file));
-        } else if (key === 'sizes' && typeof productData.sizes === 'object') {
-          payload.append('sizes', JSON.stringify(productData.sizes));
+        const val = productData[key];
+        if (val === undefined || val === null) return;
+
+        // Native File uploads (e.g. from a file input) are appended one-by-one
+        if (key === 'images' && Array.isArray(val) && val.some((v) => v instanceof File)) {
+          val.forEach((file) => payload.append('images', file));
+        }
+        // Arrays / plain objects (colors, sizes, imageUrls, variants) must be
+        // JSON-encoded so the backend can parse them out of multipart fields.
+        else if (Array.isArray(val) || (typeof val === 'object' && !(val instanceof File))) {
+          payload.append(key, JSON.stringify(val));
         } else {
-          payload.append(key, productData[key]);
+          payload.append(key, val);
         }
       });
       config = {

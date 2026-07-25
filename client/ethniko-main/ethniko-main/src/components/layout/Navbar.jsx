@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, Heart, ShoppingBag, User, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
@@ -18,6 +18,19 @@ export default function Navbar({ onOpenCart }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
+
+  // Mega-menu open/close with a small close delay so moving the mouse across the
+  // gap between the SHOP trigger and the dropdown panel doesn't close it.
+  const megaTimer = useRef(null);
+  const openMegaMenu = () => {
+    if (megaTimer.current) clearTimeout(megaTimer.current);
+    setShowMegaMenu(true);
+  };
+  const closeMegaMenu = () => {
+    if (megaTimer.current) clearTimeout(megaTimer.current);
+    megaTimer.current = setTimeout(() => setShowMegaMenu(false), 220);
+  };
+  useEffect(() => () => { if (megaTimer.current) clearTimeout(megaTimer.current); }, []);
   const { pathname } = useLocation();
   const { cart } = useCart();
   const { wishlist } = useWishlist();
@@ -235,8 +248,8 @@ export default function Navbar({ onOpenCart }) {
 
             {/* Fix #4: mega-menu open/close scoped to trigger + panel, not the whole header */}
             <div
-              onMouseEnter={() => setShowMegaMenu(true)}
-              onMouseLeave={() => setShowMegaMenu(false)}
+              onMouseEnter={openMegaMenu}
+              onMouseLeave={closeMegaMenu}
               className="relative py-1"
             >
               <Link
@@ -249,7 +262,10 @@ export default function Navbar({ onOpenCart }) {
 
               {/* DESKTOP MEGA DROP-DOWN MENU OVERLAY (moved inside the hover-scoped wrapper) */}
               {showMegaMenu && (
-                <div className="fixed left-0 right-0 top-[8.75rem] bg-[#FFFDFC] text-[#181818] border border-[#E6DCCF] rounded-b-2xl shadow-xl p-8 z-50 transition-opacity duration-300 ease-out">
+                <div
+                  onMouseEnter={openMegaMenu}
+                  onMouseLeave={closeMegaMenu}
+                  className="fixed left-0 right-0 top-[8.75rem] bg-[#FFFDFC] text-[#181818] border border-[#E6DCCF] rounded-b-2xl shadow-xl p-8 z-50 transition-opacity duration-300 ease-out max-h-[calc(100vh-8.75rem)] overflow-y-auto">
                   <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-8">
 
                     {/* Column 1: WOMEN */}

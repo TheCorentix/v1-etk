@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, Minus, Gift, Tag, Check, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
@@ -6,6 +6,35 @@ import { userService } from '../../services/userService';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
+// Currency + shipping estimate — mirrors the backend (server/src/utils/shipping.ts).
+const CART_CURRENCY = {
+  India: { code: 'INR', symbol: '₹', rate: 1 },
+  USA: { code: 'USD', symbol: '$', rate: 0.012 },
+  UK: { code: 'GBP', symbol: '£', rate: 0.0095 },
+  Australia: { code: 'AUD', symbol: 'A$', rate: 0.018 },
+};
+
+const estimateShipping = (country, weightKg, subtotalRupees) => {
+  // Domestic: free over ₹10,000, else ₹150
+  if (!country || country === 'India') {
+    const inr = subtotalRupees >= 10000 ? 0 : 150;
+    return { inr, method: 'Domestic', currency: CART_CURRENCY.India, converted: inr, eta: '3–7 days', known: !!country };
+  }
+  // International: weight-based (economy <10kg, bulk >=10kg)
+  const w = Math.max(weightKg || 0, 0.5);
+  const ratePerKg = w >= 10 ? 875 : 1800;
+  const inr = Math.round(w * ratePerKg);
+  const cur = CART_CURRENCY[country] || CART_CURRENCY.USA;
+  return {
+    inr,
+    method: w >= 10 ? 'Bulk' : 'Economy',
+    currency: cur,
+    converted: +(inr * cur.rate).toFixed(2),
+    eta: '7–12 days',
+    known: true,
+  };
+};
 
 export default function CartDrawer({ isOpen, onClose }) {
   const {
@@ -27,6 +56,27 @@ export default function CartDrawer({ isOpen, onClose }) {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // The auth `user.addresses` can be stale (adding an address updates Profile's
+  // local state, not the shared auth user), so fetch the latest addresses when
+  // the cart opens to drive shipping + checkout reliably.
+  const [freshAddresses, setFreshAddresses] = useState(null);
+  useEffect(() => {
+    if (isOpen && user) {
+      userService.getUserProfile()
+        .then((p) => setFreshAddresses(p?.addresses || []))
+        .catch(() => {});
+    }
+  }, [isOpen, user]);
+
+  const addresses = freshAddresses || user?.addresses || [];
+  const primaryAddress = addresses[0] || null;
+
+  // Live shipping estimate based on the customer's saved country + total cart weight.
+  const shipCountry = primaryAddress?.country || '';
+  const totalWeightKg = cart.reduce((sum, i) => sum + (i.weight || 0.5) * i.qty, 0);
+  const shipEstimate = estimateShipping(shipCountry, totalWeightKg, cartSubtotal);
+  const grandTotal = cartTotal + shipEstimate.inr;
 
   const [couponInput, setCouponInput] = useState("");
   const [isApplying, setIsApplying] = useState(false);
@@ -66,7 +116,7 @@ export default function CartDrawer({ isOpen, onClose }) {
       return;
     }
 
-    if (!user.addresses || user.addresses.length === 0) {
+    if (!primaryAddress) {
       toast.error("Please add a shipping address in your profile before checking out.");
       onClose();
       navigate('/profile');
@@ -74,15 +124,16 @@ export default function CartDrawer({ isOpen, onClose }) {
     }
 
     setIsCheckingOut(true);
-    const primaryAddress = user.addresses[0];
 
     const orderData = {
       items: cart.map(item => ({
         productId: item.id,
         name: item.name,
-        sku: item.slug.toUpperCase(),
+        sku: item.slug ? item.slug.toUpperCase() : '',
         size: item.size,
-        qty: item.qty,
+        // Backend order schema expects `quantity` (number) and `color` (non-empty)
+        quantity: item.qty,
+        color: item.color || 'As Shown',
         price: item.discountPrice || item.price,
         image: item.image
       })),
@@ -424,16 +475,28 @@ export default function CartDrawer({ isOpen, onClose }) {
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between text-[10px] text-[#3E7C59] font-semibold">
-                      <span>Shipping</span>
-                      <span>FREE COMPLEMENTARY</span>
+                    <div className={`flex justify-between text-[10px] font-semibold ${shipEstimate.inr === 0 ? 'text-[#3E7C59]' : 'text-neutral-600 dark:text-neutral-300'}`}>
+                      <span>Shipping {shipCountry ? `(${shipCountry})` : ''}</span>
+                      <span>
+                        {shipEstimate.inr === 0
+                          ? 'FREE'
+                          : `₹${shipEstimate.inr.toLocaleString('en-IN')}`}
+                      </span>
                     </div>
+                    {shipEstimate.inr > 0 && shipEstimate.currency.code !== 'INR' && (
+                      <div className="flex justify-between text-[9px] text-neutral-400 normal-case">
+                        <span>≈ {shipEstimate.currency.symbol}{shipEstimate.converted.toLocaleString()} {shipEstimate.currency.code} · {shipEstimate.method}, {shipEstimate.eta}</span>
+                      </div>
+                    )}
+                    {!shipCountry && (
+                      <div className="text-[9px] text-neutral-400 normal-case">Add a delivery address to see shipping.</div>
+                    )}
                   </div>
 
                   <div className="border-t border-neutral-100 pt-3 flex justify-between items-end">
                     <span className="font-serif text-sm tracking-wider text-[#181818] dark:text-[#F8F6F2]">TOTAL ESTIMATED</span>
                     <span className="font-sans text-lg font-bold text-[#B68D40]">
-                      ₹{cartTotal.toLocaleString('en-IN')}
+                      ₹{grandTotal.toLocaleString('en-IN')}
                     </span>
                   </div>
 

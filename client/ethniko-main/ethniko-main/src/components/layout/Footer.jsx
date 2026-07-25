@@ -109,7 +109,7 @@ export default function Footer() {
               <Link to="/shop?category=KIDS" className="hover:text-white transition-colors">Festive Kids Couture</Link>
             </li>
             <li>
-              <Link to="/customize" className="hover:text-white transition-colors">Bespoke Custom Designing</Link>
+              <Link to="/customize" className="hover:text-white transition-colors">Custom Designing</Link>
             </li>
           </ul>
         </div>

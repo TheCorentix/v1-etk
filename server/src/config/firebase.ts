@@ -2,12 +2,33 @@ import admin from 'firebase-admin';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import fs from 'fs';
+import path from 'path';
 
 let firestoreInstance: any;
 let authInstance: any;
 
-if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-  console.warn('⚠️ Warning: FIREBASE_SERVICE_ACCOUNT environment variable is not set.');
+// Resolve the service account credentials: prefer a JSON file under
+// server/credentials/, then fall back to the FIREBASE_SERVICE_ACCOUNT env var
+// (which holds the whole JSON as a string). If neither is present, run offline.
+const serviceAccountPath = path.resolve(
+  process.cwd(),
+  process.env.FIREBASE_SERVICE_ACCOUNT_PATH || 'credentials/firebase-service-account.json'
+);
+
+let resolvedServiceAccount: any = null;
+try {
+  if (fs.existsSync(serviceAccountPath)) {
+    resolvedServiceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    resolvedServiceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  }
+} catch (error) {
+  console.error('❌ Failed to read/parse Firebase service account credentials:', error);
+}
+
+if (!resolvedServiceAccount) {
+  console.warn('⚠️ Warning: No Firebase service account found (checked file + FIREBASE_SERVICE_ACCOUNT env var).');
   console.warn('⚠️ Server will run in OFFLINE MOCK MODE. Database operations will use local in-memory stores.');
 
   // Create a minimal in-memory mock Firestore client to avoid credential load failures
@@ -203,9 +224,9 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 } else {
   try {
     if (getApps().length === 0) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
       initializeApp({
-        credential: cert(serviceAccount),
+        credential: cert(resolvedServiceAccount),
+        projectId: resolvedServiceAccount.project_id,
       });
     }
 
@@ -216,7 +237,7 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
       ignoreUndefinedProperties: true,
     });
 
-    console.log('🔥 Firebase Admin SDK initialized successfully.');
+    console.log(`🔥 Firebase Admin SDK initialized successfully (project: ${resolvedServiceAccount.project_id}).`);
   } catch (error) {
     console.error('❌ Failed to initialize Firebase Admin SDK:', error);
     process.exit(1);
