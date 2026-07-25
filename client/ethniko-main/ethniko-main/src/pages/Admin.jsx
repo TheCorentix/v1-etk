@@ -1378,7 +1378,7 @@ export default function Admin() {
                         type="text"
                         value={storeSettings.storeName}
                         onChange={(e) => setStoreSettings({ ...storeSettings, storeName: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black dark:text-white"
                       />
                     </div>
                     <div className="space-y-1">
