@@ -11,6 +11,9 @@ export default {
         'etniko-gold':   '#B68D40', // accent
         'etniko-cream':  '#FAF7F2', // page background
         'etniko-cream-alt': '#F2EEE9', // feature strip background
+        neutral: {
+          850: '#1f1f1f', // sits between default neutral-800 (#262626) and neutral-900 (#171717)
+        },
         teal: {
           50: '#f0fdfa',
           100: '#ccfbf1',
