@@ -160,7 +160,7 @@ export default function CartDrawer({ isOpen, onClose }) {
       const { order, paymentSession } = checkoutResponse.data;
 
       // 2. Determine Payment Route: Sandbox Bypass vs Live Razorpay
-      if (paymentSession.key.startsWith('order_sandbox_')) {
+      if (paymentSession.method === 'sandbox') {
         toast.loading("Simulating payment checkout sandbox bypass...", { id: "checkout_toast" });
         
         // Directly trigger backend signature verification for simulation

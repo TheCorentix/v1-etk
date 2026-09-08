@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { env } from '../config/env';
 
 export class OrderController {
   private orderService = new OrderService();
@@ -28,7 +29,16 @@ export class OrderController {
         shippingAddress
       );
 
-      sendSuccess(res, { order }, 'Order initialized successfully.', 201);
+      // Payload the Razorpay Checkout widget (or sandbox bypass) needs on the client.
+      const paymentSession = {
+        key: order.paymentMethod === 'razorpay' ? env.RAZORPAY_KEY_ID : 'sandbox',
+        id: order.razorpayOrderId,
+        amount: order.total,
+        currency: 'INR',
+        method: order.paymentMethod,
+      };
+
+      sendSuccess(res, { order, paymentSession }, 'Order initialized successfully.', 201);
     } catch (error) {
       next(error);
     }
