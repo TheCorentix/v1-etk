@@ -352,7 +352,6 @@ export default function Shop() {
                   <option value="newest">Newest Arrivals</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
-                  <option value="rating">Top Rated</option>
                 </select>
               </div>
             </div>
@@ -463,7 +462,7 @@ export default function Shop() {
           {pagination.totalPages > 1 && (
             <div className="flex justify-center items-center space-x-6 pt-10 border-t border-[#E6DCCF]">
               <button
-                onClick={() => updateParam('page', pageParam - 1)}
+                onClick={() => updateParam('page', pageParam - 1, false)}
                 disabled={pageParam === 1}
                 className="p-2 rounded-md border border-[#E6DCCF] hover:border-[#B68D40] hover:text-[#B68D40] disabled:opacity-30 disabled:hover:border-[#E6DCCF] transition-colors duration-300 focus:outline-none"
                 aria-label="Previous Page"
@@ -476,7 +475,7 @@ export default function Shop() {
               </span>
 
               <button
-                onClick={() => updateParam('page', pageParam + 1)}
+                onClick={() => updateParam('page', pageParam + 1, false)}
                 disabled={pageParam === pagination.totalPages}
                 className="p-2 rounded-md border border-[#E6DCCF] hover:border-[#B68D40] hover:text-[#B68D40] disabled:opacity-30 disabled:hover:border-[#E6DCCF] transition-colors duration-300 focus:outline-none"
                 aria-label="Next Page"

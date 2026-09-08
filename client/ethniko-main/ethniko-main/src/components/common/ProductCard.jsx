@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, Scissors } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
 import QuickViewModal from './QuickViewModal';
+import CustomRequestModal from './CustomRequestModal';
 
 export default function ProductCard({ product }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [hovered, setHovered] = useState(false);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
 
   const favorited = isInWishlist(product.id);
   const discount = product.discountPrice ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
@@ -129,6 +131,16 @@ export default function ProductCard({ product }) {
                   <ShoppingBag className="w-3.5 h-3.5" />
                 </button>
               )}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCustomizeOpen(true);
+                }}
+                className="p-2 bg-white/95 text-neutral-900 hover:bg-[#B68D40] hover:text-white transition-colors duration-300"
+                aria-label="Request a custom version of this design"
+              >
+                <Scissors className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </Link>
@@ -168,6 +180,13 @@ export default function ProductCard({ product }) {
       <QuickViewModal
         isOpen={quickViewOpen}
         onClose={() => setQuickViewOpen(false)}
+        product={product}
+      />
+
+      {/* Per-product customization request */}
+      <CustomRequestModal
+        isOpen={customizeOpen}
+        onClose={() => setCustomizeOpen(false)}
         product={product}
       />
     </>

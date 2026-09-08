@@ -179,6 +179,7 @@ export class ProductController {
         status,
         priceRange,
         search,
+        sort,
       } = req.query;
 
       const pageNum = page ? parseInt(page as string, 10) : 1;
@@ -194,6 +195,7 @@ export class ProductController {
         ...(type && { type }),
         ...(priceRange && { priceRange }),
         ...(search && { search }),
+        ...(sort && { sort }),
         status: resolvedStatus,
       };
 

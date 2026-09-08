@@ -56,7 +56,12 @@ export class LookbookController {
       if (title) parsedFields.title = title;
       if (tags) parsedFields.tags = typeof tags === 'string' ? JSON.parse(tags) : tags;
 
-      const look = await this.lookbookService.updateLook(id, parsedFields);
+      // Extract optionally re-uploaded video/thumbnail streams populated by Multer's fields middleware
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+      const localVideoPath = files?.video?.[0]?.path;
+      const localThumbnailPath = files?.thumbnail?.[0]?.path;
+
+      const look = await this.lookbookService.updateLook(id, parsedFields, localVideoPath, localThumbnailPath);
       sendSuccess(res, { look }, 'Lookbook updated successfully.', 200);
     } catch (error) {
       next(error);

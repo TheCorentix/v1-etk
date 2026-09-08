@@ -77,12 +77,14 @@ export const userService = {
   submitCustomizationRequest: async (requestData) => {
     const payload = new FormData();
 
-    // Map input fields to FormData object
+    // Map input fields to FormData object. `FormData.append` stringifies undefined/null
+    // to the literal text "undefined"/"null", so skip fields that aren't actually set.
     Object.keys(requestData).forEach((key) => {
-      if (key === 'images' && Array.isArray(requestData.images)) {
-        requestData.images.forEach((file) => payload.append('images', file));
-      } else {
-        payload.append(key, requestData[key]);
+      const value = requestData[key];
+      if (key === 'images' && Array.isArray(value)) {
+        value.forEach((file) => payload.append('images', file));
+      } else if (value !== undefined && value !== null) {
+        payload.append(key, value);
       }
     });
 

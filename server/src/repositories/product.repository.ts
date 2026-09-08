@@ -34,6 +34,7 @@ export interface ProductFilters {
   status?: 'PUBLISHED' | 'DRAFT';
   priceRange?: 'below10k' | 'above10k';
   search?: string;
+  sort?: 'newest' | 'price-asc' | 'price-desc';
 }
 
 export class ProductRepository {
@@ -162,6 +163,21 @@ export class ProductRepository {
           p.fabric.toLowerCase().includes(searchLower) ||
           p.sku.toLowerCase().includes(searchLower)
       );
+    }
+
+    // Apply sort ordering (in-memory, avoiding a composite Firestore index per filter combination)
+    const effectivePrice = (p: ProductDocument) => (p.discountPrice && p.discountPrice > 0 ? p.discountPrice : p.price);
+    switch (filters.sort) {
+      case 'price-asc':
+        products.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+        break;
+      case 'price-desc':
+        products.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+        break;
+      case 'newest':
+      default:
+        products.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        break;
     }
 
     // Apply pagination slice bounds

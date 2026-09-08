@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Check, HelpCircle, ChevronRight, Play, VolumeX, Volume2 } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Check, HelpCircle, ChevronRight, Play, VolumeX, Volume2, Scissors } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { productService } from '../services/productService';
 import { mockReviews } from '../mock/reviews';
@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/common/ProductCard';
 import SkeletonLoader from '../components/common/SkeletonLoader';
+import CustomRequestModal from '../components/common/CustomRequestModal';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -32,6 +33,7 @@ export default function ProductDetails() {
   const [selectedFabric, setSelectedFabric] = useState("");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
 
   // Video settings
   const [videoMuted, setVideoMuted] = useState(true);
@@ -413,6 +415,14 @@ export default function ProductDetails() {
             >
               <Heart className={`w-4 h-4 ${favorited ? 'fill-[#B68D40] text-[#B68D40]' : ''}`} />
             </button>
+
+            <button
+              onClick={() => setCustomizeOpen(true)}
+              className="p-4 border border-neutral-300 text-neutral-800 hover:border-[#B68D40] transition-colors focus:outline-none"
+              aria-label="Request a custom version of this design"
+            >
+              <Scissors className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Bespoke advisory banner */}
@@ -441,7 +451,7 @@ export default function ProductDetails() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-2.5 pr-5 border-b-2 -mb-0.5 transition-colors focus:outline-none ${
+                  className={`py-2.5 pr-5 border-b-2 -mb-0.5 transition-colors focus:outline-none capitalize ${
                     activeTab === tab
                       ? 'border-[#B68D40] text-[#B68D40]'
                       : 'border-transparent text-neutral-400 hover:text-black'
@@ -597,6 +607,13 @@ export default function ProductDetails() {
           </div>
         </section>
       )}
+
+      {/* Per-product customization request */}
+      <CustomRequestModal
+        isOpen={customizeOpen}
+        onClose={() => setCustomizeOpen(false)}
+        product={product}
+      />
 
     </div>
   );

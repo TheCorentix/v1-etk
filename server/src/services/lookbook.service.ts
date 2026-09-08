@@ -44,14 +44,37 @@ export class LookbookService {
   }
 
   /**
-   * Modifies an existing lookbook video tags, coordinates, or title.
+   * Modifies an existing lookbook video tags, coordinates, or title. Optionally replaces
+   * the source video and/or thumbnail with newly uploaded files.
    */
-  async updateLook(id: string, data: Partial<LookbookDocument>): Promise<LookbookDocument | null> {
+  async updateLook(
+    id: string,
+    data: Partial<LookbookDocument>,
+    localVideoPath?: string,
+    localThumbnailPath?: string
+  ): Promise<LookbookDocument | null> {
     const existing = await this.lookbookRepository.findById(id);
     if (!existing) {
       throw new Error(`Lookbook with ID ${id} not found.`);
     }
-    return this.lookbookRepository.update(id, data);
+
+    const updateData: Partial<LookbookDocument> = { ...data };
+
+    if (localVideoPath) {
+      const videoResult = await uploadToCloudinary(localVideoPath, 'lookbook');
+      updateData.videoUrl = videoResult.secureUrl;
+      // A freshly uploaded video invalidates any auto-derived thumbnail from the old one.
+      if (!localThumbnailPath) {
+        updateData.thumbnailUrl = videoResult.secureUrl.replace(/\.[^/.]+$/, '.jpg');
+      }
+    }
+
+    if (localThumbnailPath) {
+      const thumbResult = await uploadToCloudinary(localThumbnailPath, 'lookbook');
+      updateData.thumbnailUrl = thumbResult.secureUrl;
+    }
+
+    return this.lookbookRepository.update(id, updateData);
   }
 
   /**

@@ -17,6 +17,8 @@ export interface CustomisationDocument {
   whatsappNumber?: string | null;
   category: string; // e.g. "Saree", "Lehenga"
   occasion: string; // e.g. "Bridal Wedding"
+  productId?: string | null; // References `products.id` when the request originated from a specific catalog item
+  productSku?: string | null;
   fabricPref?: string | null; // For tailoring, stores free-text fabric details
   colorPref?: string | null;
   budgetRange?: string | null;

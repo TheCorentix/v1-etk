@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import AppRoutes from './routes/AppRoutes';
+import ScrollToTop from './components/common/ScrollToTop';
 import SearchModal from './components/common/SearchModal';
 import CartDrawer from './components/common/CartDrawer';
 import { WishlistProvider } from './context/WishlistContext';
@@ -17,6 +18,7 @@ export default function App() {
       <CartProvider>
         <SearchProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <div className="flex flex-col min-h-screen bg-[#FFFFFF] text-[#181818] selection:bg-[#B68D40] selection:text-white transition-colors duration-300">
 
               {/* Persistent navigation header */}

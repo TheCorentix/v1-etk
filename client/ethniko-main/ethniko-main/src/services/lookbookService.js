@@ -43,10 +43,22 @@ export const lookbookService = {
   },
 
   /**
-   * Modifies lookbook coordinates hotspots or titles (Admin only).
+   * Modifies lookbook coordinates hotspots, titles, or the source video/thumbnail (Admin only).
    */
   updateLookbook: async (id, lookbookData) => {
-    const response = await api.put(`/lookbooks/${id}`, lookbookData);
+    let payload = lookbookData;
+    let config = {};
+
+    if (!(lookbookData instanceof FormData)) {
+      payload = new FormData();
+      if (lookbookData.title !== undefined) payload.append('title', lookbookData.title);
+      if (lookbookData.tags !== undefined) payload.append('tags', JSON.stringify(lookbookData.tags || []));
+      if (lookbookData.video) payload.append('video', lookbookData.video);
+      if (lookbookData.thumbnail) payload.append('thumbnail', lookbookData.thumbnail);
+    }
+    config.headers = { 'Content-Type': 'multipart/form-data' };
+
+    const response = await api.put(`/lookbooks/${id}`, payload, config);
     return response.data.look;
   },
 

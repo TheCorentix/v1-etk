@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Scissors, ShoppingBag, Plus, Edit, Trash2, Check, RefreshCw, BarChart2, Eye, Sliders, Users, FileText, Layers, Settings, Star, Globe, Truck, Heart, ArrowUp, ArrowDown, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Scissors, ShoppingBag, Plus, Edit, Trash2, Check, RefreshCw, BarChart2, Eye, Sliders, Users, FileText, Layers, Settings, Star, Globe, Truck, Heart, ArrowUp, ArrowDown, AlertCircle, Film } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { productService } from '../services/productService';
@@ -7,6 +7,7 @@ import { adminService } from '../services/adminService';
 import { homepageService } from '../services/homepageService';
 import MediaLibraryDialog from '../components/admin/MediaLibraryDialog';
 import VariantsMatrixBuilder from '../components/admin/VariantsMatrixBuilder';
+import LookbookManager from '../components/admin/LookbookManager';
 
 // Default avatars used for testimonials when no custom image is provided.
 const DEFAULT_AVATARS = [
@@ -523,6 +524,7 @@ export default function Admin() {
               { id: "products", label: "Catalog Products", icon: ShoppingBag },
               { id: "orders", label: "Order Status", icon: FileText },
               { id: "customizations", label: "Styling requests", icon: Scissors },
+              { id: "lookbook", label: "Look & Shop", icon: Film },
               { id: "cms", label: "Homepage CMS", icon: Sliders },
               { id: "categories", label: "Categories & Collections", icon: Layers },
               { id: "testimonials", label: "Testimonials & Reviews", icon: Star },
@@ -1152,7 +1154,12 @@ export default function Admin() {
                           <span className="font-bold text-neutral-800 block normal-case">{cust.customerName}</span>
                           <span className="text-[9px] text-neutral-400 block mt-0.5">{cust.phone}</span>
                         </td>
-                        <td className="p-3 font-medium normal-case">{cust.category || '—'}</td>
+                        <td className="p-3 font-medium normal-case">
+                          <span className="block">{cust.category || '—'}</span>
+                          {cust.productSku && (
+                            <span className="text-[9px] font-mono text-neutral-400 block mt-0.5">SKU: {cust.productSku}</span>
+                          )}
+                        </td>
                         <td className="p-3">
                           <span className="px-2 py-0.5 bg-[#B68D40] text-white border text-[8px] font-bold whitespace-nowrap">
                             {STATUS_LABELS[cust.status] || cust.status}
@@ -1253,6 +1260,8 @@ export default function Admin() {
                           ['WhatsApp', selectedCustom.whatsappNumber],
                           ['Garment', selectedCustom.category],
                           ['Request Type', selectedCustom.occasion],
+                          ['Product SKU', selectedCustom.productSku],
+                          ['Product ID', selectedCustom.productId],
                           ['Fabric Details', selectedCustom.fabricPref],
                           ['Color', selectedCustom.colorPref],
                           ['Budget', selectedCustom.budgetRange],
@@ -1296,6 +1305,11 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* LOOK & SHOP WORKSPACE */}
+          {activeTab === 'lookbook' && (
+            <LookbookManager products={products} />
           )}
 
           {/* HOMEPAGE CMS WORKSPACE */}
