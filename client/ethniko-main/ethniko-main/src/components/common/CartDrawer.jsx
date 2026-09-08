@@ -150,19 +150,17 @@ export default function CartDrawer({ isOpen, onClose }) {
     };
 
     try {
-      // 1. Initialize Order in Express Backend
-      const checkoutResponse = await userService.createOrder(orderData);
-      
-      if (!checkoutResponse || !checkoutResponse.success) {
-        throw new Error(checkoutResponse?.message || "Failed to initialize order.");
-      }
-
-      const { order, paymentSession } = checkoutResponse.data;
+      // 1. Initialize Order in Express Backend.
+      // Note: `api`'s response interceptor already unwraps the {success, message, data}
+      // envelope and rejects the promise on any non-2xx response, so reaching this line
+      // means the request succeeded and `userService.createOrder` resolves with the
+      // inner `data` payload directly — not another envelope to unwrap.
+      const { order, paymentSession } = await userService.createOrder(orderData);
 
       // 2. Determine Payment Route: Sandbox Bypass vs Live Razorpay
       if (paymentSession.method === 'sandbox') {
         toast.loading("Simulating payment checkout sandbox bypass...", { id: "checkout_toast" });
-        
+
         // Directly trigger backend signature verification for simulation
         const verifyData = {
           razorpayOrderId: paymentSession.id,
@@ -170,16 +168,12 @@ export default function CartDrawer({ isOpen, onClose }) {
           razorpaySignature: 'sandbox_signature'
         };
 
-        const verifyResponse = await userService.verifyPayment(verifyData);
-        
-        if (verifyResponse && verifyResponse.success) {
-          toast.success("Sandbox order checkout completed successfully!", { id: "checkout_toast" });
-          setOrderNumber(order.id);
-          setCheckoutSuccess(true);
-          clearCart();
-        } else {
-          throw new Error("Sandbox payment verification failed.");
-        }
+        await userService.verifyPayment(verifyData);
+
+        toast.success("Sandbox order checkout completed successfully!", { id: "checkout_toast" });
+        setOrderNumber(order.id);
+        setCheckoutSuccess(true);
+        clearCart();
       } else {
         // Run Live Razorpay Checkout
         const scriptLoaded = await loadRazorpayScript();
@@ -203,15 +197,12 @@ export default function CartDrawer({ isOpen, onClose }) {
                 razorpaySignature: response.razorpay_signature,
               };
 
-              const verifyResponse = await userService.verifyPayment(verifyData);
-              if (verifyResponse && verifyResponse.success) {
-                toast.success("Order checkouts registered successfully!", { id: "checkout_toast" });
-                setOrderNumber(order.id);
-                setCheckoutSuccess(true);
-                clearCart();
-              } else {
-                toast.error("Signature verification failed.", { id: "checkout_toast" });
-              }
+              await userService.verifyPayment(verifyData);
+
+              toast.success("Order checkouts registered successfully!", { id: "checkout_toast" });
+              setOrderNumber(order.id);
+              setCheckoutSuccess(true);
+              clearCart();
             } catch (err) {
               console.error(err);
               toast.error("Payment verification failed.", { id: "checkout_toast" });

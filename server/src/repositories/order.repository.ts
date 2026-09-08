@@ -149,11 +149,12 @@ export class OrderRepository {
       queryRef = queryRef.where('paymentStatus', '==', filters.paymentStatus);
     }
 
-    // Default sorting order by creation date (descending)
-    queryRef = queryRef.orderBy('createdAt', 'desc');
-
     const snapshot = await queryRef.get();
     const orders = mapQuery<OrderDocument>(snapshot);
+
+    // Sort by creation date (descending) in-memory rather than via Firestore's
+    // orderBy, which would require a composite index for every filter combination above.
+    orders.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 
     const total = orders.length;
     const startIndex = (pagination.page - 1) * pagination.limit;
@@ -173,10 +174,12 @@ export class OrderRepository {
     const querySnapshot = await db
       .collection(OrderRepository.collectionName)
       .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
       .get();
 
-    return mapQuery<OrderDocument>(querySnapshot);
+    // Sort in-memory (see `list()`) to avoid requiring a composite Firestore index.
+    const orders = mapQuery<OrderDocument>(querySnapshot);
+    orders.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    return orders;
   }
 }
 
