@@ -18,7 +18,7 @@ const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Premium minimal luxury loading screen
 const PageLoading = () => (
-  <div className="flex flex-col items-center justify-center min-h-[60vh] bg-[#FFFFFF] dark:bg-[#181818]">
+  <div className="flex flex-col items-center justify-center min-h-[60vh] bg-[#FFFFFF]">
     <div className="relative w-16 h-16 flex items-center justify-center">
       {/* Outer spinning gold frame */}
       <div className="absolute border border-t-[#B68D40] border-[#ECECEC] rounded-full w-12 h-12 animate-spin duration-1000" />

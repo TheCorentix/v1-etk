@@ -138,14 +138,14 @@ export default function HomepageSectionBuilder() {
 
       {/* Add Section form */}
       {showAddSection && (
-        <form onSubmit={handleCreateSection} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900 rounded-lg">
+        <form onSubmit={handleCreateSection} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary rounded-lg">
           <div className="space-y-1">
             <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Section Title</label>
             <input
               type="text" required
               value={newSection.title}
               onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -153,7 +153,7 @@ export default function HomepageSectionBuilder() {
             <select
               value={newSection.type}
               onChange={(e) => setNewSection({ ...newSection, type: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2.5 text-xs font-sans focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2.5 text-xs font-sans focus:outline-none"
             >
               <option value="PRODUCT_GRID">PRODUCT GRID RAIL</option>
               <option value="LOOKBOOK_SNAP">LOOK & SHOP HERO</option>
@@ -168,7 +168,7 @@ export default function HomepageSectionBuilder() {
               type="text"
               value={newSection.subtitle}
               onChange={(e) => setNewSection({ ...newSection, subtitle: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -178,7 +178,7 @@ export default function HomepageSectionBuilder() {
               placeholder="e.g. Sarees or Lookbook reference ID"
               value={newSection.referenceId}
               onChange={(e) => setNewSection({ ...newSection, referenceId: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
             />
           </div>
           <div className="md:col-span-2 pt-2">
@@ -192,7 +192,7 @@ export default function HomepageSectionBuilder() {
         {sections.map((sec, idx) => (
           <div
             key={sec.id}
-            className="border p-4 flex items-center justify-between gap-6 bg-white dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-800 shadow-sm rounded-lg hover:shadow-md transition-shadow"
+            className="border p-4 flex items-center justify-between gap-6 bg-white border-[#ECECEC] shadow-sm rounded-lg hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-4">
               <span className="w-8 h-8 rounded-full bg-[#B68D40]/10 flex items-center justify-center text-[#B68D40] text-[10px] font-sans font-bold">
@@ -202,7 +202,7 @@ export default function HomepageSectionBuilder() {
                 <span className="text-[8px] uppercase tracking-wider font-mono px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded">
                   {sec.type}
                 </span>
-                <h4 className="font-serif text-sm text-neutral-800 dark:text-primary pt-1">{sec.title}</h4>
+                <h4 className="font-serif text-sm text-neutral-800 pt-1">{sec.title}</h4>
                 {sec.subtitle && <p className="text-[10px] font-sans text-neutral-400">{sec.subtitle}</p>}
               </div>
             </div>

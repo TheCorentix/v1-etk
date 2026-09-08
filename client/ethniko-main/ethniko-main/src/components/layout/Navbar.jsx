@@ -110,13 +110,13 @@ export default function Navbar({ onOpenCart }) {
   // Fix #2: shared active-state class helper for mobile links
   const mobileLinkClass = (path) =>
     `hover:text-[#B68D40] transition-colors ${
-      pathname === path ? 'text-[#B68D40]' : 'text-[#181818] dark:text-[#F8F6F2]'
+      pathname === path ? 'text-[#B68D40]' : 'text-[#181818]'
     }`;
 
   return (
     <>
       <header
-        className={`w-full bg-[#F8F6F2] dark:bg-[#181818] border-b border-[#ECECEC] dark:border-neutral-800 text-[#181818] dark:text-[#F8F6F2] sticky top-0 z-40 transition-colors transition-transform duration-300 ease-out md:translate-y-0 ${
+        className={`w-full bg-[#F8F6F2] border-b border-[#ECECEC] text-[#181818] sticky top-0 z-40 transition-colors transition-transform duration-300 ease-out md:translate-y-0 ${
           showNavbar ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
@@ -185,7 +185,7 @@ export default function Navbar({ onOpenCart }) {
             </div>
 
             {/* Fix #9: larger click targets (p-1.5 -> p-2) */}
-            <div className="flex items-center space-x-2.5 sm:space-x-3.5 w-44 justify-end z-10 text-neutral-600 dark:text-neutral-300">
+            <div className="flex items-center space-x-2.5 sm:space-x-3.5 w-44 justify-end z-10 text-neutral-600">
               <button
                 onClick={openSearch}
                 className="p-2 hover:text-[#B68D40] transition-colors focus:outline-none"
@@ -488,13 +488,13 @@ export default function Navbar({ onOpenCart }) {
           onClick={() => setMobileMenuOpen(false)}
         />
         <div
-          className={`relative w-4/5 max-w-sm bg-white dark:bg-[#181818] h-full flex flex-col p-8 transition-transform duration-300 shadow-2xl ${
+          className={`relative w-4/5 max-w-sm bg-white h-full flex flex-col p-8 transition-transform duration-300 shadow-2xl ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-6 right-6 p-2 text-[#181818] dark:text-[#F8F6F2] focus:outline-none hover:text-[#B68D40]"
+            className="absolute top-6 right-6 p-2 text-[#181818] focus:outline-none hover:text-[#B68D40]"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />

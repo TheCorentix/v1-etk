@@ -51,7 +51,7 @@ export default function SearchModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeSearch}
-            className="fixed inset-0 bg-white/90 dark:bg-[#181818]/90 backdrop-blur-md"
+            className="fixed inset-0 bg-white/90 backdrop-blur-md"
           />
 
           {/* Search Content Overlay */}
@@ -66,7 +66,7 @@ export default function SearchModal() {
             <div className="flex justify-end mb-6">
               <button
                 onClick={closeSearch}
-                className="p-3 border border-neutral-300 dark:border-neutral-700 rounded-full hover:border-[#B68D40] hover:text-[#B68D40] dark:text-primary transition-all focus:outline-none"
+                className="p-3 border border-neutral-300 rounded-full hover:border-[#B68D40] hover:text-[#B68D40] transition-all focus:outline-none"
                 aria-label="Close search"
               >
                 <X className="w-5 h-5" />
@@ -74,15 +74,15 @@ export default function SearchModal() {
             </div>
 
             {/* Input Bar Form */}
-            <form onSubmit={handleSearchSubmit} className="relative w-full border-b border-neutral-800 dark:border-neutral-200 pb-4">
-              <Search className="absolute left-1 top-2.5 w-6 h-6 text-neutral-400 dark:text-neutral-500" />
+            <form onSubmit={handleSearchSubmit} className="relative w-full border-b border-neutral-800 pb-4">
+              <Search className="absolute left-1 top-2.5 w-6 h-6 text-neutral-400" />
               <input
                 ref={inputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="SEARCH DESIGNER COUTURE..."
-                className="w-full pl-12 pr-10 bg-transparent text-xl md:text-3xl font-serif tracking-widest text-[#181818] dark:text-[#F8F6F2] placeholder-neutral-400 border-none outline-none focus:ring-0 uppercase"
+                className="w-full pl-12 pr-10 bg-transparent text-xl md:text-3xl font-serif tracking-widest text-[#181818] placeholder-neutral-400 border-none outline-none focus:ring-0 uppercase"
               />
               {searchQuery && (
                 <button
@@ -125,7 +125,7 @@ export default function SearchModal() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <h4 className="font-serif text-[11px] uppercase tracking-wider text-[#181818] dark:text-[#F8F6F2] leading-tight">
+                            <h4 className="font-serif text-[11px] uppercase tracking-wider text-[#181818] leading-tight">
                               {product.name}
                             </h4>
                             <p className="text-[10px] font-sans text-neutral-500 font-medium">
@@ -139,7 +139,7 @@ export default function SearchModal() {
                 ) : (
                   /* No Results State */
                   <div className="py-16 text-center space-y-4">
-                    <h3 className="font-serif text-lg tracking-wider text-text-custom dark:text-primary uppercase">
+                    <h3 className="font-serif text-lg tracking-wider text-text-custom uppercase">
                       No matching garments found
                     </h3>
                     <p className="text-xs text-neutral-500 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
@@ -155,7 +155,7 @@ export default function SearchModal() {
                 {/* Recent Searches */}
                 {recentSearches.length > 0 && (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                    <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
                       <span className="text-[10px] tracking-[0.25em] font-sans font-semibold text-[#B68D40] uppercase">
                         RECENT LOOKUPS
                       </span>
@@ -172,7 +172,7 @@ export default function SearchModal() {
                         <div key={term} className="flex justify-between items-center group">
                           <button
                             onClick={() => handleSuggestionClick(term)}
-                            className="text-xs font-sans text-left text-neutral-600 dark:text-neutral-300 hover:text-[#B68D40] transition-colors"
+                            className="text-xs font-sans text-left text-neutral-600 hover:text-[#B68D40] transition-colors"
                           >
                             {term}
                           </button>
@@ -191,7 +191,7 @@ export default function SearchModal() {
 
                 {/* Trending searches tags list */}
                 <div className="space-y-4">
-                  <div className="border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                  <div className="border-b border-neutral-200 pb-2">
                     <span className="text-[10px] tracking-[0.25em] font-sans font-semibold text-[#B68D40] uppercase">
                       TRENDING NOW
                     </span>
@@ -201,7 +201,7 @@ export default function SearchModal() {
                       <button
                         key={tag}
                         onClick={() => handleSuggestionClick(tag)}
-                        className="px-3.5 py-1.5 border border-neutral-200 dark:border-neutral-800 text-[10px] tracking-wider uppercase hover:border-[#B68D40] hover:text-[#B68D40] transition-colors font-sans text-neutral-600 dark:text-neutral-300"
+                        className="px-3.5 py-1.5 border border-neutral-200 text-[10px] tracking-wider uppercase hover:border-[#B68D40] hover:text-[#B68D40] transition-colors font-sans text-neutral-600"
                       >
                         {tag}
                       </button>
@@ -211,7 +211,7 @@ export default function SearchModal() {
 
                 {/* Popular Recommended items */}
                 <div className="space-y-4 md:col-span-1">
-                  <div className="border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                  <div className="border-b border-neutral-200 pb-2">
                     <span className="text-[10px] tracking-[0.25em] font-sans font-semibold text-[#B68D40] uppercase">
                       POPULAR ITEMS
                     </span>
@@ -232,7 +232,7 @@ export default function SearchModal() {
                           />
                         </div>
                         <div className="space-y-0.5">
-                          <h5 className="font-serif text-[11px] uppercase tracking-wider text-[#181818] dark:text-[#F8F6F2] group-hover:text-[#B68D40] transition-colors leading-tight">
+                          <h5 className="font-serif text-[11px] uppercase tracking-wider text-[#181818] group-hover:text-[#B68D40] transition-colors leading-tight">
                             {p.name}
                           </h5>
                           <p className="text-[9px] font-sans text-neutral-500 font-medium">

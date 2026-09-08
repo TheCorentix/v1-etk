@@ -224,16 +224,16 @@ export default function Customize() {
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-primary dark:bg-neutral-900 border border-[#D9C7A3] p-12 text-center space-y-6"
+          className="bg-primary border border-[#D9C7A3] p-12 text-center space-y-6"
         >
           <div className="w-16 h-16 bg-[#3E7C59]/10 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle className="w-8 h-8 text-[#3E7C59]" />
           </div>
-          <h3 className="font-serif text-2xl text-text-custom dark:text-primary tracking-wider">REQUEST SUBMITTED</h3>
+          <h3 className="font-serif text-2xl text-text-custom tracking-wider">REQUEST SUBMITTED</h3>
           <p className="text-xs text-neutral-500 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
             Your {subcategory === "tailoring" ? "tailoring" : "customized"} request has been registered at ETNIKO under reference:
           </p>
-          <span className="font-mono text-sm font-semibold text-[#B68D40] tracking-widest bg-white dark:bg-neutral-800 px-6 py-2.5 border border-[#D9C7A3] inline-block">
+          <span className="font-mono text-sm font-semibold text-[#B68D40] tracking-widest bg-white px-6 py-2.5 border border-[#D9C7A3] inline-block">
             {requestId}
           </span>
           <p className="text-xs text-neutral-400 max-w-sm mx-auto">
@@ -297,7 +297,7 @@ export default function Customize() {
 
           {/* Progress Indicator line */}
           <div className="relative flex justify-between items-center max-w-2xl mx-auto">
-            <div className="absolute inset-x-0 h-0.5 bg-neutral-200 dark:bg-neutral-850 -z-10" />
+            <div className="absolute inset-x-0 h-0.5 bg-neutral-200 -z-10" />
             <div
               style={{ width: `${((step - 1) / 3) * 100}%` }}
               className="absolute h-0.5 bg-[#B68D40] transition-all duration-500 -z-10"
@@ -314,7 +314,7 @@ export default function Customize() {
                         ? 'bg-[#B68D40] border-[#B68D40] text-white shadow-sm'
                         : active
                         ? 'bg-white border-[#B68D40] text-[#B68D40] shadow-md ring-4 ring-primary'
-                        : 'bg-white dark:bg-neutral-850 border-neutral-200 text-neutral-400'
+                        : 'bg-white border-neutral-200 text-neutral-400'
                     }`}
                   >
                     {done ? "✓" : s.id}
@@ -330,7 +330,7 @@ export default function Customize() {
           </div>
 
           {/* Form Step Components */}
-          <div className="bg-white dark:bg-[#181818] border border-[#ECECEC] dark:border-neutral-800 p-8 shadow-sm">
+          <div className="bg-white border border-[#ECECEC] p-8 shadow-sm">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${subcategory}-${step}`}
@@ -367,7 +367,7 @@ export default function Customize() {
                                 className={`flex flex-col items-center gap-2 border px-3 py-4 text-center transition-all duration-200 ${
                                   selected
                                     ? 'bg-[#B68D40] border-[#B68D40] text-white'
-                                    : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                    : 'bg-transparent border-neutral-300 text-text-custom hover:border-[#B68D40]'
                                 }`}
                               >
                                 <Icon className="w-5 h-5" />
@@ -392,7 +392,7 @@ export default function Customize() {
                                 className={`border px-3 py-3 text-left text-xs font-sans transition-all duration-200 ${
                                   selected
                                     ? 'bg-[#B68D40] border-[#B68D40] text-white font-semibold'
-                                    : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                    : 'bg-transparent border-neutral-300 text-text-custom hover:border-[#B68D40]'
                                 }`}
                               >
                                 {opt.label}
@@ -417,7 +417,7 @@ export default function Customize() {
                                   className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
                                     selected
                                       ? 'bg-[#B68D40] border-[#B68D40] text-white font-semibold'
-                                      : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                      : 'bg-transparent border-neutral-300 text-text-custom hover:border-[#B68D40]'
                                   }`}
                                 >
                                   <Layers className="w-3.5 h-3.5 shrink-0" />
@@ -437,7 +437,7 @@ export default function Customize() {
                             placeholder="Describe the fabric you'd like: type, weave, weight, color, GSM, or any swatch reference..."
                             value={formData.fabricDetails}
                             onChange={(e) => setFormData({ ...formData, fabricDetails: e.target.value })}
-                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                           />
                         </div>
                       )}
@@ -457,7 +457,7 @@ export default function Customize() {
                                   className={`flex items-center gap-2 border px-3 py-3 text-xs font-sans transition-all duration-200 ${
                                     selected
                                       ? 'border-[#B68D40] bg-[#B68D40]/10 text-[#B68D40] font-semibold'
-                                      : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                      : 'bg-transparent border-neutral-300 text-text-custom hover:border-[#B68D40]'
                                   }`}
                                 >
                                   <span
@@ -482,7 +482,7 @@ export default function Customize() {
                       Standard Sizing
                     </h3>
 
-                    <div className="bg-primary dark:bg-neutral-900 border border-border-custom p-4 text-[11px] font-sans text-neutral-500 leading-relaxed text-justify">
+                    <div className="bg-primary border border-border-custom p-4 text-[11px] font-sans text-neutral-500 leading-relaxed text-justify">
                       <span className="font-bold text-[#B68D40] uppercase tracking-widest block mb-1">Sizing Note:</span>
                       This design is made from an existing ETNIKO pattern, so a standard size is usually all we need. If you'd like small alterations, flag it below and share the 1-2 measurements that matter.
                     </div>
@@ -498,7 +498,7 @@ export default function Customize() {
                             className={`w-11 h-11 border text-xs font-sans font-semibold transition-all duration-200 ${
                               formData.size === sz
                                 ? 'bg-[#B68D40] border-[#B68D40] text-white'
-                                : 'bg-transparent border-neutral-300 dark:border-neutral-700 text-text-custom dark:text-white hover:border-[#B68D40]'
+                                : 'bg-transparent border-neutral-300 text-text-custom hover:border-[#B68D40]'
                             }`}
                           >
                             {sz}
@@ -529,7 +529,7 @@ export default function Customize() {
                               ...formData,
                               measurements: { ...formData.measurements, bust: e.target.value }
                             })}
-                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                           />
                         </div>
                         <div className="space-y-1">
@@ -542,7 +542,7 @@ export default function Customize() {
                               ...formData,
                               measurements: { ...formData.measurements, waist: e.target.value }
                             })}
-                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                           />
                         </div>
                       </div>
@@ -555,7 +555,7 @@ export default function Customize() {
                         placeholder="e.g. Take in the waist slightly, lengthen sleeves by 1 inch..."
                         value={formData.alterationNotes}
                         onChange={(e) => setFormData({ ...formData, alterationNotes: e.target.value })}
-                        className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                        className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                       />
                     </div>
                   </div>
@@ -568,7 +568,7 @@ export default function Customize() {
                       Tailoring Sizing Measurements
                     </h3>
 
-                    <div className="bg-primary dark:bg-neutral-900 border border-border-custom p-4 text-[11px] font-sans text-neutral-500 leading-relaxed text-justify">
+                    <div className="bg-primary border border-border-custom p-4 text-[11px] font-sans text-neutral-500 leading-relaxed text-justify">
                       <span className="font-bold text-[#B68D40] uppercase tracking-widest block mb-1">Tailoring Note:</span>
                       For a perfect draping silhouette, we recommend using a standard tailor tape. Wrap the tape comfortably (not too tight) around the bust, natural waist, and hips. If unsure, you may submit approximations; our stylist will finalize sizing with you.
                     </div>
@@ -584,7 +584,7 @@ export default function Customize() {
                             ...formData,
                             measurements: { ...formData.measurements, bust: e.target.value }
                           })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
 
@@ -598,7 +598,7 @@ export default function Customize() {
                             ...formData,
                             measurements: { ...formData.measurements, waist: e.target.value }
                           })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
 
@@ -612,7 +612,7 @@ export default function Customize() {
                             ...formData,
                             measurements: { ...formData.measurements, hips: e.target.value }
                           })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
 
@@ -626,7 +626,7 @@ export default function Customize() {
                             ...formData,
                             measurements: { ...formData.measurements, shoulder: e.target.value }
                           })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
 
@@ -640,7 +640,7 @@ export default function Customize() {
                             ...formData,
                             measurements: { ...formData.measurements, height: e.target.value }
                           })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
                     </div>
@@ -655,7 +655,7 @@ export default function Customize() {
                           ...formData,
                           measurements: { ...formData.measurements, custom: e.target.value }
                         })}
-                        className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                        className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                       />
                     </div>
                   </div>
@@ -679,7 +679,7 @@ export default function Customize() {
                               placeholder="Full name"
                               value={formData.senderName}
                               onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
-                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                              className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                             />
                           </div>
 
@@ -690,7 +690,7 @@ export default function Customize() {
                               placeholder="10-digit mobile number"
                               value={formData.senderPhone}
                               onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
-                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                              className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                             />
                           </div>
 
@@ -701,7 +701,7 @@ export default function Customize() {
                               placeholder="Full postal address for pickup / delivery correspondence..."
                               value={formData.senderAddress}
                               onChange={(e) => setFormData({ ...formData, senderAddress: e.target.value })}
-                              className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                              className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                             />
                           </div>
                         </>
@@ -714,7 +714,7 @@ export default function Customize() {
                           <select
                             value={formData.budget}
                             onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                            className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                            className="w-full bg-transparent border border-neutral-300 px-3 py-2.5 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                           >
                             <option value="₹5,000 – ₹10,000">₹5,000 – ₹10,000</option>
                             <option value="₹10,000 – ₹20,000">₹10,000 – ₹20,000</option>
@@ -730,7 +730,7 @@ export default function Customize() {
                           type="date"
                           value={formData.preferredDate}
                           onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-neutral-500 focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-neutral-500 focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
 
@@ -739,7 +739,7 @@ export default function Customize() {
                           References & Sketch Uploads {subcategory === "tailoring" && <span className="text-[#B68D40]">*</span>}
                         </label>
 
-                        <div className="border-2 border-dashed border-neutral-300 dark:border-neutral-750 p-6 flex flex-col items-center justify-center space-y-2 bg-primary/30">
+                        <div className="border-2 border-dashed border-neutral-300 p-6 flex flex-col items-center justify-center space-y-2 bg-primary/30">
                           <Upload className="w-8 h-8 text-[#B68D40] opacity-80" />
                           <div className="text-center">
                             <label className="cursor-pointer text-[10px] tracking-widest text-[#B68D40] uppercase font-bold hover:text-black">
@@ -773,7 +773,7 @@ export default function Customize() {
                           placeholder="Describe your design vision: Gota work density, motif choices, dupatta lengths, or embroidery wishes..."
                           value={formData.specialRequests}
                           onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
-                          className="w-full bg-transparent border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none focus:border-[#B68D40]"
+                          className="w-full bg-transparent border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none focus:border-[#B68D40]"
                         />
                       </div>
                     </div>
@@ -787,20 +787,20 @@ export default function Customize() {
                       Review Dossier Submission
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs font-sans leading-relaxed text-neutral-600 dark:text-neutral-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs font-sans leading-relaxed text-neutral-600">
 
                       <div className="space-y-4">
                         <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1">
                           Silhouette Selections
                         </h4>
                         <div className="space-y-1">
-                          <p><span className="text-neutral-400">Garment Type:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.garmentType} ({formData.category})</span></p>
+                          <p><span className="text-neutral-400">Garment Type:</span> <span className="font-bold text-text-custom">{formData.garmentType} ({formData.category})</span></p>
                           {subcategory === "tailoring" ? (
-                            <p><span className="text-neutral-400">Fabric Details:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.fabricDetails || "—"}</span></p>
+                            <p><span className="text-neutral-400">Fabric Details:</span> <span className="font-bold text-text-custom">{formData.fabricDetails || "—"}</span></p>
                           ) : (
                             <>
-                              <p><span className="text-neutral-400">Fabric Swatch:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.fabric}</span></p>
-                              <p><span className="text-neutral-400">Color Choice:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.color}</span></p>
+                              <p><span className="text-neutral-400">Fabric Swatch:</span> <span className="font-bold text-text-custom">{formData.fabric}</span></p>
+                              <p><span className="text-neutral-400">Color Choice:</span> <span className="font-bold text-text-custom">{formData.color}</span></p>
                             </>
                           )}
                         </div>
@@ -811,10 +811,10 @@ export default function Customize() {
                               Contact & Schedule
                             </h4>
                             <div className="space-y-1">
-                              <p><span className="text-neutral-400">Name:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderName || "—"}</span></p>
-                              <p><span className="text-neutral-400">Contact:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderPhone || "—"}</span></p>
-                              <p><span className="text-neutral-400">Address:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.senderAddress || "—"}</span></p>
-                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.preferredDate || "Open Timeline"}</span></p>
+                              <p><span className="text-neutral-400">Name:</span> <span className="font-bold text-text-custom">{formData.senderName || "—"}</span></p>
+                              <p><span className="text-neutral-400">Contact:</span> <span className="font-bold text-text-custom">{formData.senderPhone || "—"}</span></p>
+                              <p><span className="text-neutral-400">Address:</span> <span className="font-bold text-text-custom">{formData.senderAddress || "—"}</span></p>
+                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom">{formData.preferredDate || "Open Timeline"}</span></p>
                             </div>
                           </>
                         ) : (
@@ -823,8 +823,8 @@ export default function Customize() {
                               Budget & Schedule
                             </h4>
                             <div className="space-y-1">
-                              <p><span className="text-neutral-400">Estimate Budget:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.budget}</span></p>
-                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom dark:text-primary">{formData.preferredDate || "Open Timeline"}</span></p>
+                              <p><span className="text-neutral-400">Estimate Budget:</span> <span className="font-bold text-text-custom">{formData.budget}</span></p>
+                              <p><span className="text-neutral-400">Delivery Date:</span> <span className="font-bold text-text-custom">{formData.preferredDate || "Open Timeline"}</span></p>
                             </div>
                           </>
                         )}
@@ -836,9 +836,9 @@ export default function Customize() {
                             <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1">
                               Sizing
                             </h4>
-                            <div className="bg-primary dark:bg-neutral-900 p-3.5 border border-neutral-200 text-center">
+                            <div className="bg-primary p-3.5 border border-neutral-200 text-center">
                               <span className="text-neutral-400 text-[8px] uppercase block">Standard Size</span>
-                              <span className="font-bold text-lg text-text-custom dark:text-primary">{formData.size}</span>
+                              <span className="font-bold text-lg text-text-custom">{formData.size}</span>
                             </div>
                             {formData.needsAlteration && (
                               <p className="text-[10px] text-neutral-500">
@@ -854,18 +854,18 @@ export default function Customize() {
                             <h4 className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase border-b pb-1">
                               Measurements dossier
                             </h4>
-                            <div className="grid grid-cols-3 gap-2 text-center bg-primary dark:bg-neutral-900 p-3.5 border border-neutral-200">
+                            <div className="grid grid-cols-3 gap-2 text-center bg-primary p-3.5 border border-neutral-200">
                               <div>
                                 <span className="text-neutral-400 text-[8px] uppercase block">Bust</span>
-                                <span className="font-bold text-text-custom dark:text-primary">{formData.measurements.bust || "—"}</span>
+                                <span className="font-bold text-text-custom">{formData.measurements.bust || "—"}</span>
                               </div>
                               <div>
                                 <span className="text-neutral-400 text-[8px] uppercase block">Waist</span>
-                                <span className="font-bold text-text-custom dark:text-primary">{formData.measurements.waist || "—"}</span>
+                                <span className="font-bold text-text-custom">{formData.measurements.waist || "—"}</span>
                               </div>
                               <div>
                                 <span className="text-neutral-400 text-[8px] uppercase block">Hips</span>
-                                <span className="font-bold text-text-custom dark:text-primary">{formData.measurements.hips || "—"}</span>
+                                <span className="font-bold text-text-custom">{formData.measurements.hips || "—"}</span>
                               </div>
                             </div>
                             {formData.measurements.custom && (

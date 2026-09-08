@@ -24,7 +24,7 @@ export default function AccessDenied() {
         </div>
       </div>
       <h1 className="text-8xl font-serif font-light text-neutral-300">403</h1>
-      <h2 className="text-2xl font-serif uppercase tracking-wider text-neutral-800 dark:text-white">Access Denied</h2>
+      <h2 className="text-2xl font-serif uppercase tracking-wider text-neutral-800">Access Denied</h2>
       <p className="text-xs font-sans text-neutral-500 leading-relaxed uppercase tracking-widest">
         You do not have the required administrative permissions to enter the ETNIKO workspace console.
       </p>
@@ -34,7 +34,7 @@ export default function AccessDenied() {
         </Link>
         <button
           onClick={handleSignOutAndRedirect}
-          className="border border-neutral-300 dark:border-neutral-700 hover:border-[#B68D40] dark:hover:border-[#B68D40] hover:text-[#B68D40] dark:hover:text-[#B68D40] px-6 py-3 text-xs uppercase tracking-widest transition-colors font-sans font-semibold focus:outline-none"
+          className="border border-neutral-300 hover:border-[#B68D40] hover:text-[#B68D40] px-6 py-3 text-xs uppercase tracking-widest transition-colors font-sans font-semibold focus:outline-none"
         >
           Sign in as Admin
         </button>

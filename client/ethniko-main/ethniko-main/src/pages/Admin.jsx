@@ -516,8 +516,8 @@ export default function Admin() {
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Navigation Sidebar */}
-        <aside className="w-full lg:w-64 border border-border-custom dark:border-neutral-800 shrink-0 bg-primary dark:bg-neutral-900">
-          <div className="flex flex-wrap lg:flex-col text-[10px] font-sans font-semibold tracking-widest uppercase divide-[#ECECEC] dark:divide-neutral-800 divide-x lg:divide-x-0 lg:divide-y text-neutral-500">
+        <aside className="w-full lg:w-64 border border-border-custom shrink-0 bg-primary">
+          <div className="flex flex-wrap lg:flex-col text-[10px] font-sans font-semibold tracking-widest uppercase divide-[#ECECEC] divide-x lg:divide-x-0 lg:divide-y text-neutral-500">
             {[
               { id: "dashboard", label: "Analytics", icon: BarChart2 },
               { id: "products", label: "Catalog Products", icon: ShoppingBag },
@@ -534,7 +534,7 @@ export default function Admin() {
                   key={tab.id}
                   onClick={() => { setActiveTab(tab.id); setSelectedOrder(null); setSelectedCustom(null); }}
                   className={`flex-grow lg:flex-grow-0 p-4 text-left flex items-center gap-2.5 focus:outline-none ${
-                    activeTab === tab.id ? 'bg-white dark:bg-neutral-800 text-[#B68D40] font-bold border-l-2 border-[#B68D40]' : 'hover:bg-neutral-50'
+                    activeTab === tab.id ? 'bg-white text-[#B68D40] font-bold border-l-2 border-[#B68D40]' : 'hover:bg-neutral-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -546,7 +546,7 @@ export default function Admin() {
         </aside>
 
         {/* Console Workspace */}
-        <div className="flex-grow w-full border border-border-custom dark:border-neutral-800 p-8 min-h-[60vh] bg-white dark:bg-[#181818] shadow-sm">
+        <div className="flex-grow w-full border border-border-custom p-8 min-h-[60vh] bg-white shadow-sm">
           
           {/* ANALYTICS WORKSPACE */}
           {activeTab === 'dashboard' && (
@@ -555,26 +555,26 @@ export default function Admin() {
               
               {/* Cards Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] dark:bg-[#2A2418] space-y-1">
+                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">TOTAL SALES REVENUE</span>
-                  <p className="text-xl font-bold font-sans text-neutral-800 dark:text-primary">₹{stats.sales.toLocaleString('en-IN')}</p>
+                  <p className="text-xl font-bold font-sans text-neutral-800">₹{stats.sales.toLocaleString('en-IN')}</p>
                 </div>
-                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] dark:bg-[#2A2418] space-y-1">
+                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">AUDITED ORDERS</span>
-                  <p className="text-xl font-bold font-sans text-neutral-800 dark:text-primary">{stats.orders}</p>
+                  <p className="text-xl font-bold font-sans text-neutral-800">{stats.orders}</p>
                 </div>
-                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] dark:bg-[#2A2418] space-y-1">
+                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">ACTIVE STYLINGS</span>
-                  <p className="text-xl font-bold font-sans text-neutral-800 dark:text-primary">{stats.customizations}</p>
+                  <p className="text-xl font-bold font-sans text-neutral-800">{stats.customizations}</p>
                 </div>
-                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] dark:bg-[#2A2418] space-y-1">
+                <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">CLIENT REACH</span>
-                  <p className="text-xl font-bold font-sans text-neutral-800 dark:text-primary">{stats.customers}</p>
+                  <p className="text-xl font-bold font-sans text-neutral-800">{stats.customers}</p>
                 </div>
               </div>
 
               {/* Mock Analytics Chart indicators */}
-              <div className="border border-border-custom dark:border-neutral-800 p-6 space-y-6">
+              <div className="border border-border-custom p-6 space-y-6">
                 <h4 className="text-[10px] font-sans font-bold tracking-widest text-[#B68D40] uppercase">Sales by Couture Category</h4>
                 <div className="space-y-4">
                   {[
@@ -587,7 +587,7 @@ export default function Admin() {
                         <span>{item.cat}</span>
                         <span>{item.val} ({item.share}%)</span>
                       </div>
-                      <div className="w-full h-1.5 bg-neutral-100 dark:bg-neutral-850 rounded-none overflow-hidden">
+                      <div className="w-full h-1.5 bg-neutral-100 rounded-none overflow-hidden">
                         <div style={{ width: `${item.share}%` }} className="h-full bg-[#B68D40]" />
                       </div>
                     </div>
@@ -613,12 +613,12 @@ export default function Admin() {
 
               {/* Add Product form */}
               {showAddProduct && (
-                <form onSubmit={handleCreateProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900">
+                <form onSubmit={handleCreateProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary">
                   {Object.keys(formErrors).length > 0 && (
-                    <div className="md:col-span-2 flex items-start gap-2.5 border border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800 px-4 py-3">
+                    <div className="md:col-span-2 flex items-start gap-2.5 border border-red-300 bg-red-50 px-4 py-3">
                       <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
                       <div>
-                        <p className="text-[10px] uppercase tracking-widest font-sans font-bold text-red-600 dark:text-red-400">
+                        <p className="text-[10px] uppercase tracking-widest font-sans font-bold text-red-600">
                           Please fix {Object.keys(formErrors).length} {Object.keys(formErrors).length === 1 ? 'issue' : 'issues'} before saving
                         </p>
                         <ul className="mt-1 space-y-0.5 list-disc list-inside">
@@ -635,7 +635,7 @@ export default function Admin() {
                       type="text"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.name ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.name ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.name && <p className="text-[9px] text-red-500 font-sans">{formErrors.name}</p>}
                   </div>
@@ -646,7 +646,7 @@ export default function Admin() {
                       value={newProduct.sku}
                       placeholder="Auto-generated on save"
                       onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -654,7 +654,7 @@ export default function Admin() {
                     <select
                       value={newProduct.category}
                       onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2.5 text-xs font-sans text-text-custom focus:outline-none"
                     >
                       <option value="WOMEN">WOMEN</option>
                       <option value="MEN">MEN</option>
@@ -668,7 +668,7 @@ export default function Admin() {
                       value={newProduct.subcategory}
                       placeholder="e.g. Sarees, Kurtas, Girls"
                       onChange={(e) => setNewProduct({ ...newProduct, subcategory: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.subcategory ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.subcategory ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.subcategory && <p className="text-[9px] text-red-500 font-sans">{formErrors.subcategory}</p>}
                   </div>
@@ -678,7 +678,7 @@ export default function Admin() {
                       type="number"
                       value={newProduct.price}
                       onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.price ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.price ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.price && <p className="text-[9px] text-red-500 font-sans">{formErrors.price}</p>}
                   </div>
@@ -688,7 +688,7 @@ export default function Admin() {
                       type="text"
                       value={newProduct.fabric}
                       onChange={(e) => setNewProduct({ ...newProduct, fabric: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.fabric ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.fabric ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.fabric && <p className="text-[9px] text-red-500 font-sans">{formErrors.fabric}</p>}
                   </div>
@@ -699,7 +699,7 @@ export default function Admin() {
                       value={newProduct.colors}
                       placeholder="e.g. Gold, Ivory, Maroon"
                       onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.colors ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.colors ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.colors && <p className="text-[9px] text-red-500 font-sans">{formErrors.colors}</p>}
                   </div>
@@ -709,7 +709,7 @@ export default function Admin() {
                       type="number"
                       value={newProduct.stock}
                       onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.stock ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.stock ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.stock && <p className="text-[9px] text-red-500 font-sans">{formErrors.stock}</p>}
                   </div>
@@ -721,7 +721,7 @@ export default function Admin() {
                       min="0"
                       value={newProduct.weight}
                       onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-text-custom focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -729,7 +729,7 @@ export default function Admin() {
                     <select
                       value={newProduct.type}
                       onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2.5 text-xs font-sans text-text-custom focus:outline-none"
                     >
                       <option value="READY_TO_WEAR">Ready to Wear</option>
                       <option value="CUSTOM_MADE">Custom Made</option>
@@ -740,7 +740,7 @@ export default function Admin() {
                     <select
                       value={newProduct.status}
                       onChange={(e) => setNewProduct({ ...newProduct, status: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2.5 text-xs font-sans text-text-custom dark:text-white focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2.5 text-xs font-sans text-text-custom focus:outline-none"
                     >
                       <option value="PUBLISHED">Published (visible in shop)</option>
                       <option value="DRAFT">Draft (hidden)</option>
@@ -752,13 +752,13 @@ export default function Admin() {
                       rows={2}
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                      className={`w-full bg-white dark:bg-neutral-850 border px-3 py-2 text-xs font-sans text-text-custom dark:text-white focus:outline-none ${formErrors.description ? 'border-red-500' : 'border-neutral-300 dark:border-neutral-700'}`}
+                      className={`w-full bg-white border px-3 py-2 text-xs font-sans text-text-custom focus:outline-none ${formErrors.description ? 'border-red-500' : 'border-neutral-300'}`}
                     />
                     {formErrors.description && <p className="text-[9px] text-red-500 font-sans">{formErrors.description}</p>}
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block font-semibold">Garment Showcase Images</label>
-                    <div className="flex flex-wrap gap-2 items-center bg-white dark:bg-neutral-855 p-3 border">
+                    <div className="flex flex-wrap gap-2 items-center bg-white p-3 border">
                       {newProduct.images && newProduct.images.map((img, i) => (
                         <div key={i} className="relative w-12 h-16 border">
                           <img src={img} alt="" className="w-full h-full object-cover" />
@@ -792,9 +792,9 @@ export default function Admin() {
 
               {/* Products Table */}
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-neutral-200 dark:border-neutral-800 text-left text-[10px] uppercase">
+                <table className="w-full border-collapse border border-neutral-200 text-left text-[10px] uppercase">
                   <thead>
-                    <tr className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 font-semibold text-[#B68D40] tracking-wider">
+                    <tr className="bg-neutral-50 border-b border-neutral-200 font-semibold text-[#B68D40] tracking-wider">
                       <th className="p-3">IMAGE</th>
                       <th className="p-3">NAME</th>
                       <th className="p-3">SKU</th>
@@ -806,7 +806,7 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {products.map((p) => (
-                      <tr key={p.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors">
+                      <tr key={p.id} className="border-b border-neutral-100 text-neutral-600 hover:bg-neutral-50 transition-colors">
                         <td className="p-3">
                           <img
                             src={p.images[0]}
@@ -819,7 +819,7 @@ export default function Admin() {
                           <button
                             type="button"
                             onClick={() => setSelectedProduct(p)}
-                            className="font-serif font-bold text-neutral-800 dark:text-primary block text-left hover:text-[#B68D40] transition-colors"
+                            className="font-serif font-bold text-neutral-800 block text-left hover:text-[#B68D40] transition-colors"
                           >
                             {p.name}
                           </button>
@@ -889,18 +889,18 @@ export default function Admin() {
                   onClick={() => setSelectedProduct(null)}
                 >
                   <div
-                    className="bg-white dark:bg-[#181818] border border-[#D9C7A3] dark:border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
+                    className="bg-white border border-[#D9C7A3] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Header */}
-                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-[#181818]">
+                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 sticky top-0 bg-white">
                       <div>
-                        <h3 className="font-serif text-lg tracking-wider text-neutral-900 dark:text-primary">{selectedProduct.name}</h3>
+                        <h3 className="font-serif text-lg tracking-wider text-neutral-900">{selectedProduct.name}</h3>
                         <span className="font-mono text-[11px] text-[#B68D40]">{selectedProduct.sku || 'SKU —'}</span>
                       </div>
                       <button
                         onClick={() => setSelectedProduct(null)}
-                        className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-xl leading-none"
+                        className="text-neutral-400 hover:text-neutral-900 text-xl leading-none"
                         aria-label="Close"
                       >
                         ×
@@ -912,7 +912,7 @@ export default function Admin() {
                       {selectedProduct.images && selectedProduct.images.length > 0 && (
                         <div className="flex gap-2 flex-wrap">
                           {selectedProduct.images.map((img, i) => (
-                            <img key={i} src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200 dark:border-neutral-800" />
+                            <img key={i} src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200" />
                           ))}
                         </div>
                       )}
@@ -932,7 +932,7 @@ export default function Admin() {
                         ].map(([label, value]) => (
                           <div key={label} className="space-y-0.5">
                             <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">{label}</span>
-                            <span className="font-semibold text-neutral-800 dark:text-primary break-words">{value}</span>
+                            <span className="font-semibold text-neutral-800 break-words">{value}</span>
                           </div>
                         ))}
                       </div>
@@ -944,7 +944,7 @@ export default function Admin() {
                           <div className="flex flex-wrap gap-1.5">
                             {(selectedProduct.sizes && selectedProduct.sizes.length > 0)
                               ? selectedProduct.sizes.map((s) => (
-                                  <span key={s} className="px-2 py-0.5 border border-neutral-300 dark:border-neutral-700 text-[10px] font-semibold">{s}</span>
+                                  <span key={s} className="px-2 py-0.5 border border-neutral-300 text-[10px] font-semibold">{s}</span>
                                 ))
                               : <span className="text-neutral-400">—</span>}
                           </div>
@@ -954,7 +954,7 @@ export default function Admin() {
                           <div className="flex flex-wrap gap-1.5">
                             {(selectedProduct.colors && selectedProduct.colors.length > 0)
                               ? selectedProduct.colors.map((c) => (
-                                  <span key={c} className="px-2 py-0.5 border border-neutral-300 dark:border-neutral-700 text-[10px] font-semibold">{c}</span>
+                                  <span key={c} className="px-2 py-0.5 border border-neutral-300 text-[10px] font-semibold">{c}</span>
                                 ))
                               : <span className="text-neutral-400">—</span>}
                           </div>
@@ -965,7 +965,7 @@ export default function Admin() {
                       {selectedProduct.description && (
                         <div className="space-y-1">
                           <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Description</span>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">{selectedProduct.description}</p>
+                          <p className="text-xs text-neutral-600 leading-relaxed">{selectedProduct.description}</p>
                         </div>
                       )}
                       {selectedProduct.story && (
@@ -976,7 +976,7 @@ export default function Admin() {
                       )}
 
                       {/* Slug / URL */}
-                      <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
+                      <div className="pt-2 border-t border-neutral-100">
                         <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Storefront URL</span>
                         <span className="font-mono text-[11px] text-neutral-500">/product/{selectedProduct.slug}</span>
                       </div>
@@ -993,9 +993,9 @@ export default function Admin() {
               <h3 className="font-serif text-lg tracking-wider border-b pb-3 uppercase">Boutique Orders</h3>
               
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-neutral-200 dark:border-neutral-800 text-left text-[10px] uppercase">
+                <table className="w-full border-collapse border border-neutral-200 text-left text-[10px] uppercase">
                   <thead>
-                    <tr className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 font-semibold text-[#B68D40] tracking-wider">
+                    <tr className="bg-neutral-50 border-b border-neutral-200 font-semibold text-[#B68D40] tracking-wider">
                       <th className="p-3">ORDER REFERENCE</th>
                       <th className="p-3">CLIENT INFO</th>
                       <th className="p-3">TOTAL</th>
@@ -1005,15 +1005,15 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {orders.map((ord) => (
-                      <tr key={ord.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300">
-                        <td className="p-3 font-mono font-semibold text-neutral-800 dark:text-primary">{ord.id}</td>
+                      <tr key={ord.id} className="border-b border-neutral-100 text-neutral-600">
+                        <td className="p-3 font-mono font-semibold text-neutral-800">{ord.id}</td>
                         <td className="p-3">
-                          <span className="font-bold text-neutral-800 dark:text-primary block">{ord.customerName}</span>
+                          <span className="font-bold text-neutral-800 block">{ord.customerName}</span>
                           <span className="text-[9px] text-neutral-400 block mt-0.5">{ord.customerPhone}</span>
                         </td>
                         <td className="p-3 font-semibold">₹{ord.total.toLocaleString()}</td>
                         <td className="p-3">
-                          <span className="px-2 py-0.5 bg-primary dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 text-[8px] font-bold">
+                          <span className="px-2 py-0.5 bg-primary text-neutral-600 border border-neutral-200 text-[8px] font-bold">
                             {ord.orderStatus}
                           </span>
                         </td>
@@ -1051,7 +1051,7 @@ export default function Admin() {
               </div>
 
               {/* Status form */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-50 dark:bg-neutral-900 border p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-50 border p-6">
                 <div className="space-y-3">
                   <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-sans block">Update status milestone</span>
                   <div className="flex flex-wrap gap-2">
@@ -1079,7 +1079,7 @@ export default function Admin() {
                       placeholder="TRAK-IND-9999"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                     />
                     <button
                       onClick={() => handleUpdateOrderStatus(selectedOrder.id, selectedOrder.orderStatus)}
@@ -1134,9 +1134,9 @@ export default function Admin() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-neutral-200 dark:border-neutral-800 text-left text-[10px] uppercase">
+                <table className="w-full border-collapse border border-neutral-200 text-left text-[10px] uppercase">
                   <thead>
-                    <tr className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 font-semibold text-[#B68D40] tracking-wider">
+                    <tr className="bg-neutral-50 border-b border-neutral-200 font-semibold text-[#B68D40] tracking-wider">
                       <th className="p-3">REQUEST REFERENCE</th>
                       <th className="p-3">CLIENT INFO</th>
                       <th className="p-3">GARMENT</th>
@@ -1146,10 +1146,10 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {visibleCustomizations.map((cust) => (
-                      <tr key={cust.id} className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 align-top">
-                        <td className="p-3 font-mono font-semibold text-neutral-800 dark:text-primary">{cust.id}</td>
+                      <tr key={cust.id} className="border-b border-neutral-100 text-neutral-600 align-top">
+                        <td className="p-3 font-mono font-semibold text-neutral-800">{cust.id}</td>
                         <td className="p-3">
-                          <span className="font-bold text-neutral-800 dark:text-primary block normal-case">{cust.customerName}</span>
+                          <span className="font-bold text-neutral-800 block normal-case">{cust.customerName}</span>
                           <span className="text-[9px] text-neutral-400 block mt-0.5">{cust.phone}</span>
                         </td>
                         <td className="p-3 font-medium normal-case">{cust.category || '—'}</td>
@@ -1202,20 +1202,20 @@ export default function Admin() {
                   onClick={() => setSelectedCustom(null)}
                 >
                   <div
-                    className="bg-white dark:bg-[#181818] border border-[#D9C7A3] dark:border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
+                    className="bg-white border border-[#D9C7A3] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Header */}
-                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-[#181818]">
+                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 sticky top-0 bg-white">
                       <div>
-                        <h3 className="font-serif text-lg tracking-wider text-neutral-900 dark:text-primary">
+                        <h3 className="font-serif text-lg tracking-wider text-neutral-900">
                           {isTailoringReq(selectedCustom) ? 'Tailoring Request' : 'Customization Request'}
                         </h3>
                         <span className="font-mono text-[11px] text-[#B68D40]">{selectedCustom.id}</span>
                       </div>
                       <button
                         onClick={() => setSelectedCustom(null)}
-                        className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-xl leading-none"
+                        className="text-neutral-400 hover:text-neutral-900 text-xl leading-none"
                         aria-label="Close"
                       >
                         ×
@@ -1261,7 +1261,7 @@ export default function Admin() {
                         ].map(([label, value]) => (
                           <div key={label} className="space-y-0.5">
                             <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">{label}</span>
-                            <span className="font-semibold text-neutral-800 dark:text-primary break-words">{value || '—'}</span>
+                            <span className="font-semibold text-neutral-800 break-words">{value || '—'}</span>
                           </div>
                         ))}
                       </div>
@@ -1269,13 +1269,13 @@ export default function Admin() {
                       {/* Address */}
                       <div className="space-y-0.5">
                         <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Address</span>
-                        <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">{selectedCustom.address || '—'}</p>
+                        <p className="text-neutral-700 leading-relaxed">{selectedCustom.address || '—'}</p>
                       </div>
 
                       {/* Notes / measurements */}
                       <div className="space-y-0.5">
                         <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Measurements / Notes</span>
-                        <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap">{selectedCustom.notes || '—'}</p>
+                        <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap">{selectedCustom.notes || '—'}</p>
                       </div>
 
                       {/* Reference images */}
@@ -1285,7 +1285,7 @@ export default function Admin() {
                           <div className="flex flex-wrap gap-2">
                             {selectedCustom.images.map((img, i) => (
                               <a key={i} href={img} target="_blank" rel="noreferrer">
-                                <img src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200 dark:border-neutral-800" />
+                                <img src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200" />
                               </a>
                             ))}
                           </div>
@@ -1322,7 +1322,7 @@ export default function Admin() {
                     setDesktopFileName("");
                     setMobileFileName("");
                   }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900 rounded-lg text-left"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary rounded-lg text-left"
                 >
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold">Banner Heading</label>
@@ -1330,7 +1330,7 @@ export default function Admin() {
                       type="text" required
                       value={newBanner.heading}
                       onChange={(e) => setNewBanner({ ...newBanner, heading: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1339,7 +1339,7 @@ export default function Admin() {
                       type="text"
                       value={newBanner.subtitle}
                       onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1348,7 +1348,7 @@ export default function Admin() {
                       type="text" required
                       value={newBanner.ctaLink}
                       onChange={(e) => setNewBanner({ ...newBanner, ctaLink: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1357,7 +1357,7 @@ export default function Admin() {
                       type="text" required
                       value={newBanner.ctaText}
                       onChange={(e) => setNewBanner({ ...newBanner, ctaText: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1406,13 +1406,13 @@ export default function Admin() {
                 {banners.map((slide) => (
                   <div
                     key={slide.id}
-                    className="border p-4 bg-neutral-50 dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-800 rounded-lg flex items-center gap-4 relative"
+                    className="border p-4 bg-neutral-50 border-[#ECECEC] rounded-lg flex items-center gap-4 relative"
                   >
-                    <div className="w-16 h-12 border bg-white dark:bg-neutral-800 overflow-hidden shrink-0">
+                    <div className="w-16 h-12 border bg-white overflow-hidden shrink-0">
                       <img src={slide.imageUrl} alt="" className="w-full h-full object-cover" />
                     </div>
                     <div className="text-left flex-grow">
-                      <h4 className="font-serif text-xs text-neutral-800 dark:text-white line-clamp-1">{slide.heading}</h4>
+                      <h4 className="font-serif text-xs text-neutral-800 line-clamp-1">{slide.heading}</h4>
                       <p className="text-[9px] text-neutral-400">{slide.subtitle}</p>
                     </div>
                     <div className="flex gap-2">
@@ -1454,14 +1454,14 @@ export default function Admin() {
                 </div>
 
                 {showAddCategory && (
-                  <form onSubmit={handleCreateCategory} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900 rounded-lg">
+                  <form onSubmit={handleCreateCategory} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary rounded-lg">
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold">Category Name</label>
                       <input
                         type="text" required
                         value={newCategory.name}
                         onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                        className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1471,7 +1471,7 @@ export default function Admin() {
                         value={newCategory.slug}
                         placeholder="e.g. sarees"
                         onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value.toLowerCase() })}
-                        className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1 md:col-span-2">
@@ -1480,7 +1480,7 @@ export default function Admin() {
                         rows={2}
                         value={newCategory.description}
                         onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                        className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
@@ -1490,7 +1490,7 @@ export default function Admin() {
                           type="text"
                           value={newCategory.coverImageUrl}
                           onChange={(e) => setNewCategory({ ...newCategory, coverImageUrl: e.target.value })}
-                          className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                          className="flex-grow bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                           placeholder="Select image from media library or paste URL"
                         />
                         <button
@@ -1510,7 +1510,7 @@ export default function Admin() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {categories.map(cat => (
-                    <div key={cat.id} className="border p-4 bg-white dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-850 rounded-lg flex items-center justify-between">
+                    <div key={cat.id} className="border p-4 bg-white border-[#ECECEC] rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {cat.coverImageUrl && (
                           <img src={cat.coverImageUrl} alt="" className="w-10 h-10 object-cover border" />
@@ -1545,14 +1545,14 @@ export default function Admin() {
                 </div>
 
                 {showAddCollection && (
-                  <form onSubmit={handleCreateCollection} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900 rounded-lg">
+                  <form onSubmit={handleCreateCollection} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary rounded-lg">
                     <div className="space-y-1">
                       <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold">Collection Name</label>
                       <input
                         type="text" required
                         value={newCollection.name}
                         onChange={(e) => setNewCollection({ ...newCollection, name: e.target.value })}
-                        className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1 flex items-center justify-between border-b pb-2 pt-4 px-2">
@@ -1570,7 +1570,7 @@ export default function Admin() {
                         rows={2}
                         value={newCollection.description}
                         onChange={(e) => setNewCollection({ ...newCollection, description: e.target.value })}
-                        className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
@@ -1580,7 +1580,7 @@ export default function Admin() {
                           type="text"
                           value={newCollection.coverImageUrl}
                           onChange={(e) => setNewCollection({ ...newCollection, coverImageUrl: e.target.value })}
-                          className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                          className="flex-grow bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                           placeholder="Select image from media library or paste URL"
                         />
                         <button
@@ -1600,14 +1600,14 @@ export default function Admin() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {collections.map(col => (
-                    <div key={col.id} className="border p-4 bg-white dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-850 rounded-lg flex items-center justify-between">
+                    <div key={col.id} className="border p-4 bg-white border-[#ECECEC] rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {col.coverImageUrl && (
                           <img src={col.coverImageUrl} alt="" className="w-10 h-10 object-cover border" />
                         )}
                         <div className="text-left">
                           <h4 className="font-serif text-sm font-semibold">{col.name}</h4>
-                          {col.featured && <span className="text-[7px] px-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-bold font-sans rounded">FEATURED</span>}
+                          {col.featured && <span className="text-[7px] px-1 bg-yellow-100 text-yellow-800 font-bold font-sans rounded">FEATURED</span>}
                         </div>
                       </div>
                       <button onClick={() => handleDeleteCollection(col.id)} className="p-1.5 text-red-500 hover:text-red-700">
@@ -1638,14 +1638,14 @@ export default function Admin() {
               </div>
 
               {showAddTestimonial && (
-                <form onSubmit={handleCreateTestimonial} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900 rounded-lg">
+                <form onSubmit={handleCreateTestimonial} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary rounded-lg">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold">Customer Name</label>
                     <input
                       type="text" required
                       value={newTestimonial.customerName}
                       onChange={(e) => setNewTestimonial({ ...newTestimonial, customerName: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1653,7 +1653,7 @@ export default function Admin() {
                     <select
                       value={newTestimonial.rating}
                       onChange={(e) => setNewTestimonial({ ...newTestimonial, rating: parseInt(e.target.value, 10) })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2.5 text-xs font-sans focus:outline-none text-black"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2.5 text-xs font-sans focus:outline-none text-black"
                     >
                       <option value={5}>5 STARS</option>
                       <option value={4}>4 STARS</option>
@@ -1666,7 +1666,7 @@ export default function Admin() {
                       rows={3} required
                       value={newTestimonial.review}
                       onChange={(e) => setNewTestimonial({ ...newTestimonial, review: e.target.value })}
-                      className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                      className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                     />
                   </div>
                   <div className="md:col-span-2 pt-2">
@@ -1677,7 +1677,7 @@ export default function Admin() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {testimonials.map((item, idx) => (
-                  <div key={item.id} className="border p-4 bg-white dark:bg-neutral-900 border-[#ECECEC] dark:border-neutral-850 rounded-lg flex flex-col justify-between space-y-3">
+                  <div key={item.id} className="border p-4 bg-white border-[#ECECEC] rounded-lg flex flex-col justify-between space-y-3">
                     <div className="flex items-center gap-3">
                       <img
                         src={item.customerImageUrl || DEFAULT_AVATARS[idx % DEFAULT_AVATARS.length]}
@@ -1694,7 +1694,7 @@ export default function Admin() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-450 italic text-left">"{item.review}"</p>
+                    <p className="text-xs text-neutral-500 italic text-left">"{item.review}"</p>
                     <div className="flex justify-end border-t pt-2 mt-2">
                       <button onClick={() => handleDeleteTestimonial(item.id)} className="p-1 text-red-500 hover:text-red-750 flex items-center gap-1 text-[8px] uppercase tracking-wider font-bold">
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1717,7 +1717,7 @@ export default function Admin() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Store Profile */}
-                <div className="border p-6 bg-white dark:bg-neutral-950 rounded-lg space-y-4 text-left">
+                <div className="border p-6 bg-white rounded-lg space-y-4 text-left">
                   <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-[#B68D40] flex items-center gap-2 border-b pb-2">
                     <Globe className="w-4 h-4" />
                     <span>Store Profile</span>
@@ -1729,7 +1729,7 @@ export default function Admin() {
                         type="text"
                         value={storeSettings.storeName}
                         onChange={(e) => setStoreSettings({ ...storeSettings, storeName: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black dark:text-white"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1738,7 +1738,7 @@ export default function Admin() {
                         type="text"
                         value={storeSettings.whatsappNumber}
                         onChange={(e) => setStoreSettings({ ...storeSettings, whatsappNumber: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1747,7 +1747,7 @@ export default function Admin() {
                         type="text"
                         value={storeSettings.storeHours}
                         onChange={(e) => setStoreSettings({ ...storeSettings, storeHours: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-350 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-350 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1757,7 +1757,7 @@ export default function Admin() {
                           type="text"
                           value={storeSettings.logoUrl}
                           onChange={(e) => setStoreSettings({ ...storeSettings, logoUrl: e.target.value })}
-                          className="flex-grow bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                          className="flex-grow bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                           placeholder="Select logo image from library"
                         />
                         <button
@@ -1774,7 +1774,7 @@ export default function Admin() {
                 </div>
 
                 {/* SEO Management */}
-                <div className="border p-6 bg-white dark:bg-neutral-950 rounded-lg space-y-4 text-left">
+                <div className="border p-6 bg-white rounded-lg space-y-4 text-left">
                   <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-[#B68D40] flex items-center gap-2 border-b pb-2">
                     <Globe className="w-4 h-4" />
                     <span>SEO Settings</span>
@@ -1786,7 +1786,7 @@ export default function Admin() {
                         type="text"
                         value={seoSettings.title}
                         onChange={(e) => setSeoSettings({ ...seoSettings, title: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1795,7 +1795,7 @@ export default function Admin() {
                         rows={2}
                         value={seoSettings.description}
                         onChange={(e) => setSeoSettings({ ...seoSettings, description: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1804,7 +1804,7 @@ export default function Admin() {
                         type="text"
                         value={seoSettings.keywords}
                         onChange={(e) => setSeoSettings({ ...seoSettings, keywords: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <button onClick={() => handleSaveSettings('seo')} className="btn-luxury-solid w-full mt-4 font-bold">Save SEO Tags</button>
@@ -1812,7 +1812,7 @@ export default function Admin() {
                 </div>
 
                 {/* Shipping & Delivery CMS */}
-                <div className="border p-6 bg-white dark:bg-neutral-950 rounded-lg space-y-4 text-left">
+                <div className="border p-6 bg-white rounded-lg space-y-4 text-left">
                   <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-[#B68D40] flex items-center gap-2 border-b pb-2">
                     <Truck className="w-4 h-4" />
                     <span>Shipping Charges</span>
@@ -1824,7 +1824,7 @@ export default function Admin() {
                         type="number"
                         value={shippingSettings.flatCharge}
                         onChange={(e) => setShippingSettings({ ...shippingSettings, flatCharge: parseFloat(e.target.value) })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1836,7 +1836,7 @@ export default function Admin() {
                           ...shippingSettings,
                           pincodeExceptions: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                         })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                         placeholder="e.g. 700001, 110001"
                       />
                     </div>
@@ -1845,7 +1845,7 @@ export default function Admin() {
                 </div>
 
                 {/* Footer & Social Profiles */}
-                <div className="border p-6 bg-white dark:bg-neutral-950 rounded-lg space-y-4 text-left">
+                <div className="border p-6 bg-white rounded-lg space-y-4 text-left">
                   <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-[#B68D40] flex items-center gap-2 border-b pb-2">
                     <Heart className="w-4 h-4" />
                     <span>Social & Copyrights</span>
@@ -1857,7 +1857,7 @@ export default function Admin() {
                         type="text"
                         value={socialSettings.instagramUrl}
                         onChange={(e) => setSocialSettings({ ...socialSettings, instagramUrl: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1866,7 +1866,7 @@ export default function Admin() {
                         type="text"
                         value={socialSettings.pinterestUrl}
                         onChange={(e) => setSocialSettings({ ...socialSettings, pinterestUrl: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1875,7 +1875,7 @@ export default function Admin() {
                         type="text"
                         value={footerSettings.copyright}
                         onChange={(e) => setFooterSettings({ ...footerSettings, copyright: e.target.value })}
-                        className="w-full bg-neutral-50 dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
+                        className="w-full bg-neutral-50 border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-2">

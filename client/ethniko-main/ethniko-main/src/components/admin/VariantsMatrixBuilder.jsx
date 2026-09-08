@@ -144,7 +144,7 @@ export default function VariantsMatrixBuilder({ baseSku, basePrice, onChange, in
   };
 
   return (
-    <div className="space-y-6 border border-[#E6DCCF] dark:border-neutral-800 p-6 bg-primary dark:bg-neutral-900 rounded-lg">
+    <div className="space-y-6 border border-[#E6DCCF] p-6 bg-primary rounded-lg">
       
       <div className="flex items-center justify-between border-b pb-2.5">
         <h4 className="text-[10px] tracking-widest text-[#B68D40] font-sans font-bold uppercase flex items-center gap-1.5">
@@ -154,7 +154,7 @@ export default function VariantsMatrixBuilder({ baseSku, basePrice, onChange, in
         <button
           type="button"
           onClick={generateMatrix}
-          className="text-[9px] uppercase tracking-widest bg-white dark:bg-neutral-800 border border-[#B68D40] text-[#B68D40] hover:bg-[#B68D40] hover:text-white px-3 py-1.5 font-sans font-bold transition-colors focus:outline-none flex items-center gap-1"
+          className="text-[9px] uppercase tracking-widest bg-white border border-[#B68D40] text-[#B68D40] hover:bg-[#B68D40] hover:text-white px-3 py-1.5 font-sans font-bold transition-colors focus:outline-none flex items-center gap-1"
         >
           <RefreshCw className="w-3 h-3" />
           <span>Generate Combinations</span>
@@ -173,7 +173,7 @@ export default function VariantsMatrixBuilder({ baseSku, basePrice, onChange, in
               placeholder="e.g. Royal Blue"
               value={colorInput}
               onChange={(e) => setColorInput(e.target.value)}
-              className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
+              className="flex-grow bg-white border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
             />
             <button
               type="button"
@@ -203,7 +203,7 @@ export default function VariantsMatrixBuilder({ baseSku, basePrice, onChange, in
               placeholder="e.g. XXL"
               value={sizeInput}
               onChange={(e) => setSizeInput(e.target.value)}
-              className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
+              className="flex-grow bg-white border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
             />
             <button
               type="button"
@@ -233,7 +233,7 @@ export default function VariantsMatrixBuilder({ baseSku, basePrice, onChange, in
               placeholder="e.g. Chanderi Silk"
               value={fabricInput}
               onChange={(e) => setFabricInput(e.target.value)}
-              className="flex-grow bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
+              className="flex-grow bg-white border border-neutral-300 px-3 py-1.5 text-xs font-sans focus:outline-none"
             />
             <button
               type="button"

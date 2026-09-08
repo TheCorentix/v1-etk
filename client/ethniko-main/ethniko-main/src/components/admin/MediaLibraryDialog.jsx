@@ -87,21 +87,21 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-5xl h-[85vh] bg-[#FFFDFC] dark:bg-[#181818] border border-[#E6DCCF] dark:border-neutral-800 flex flex-col shadow-2xl rounded-xl overflow-hidden">
+      <div className="w-full max-w-5xl h-[85vh] bg-[#FFFDFC] border border-[#E6DCCF] flex flex-col shadow-2xl rounded-xl overflow-hidden">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#E6DCCF] dark:border-neutral-800 flex items-center justify-between bg-primary dark:bg-neutral-900">
+        <div className="px-6 py-4 border-b border-[#E6DCCF] flex items-center justify-between bg-primary">
           <div className="space-y-0.5">
-            <h3 className="font-serif text-base tracking-widest text-[#181818] dark:text-white uppercase">REUSABLE MEDIA LIBRARY</h3>
+            <h3 className="font-serif text-base tracking-widest text-[#181818] uppercase">REUSABLE MEDIA LIBRARY</h3>
             <p className="text-[10px] font-sans text-neutral-400 uppercase tracking-wider">Select or upload optimized images & videos</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-black dark:hover:text-white rounded-full transition-colors">
+          <button onClick={onClose} className="p-1.5 hover:bg-neutral-100 text-neutral-400 hover:text-black rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-6 border-b border-[#E6DCCF] dark:border-neutral-800 flex justify-between bg-white dark:bg-[#181818] text-xs font-sans font-bold tracking-widest uppercase">
+        <div className="px-6 border-b border-[#E6DCCF] flex justify-between bg-white text-xs font-sans font-bold tracking-widest uppercase">
           <div className="flex gap-6">
             <button
               onClick={() => setActiveTab('browse')}
@@ -140,7 +140,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                       placeholder="SEARCH BY FILE NAME..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full bg-[#FFFCF8] dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 pl-8 pr-3 py-2 text-xs font-sans tracking-wide text-black dark:text-white focus:outline-none"
+                      className="w-full bg-[#FFFCF8] border border-neutral-300 pl-8 pr-3 py-2 text-xs font-sans tracking-wide text-black focus:outline-none"
                     />
                     <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-3" />
                   </div>
@@ -148,7 +148,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                     <select
                       value={folder}
                       onChange={(e) => { setFolder(e.target.value); setPage(1); }}
-                      className="w-full bg-[#FFFCF8] dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-2 py-2.5 text-xs font-sans text-neutral-600 dark:text-neutral-300 focus:outline-none"
+                      className="w-full bg-[#FFFCF8] border border-neutral-300 px-2 py-2.5 text-xs font-sans text-neutral-600 focus:outline-none"
                     >
                       <option value="ALL">ALL FOLDERS</option>
                       <option value="media_library">MEDIA LIBRARY</option>
@@ -161,7 +161,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                     <select
                       value={resourceType}
                       onChange={(e) => { setResourceType(e.target.value); setPage(1); }}
-                      className="w-full bg-[#FFFCF8] dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-2 py-2.5 text-xs font-sans text-neutral-600 dark:text-neutral-300 focus:outline-none"
+                      className="w-full bg-[#FFFCF8] border border-neutral-300 px-2 py-2.5 text-xs font-sans text-neutral-600 focus:outline-none"
                     >
                       <option value="">ALL FORMATS</option>
                       <option value="image">IMAGES ONLY</option>
@@ -189,7 +189,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                         className={`group relative aspect-square cursor-pointer overflow-hidden border transition-all duration-300 ${
                           selectedAsset?.id === asset.id
                             ? 'border-[#B68D40] ring-2 ring-[#B68D40]/30 shadow-md scale-[0.98]'
-                            : 'border-neutral-200 dark:border-neutral-850 hover:border-neutral-400 bg-neutral-50 dark:bg-neutral-900'
+                            : 'border-neutral-200 hover:border-neutral-400 bg-neutral-50'
                         }`}
                       >
                         {asset.resourceType === 'video' ? (
@@ -210,7 +210,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                         {(!asset.usedIn || asset.usedIn.length === 0) && (
                           <button
                             onClick={(e) => handleDeleteMedia(asset.id, e)}
-                            className="absolute bottom-1.5 right-1.5 p-1.5 bg-white/95 dark:bg-neutral-800 text-neutral-400 hover:text-red-600 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow duration-200 focus:outline-none"
+                            className="absolute bottom-1.5 right-1.5 p-1.5 bg-white/95 text-neutral-400 hover:text-red-600 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow duration-200 focus:outline-none"
                             title="Delete permanently"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -244,13 +244,13 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
               </div>
 
               {/* Right Column: Asset details drawer */}
-              <div className="w-72 shrink-0 border-l border-[#E6DCCF] dark:border-neutral-800 p-6 bg-primary dark:bg-neutral-900 flex flex-col justify-between overflow-y-auto text-[10px] font-sans">
+              <div className="w-72 shrink-0 border-l border-[#E6DCCF] p-6 bg-primary flex flex-col justify-between overflow-y-auto text-[10px] font-sans">
                 {selectedAsset ? (
                   <div className="space-y-6">
                     <h4 className="text-xs font-serif tracking-widest text-[#B68D40] uppercase border-b pb-1.5">Asset Details</h4>
                     
                     {/* Visual Preview */}
-                    <div className="aspect-[4/3] border bg-white dark:bg-neutral-800 overflow-hidden flex items-center justify-center">
+                    <div className="aspect-[4/3] border bg-white overflow-hidden flex items-center justify-center">
                       {selectedAsset.resourceType === 'video' ? (
                         <video src={selectedAsset.url} controls className="w-full h-full object-contain bg-black" />
                       ) : (
@@ -259,29 +259,29 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                     </div>
 
                     {/* Metadata fields */}
-                    <div className="space-y-3.5 text-neutral-600 dark:text-neutral-400">
+                    <div className="space-y-3.5 text-neutral-600">
                       <div>
                         <span className="text-[8px] text-neutral-400 uppercase tracking-widest block">FILE NAME</span>
-                        <p className="font-semibold text-neutral-800 dark:text-white break-all">{selectedAsset.filename}</p>
+                        <p className="font-semibold text-neutral-800 break-all">{selectedAsset.filename}</p>
                       </div>
                       <div>
                         <span className="text-[8px] text-neutral-400 uppercase tracking-widest block">FOLDER PATH</span>
-                        <p className="font-mono bg-white dark:bg-neutral-800 px-1 py-0.5 border text-neutral-700 dark:text-neutral-300">{selectedAsset.folder}</p>
+                        <p className="font-mono bg-white px-1 py-0.5 border text-neutral-700">{selectedAsset.folder}</p>
                       </div>
                       <div>
                         <span className="text-[8px] text-neutral-400 uppercase tracking-widest block">SIZE & FORMAT</span>
-                        <p className="font-mono text-neutral-700 dark:text-neutral-300 uppercase">{(selectedAsset.fileSize / 1024).toFixed(1)} KB • {selectedAsset.format}</p>
+                        <p className="font-mono text-neutral-700 uppercase">{(selectedAsset.fileSize / 1024).toFixed(1)} KB • {selectedAsset.format}</p>
                       </div>
                       <div>
                         <span className="text-[8px] text-neutral-400 uppercase tracking-widest block">UPLOADED BY</span>
-                        <p className="font-semibold text-neutral-700 dark:text-neutral-300">{selectedAsset.createdBy || 'SYSTEM'}</p>
+                        <p className="font-semibold text-neutral-700">{selectedAsset.createdBy || 'SYSTEM'}</p>
                       </div>
                       <div>
                         <span className="text-[8px] text-neutral-400 uppercase tracking-widest block">USED IN</span>
                         {selectedAsset.usedIn && selectedAsset.usedIn.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {selectedAsset.usedIn.map((loc) => (
-                              <span key={loc} className="px-1.5 py-0.5 border bg-white dark:bg-neutral-850 font-mono text-[7.5px] uppercase rounded">{loc}</span>
+                              <span key={loc} className="px-1.5 py-0.5 border bg-white font-mono text-[7.5px] uppercase rounded">{loc}</span>
                             ))}
                           </div>
                         ) : (
@@ -313,7 +313,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
             <div className="flex-grow p-10 flex flex-col items-center justify-center max-w-2xl mx-auto space-y-6">
               
               <div className="text-center space-y-2">
-                <h4 className="font-serif text-lg tracking-wider uppercase text-[#181818] dark:text-white">Upload silhoutte assets</h4>
+                <h4 className="font-serif text-lg tracking-wider uppercase text-[#181818]">Upload silhoutte assets</h4>
                 <p className="text-[10px] text-neutral-400 uppercase tracking-wider">Stream files directly to Cloudinary and catalog them automatically</p>
               </div>
 
@@ -325,7 +325,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                   <select
                     value={uploadFolder}
                     onChange={(e) => setUploadFolder(e.target.value)}
-                    className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-750 px-3 py-2 text-xs font-sans text-[#181818] dark:text-white focus:outline-none"
+                    className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-[#181818] focus:outline-none"
                   >
                     <option value="media_library">MEDIA LIBRARY (GENERAL)</option>
                     <option value="products">PRODUCTS CATALOG</option>
@@ -335,7 +335,7 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                 </div>
 
                 {/* File picker drop area */}
-                <div className="border border-dashed border-[#D9C7A3] bg-primary dark:bg-neutral-900 p-8 text-center flex flex-col items-center justify-center space-y-3 cursor-pointer relative hover:border-[#B68D40] transition-colors group">
+                <div className="border border-dashed border-[#D9C7A3] bg-primary p-8 text-center flex flex-col items-center justify-center space-y-3 cursor-pointer relative hover:border-[#B68D40] transition-colors group">
                   <input
                     type="file"
                     required
@@ -346,12 +346,12 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
                   
                   {uploadFile ? (
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-[#181818] dark:text-white">{uploadFile.name}</p>
+                      <p className="text-xs font-bold text-[#181818]">{uploadFile.name}</p>
                       <p className="text-[9px] font-mono text-neutral-400 uppercase">{(uploadFile.size / 1024 / 1024).toFixed(2)} MB • {uploadFile.type}</p>
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-neutral-600 dark:text-neutral-300">Drag files here or click to browse</p>
+                      <p className="text-xs font-bold text-neutral-600">Drag files here or click to browse</p>
                       <p className="text-[9px] text-neutral-400 uppercase tracking-widest">Supports JPG, PNG, WEBP, and MP4 (Max 15MB)</p>
                     </div>
                   )}

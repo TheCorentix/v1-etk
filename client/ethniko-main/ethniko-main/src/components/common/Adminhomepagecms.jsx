@@ -161,14 +161,14 @@ export default function AdminHomepageCMS() {
 
       {/* Add Slide Form */}
       {showAddForm && (
-        <form onSubmit={handleCreateSlide} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary dark:bg-neutral-900">
+        <form onSubmit={handleCreateSlide} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-[#D9C7A3] bg-primary">
           <div className="space-y-1">
             <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Banner Title</label>
             <input
               type="text" required
               value={newSlide.title}
               onChange={(e) => setNewSlide({ ...newSlide, title: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-black focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -177,7 +177,7 @@ export default function AdminHomepageCMS() {
               type="text"
               value={newSlide.subtitle}
               onChange={(e) => setNewSlide({ ...newSlide, subtitle: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-black focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black focus:outline-none"
             />
           </div>
           <div className="space-y-1 md:col-span-2">
@@ -187,7 +187,7 @@ export default function AdminHomepageCMS() {
               placeholder="https://..."
               value={newSlide.image}
               onChange={(e) => setNewSlide({ ...newSlide, image: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-black focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -196,7 +196,7 @@ export default function AdminHomepageCMS() {
               type="text"
               value={newSlide.ctaLabel}
               onChange={(e) => setNewSlide({ ...newSlide, ctaLabel: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-black focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -205,7 +205,7 @@ export default function AdminHomepageCMS() {
               type="text"
               value={newSlide.ctaLink}
               onChange={(e) => setNewSlide({ ...newSlide, ctaLink: e.target.value })}
-              className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-xs font-sans text-black focus:outline-none"
+              className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black focus:outline-none"
             />
           </div>
           <div className="md:col-span-2 pt-2">
@@ -228,7 +228,7 @@ export default function AdminHomepageCMS() {
             const isBusy = savingId === slide.id;
 
             return (
-              <div key={slide.id} className="border bg-neutral-50 dark:bg-neutral-900">
+              <div key={slide.id} className="border bg-neutral-50">
                 {!isEditing ? (
                   <div className="p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
                     <img
@@ -241,7 +241,7 @@ export default function AdminHomepageCMS() {
                       <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block">
                         Slide {idx + 1} of {slides.length}
                       </span>
-                      <h4 className="font-serif text-sm text-neutral-800 dark:text-primary">{slide.title}</h4>
+                      <h4 className="font-serif text-sm text-neutral-800">{slide.title}</h4>
                       {slide.subtitle && (
                         <p className="text-[11px] font-sans text-neutral-500">{slide.subtitle}</p>
                       )}
@@ -306,7 +306,7 @@ export default function AdminHomepageCMS() {
                           type="text"
                           value={editingDraft.title}
                           onChange={(e) => setEditingDraft({ ...editingDraft, title: e.target.value })}
-                          className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                          className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                         />
                       </div>
                       <div className="space-y-1">
@@ -315,7 +315,7 @@ export default function AdminHomepageCMS() {
                           type="text"
                           value={editingDraft.subtitle}
                           onChange={(e) => setEditingDraft({ ...editingDraft, subtitle: e.target.value })}
-                          className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                          className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                         />
                       </div>
                       <div className="space-y-1 md:col-span-2">
@@ -324,7 +324,7 @@ export default function AdminHomepageCMS() {
                           type="url"
                           value={editingDraft.image}
                           onChange={(e) => setEditingDraft({ ...editingDraft, image: e.target.value })}
-                          className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                          className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                         />
                       </div>
                       <div className="space-y-1">
@@ -333,7 +333,7 @@ export default function AdminHomepageCMS() {
                           type="text"
                           value={editingDraft.ctaLabel}
                           onChange={(e) => setEditingDraft({ ...editingDraft, ctaLabel: e.target.value })}
-                          className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                          className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                         />
                       </div>
                       <div className="space-y-1">
@@ -342,7 +342,7 @@ export default function AdminHomepageCMS() {
                           type="text"
                           value={editingDraft.ctaLink}
                           onChange={(e) => setEditingDraft({ ...editingDraft, ctaLink: e.target.value })}
-                          className="w-full bg-white dark:bg-neutral-850 border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
+                          className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                         />
                       </div>
                     </div>

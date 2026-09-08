@@ -42,12 +42,12 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 50, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="relative w-full max-w-3xl bg-white dark:bg-[#181818] border border-[#ECECEC] dark:border-neutral-800 shadow-2xl flex flex-col md:flex-row overflow-hidden z-10"
+            className="relative w-full max-w-3xl bg-white border border-[#ECECEC] shadow-2xl flex flex-col md:flex-row overflow-hidden z-10"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-neutral-800/90 text-neutral-800 dark:text-primary rounded-full hover:text-[#B68D40] transition-colors focus:outline-none z-20"
+              className="absolute top-4 right-4 p-2 bg-white/90 text-neutral-800 rounded-full hover:text-[#B68D40] transition-colors focus:outline-none z-20"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
@@ -60,7 +60,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
-              <span className="absolute bottom-4 left-4 bg-white/90 dark:bg-neutral-900/90 text-[8px] tracking-[0.2em] px-2.5 py-1 text-neutral-800 dark:text-primary uppercase font-sans font-medium">
+              <span className="absolute bottom-4 left-4 bg-white/90 text-[8px] tracking-[0.2em] px-2.5 py-1 text-neutral-800 uppercase font-sans font-medium">
                 {product.fabric}
               </span>
             </div>
@@ -74,13 +74,13 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                   <span className="text-[9px] uppercase tracking-[0.25em] text-[#B68D40] font-sans font-semibold">
                     {product.designer}
                   </span>
-                  <h3 className="font-serif text-xl text-neutral-900 dark:text-primary uppercase tracking-wide leading-tight">
+                  <h3 className="font-serif text-xl text-neutral-900 uppercase tracking-wide leading-tight">
                     {product.name}
                   </h3>
                 </div>
 
                 <div className="flex items-center gap-3 font-sans text-base">
-                  <span className="font-semibold text-neutral-900 dark:text-primary">
+                  <span className="font-semibold text-neutral-900">
                     ₹{activePrice.toLocaleString('en-IN')}
                   </span>
                   {product.discountPrice && (
@@ -90,7 +90,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                   )}
                 </div>
 
-                <p className="text-[11px] font-sans leading-relaxed text-neutral-500 dark:text-neutral-400 text-justify">
+                <p className="text-[11px] font-sans leading-relaxed text-neutral-500 text-justify">
                   {product.description}
                 </p>
               </div>
@@ -108,7 +108,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                       className={`px-3 py-1.5 border text-[10px] tracking-wider uppercase transition-colors font-sans focus:outline-none ${
                         selectedSize === sz
                           ? 'border-[#B68D40] bg-[#B68D40] text-white'
-                          : 'border-[#ECECEC] dark:border-neutral-800 hover:border-[#B68D40]'
+                          : 'border-[#ECECEC] hover:border-[#B68D40]'
                       }`}
                     >
                       {sz}
@@ -138,7 +138,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                   )}
                   <button
                     onClick={() => toggleWishlist(product)}
-                    className="p-3 border border-[#ECECEC] dark:border-neutral-800 text-neutral-800 dark:text-primary hover:border-[#B68D40] transition-colors focus:outline-none"
+                    className="p-3 border border-[#ECECEC] text-neutral-800 hover:border-[#B68D40] transition-colors focus:outline-none"
                     aria-label="Wishlist toggle"
                   >
                     <Heart className={`w-4 h-4 ${favorited ? 'fill-[#B68D40] text-[#B68D40]' : ''}`} />
@@ -148,7 +148,7 @@ export default function QuickViewModal({ isOpen, onClose, product }) {
                 <Link
                   to={`/product/${product.slug}`}
                   onClick={onClose}
-                  className="text-[10px] uppercase tracking-widest text-[#B68D40] hover:text-neutral-900 dark:hover:text-white transition-colors flex items-center gap-1.5 font-sans font-semibold"
+                  className="text-[10px] uppercase tracking-widest text-[#B68D40] hover:text-neutral-900 transition-colors flex items-center gap-1.5 font-sans font-semibold"
                 >
                   <span>View Full Couture Details</span>
                   <ArrowRight className="w-3.5 h-3.5" />

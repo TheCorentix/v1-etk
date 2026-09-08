@@ -33,10 +33,10 @@ export default function ProductCard({ product }) {
       <motion.div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="group relative flex flex-col bg-white dark:bg-[#1f1f1f] border border-[#ECECEC] dark:border-neutral-800 transition-all duration-500 overflow-hidden"
+        className="group relative flex flex-col bg-white border border-[#ECECEC] transition-all duration-500 overflow-hidden"
       >
         {/* Image Frame */}
-        <Link to={`/product/${product.slug}`} className="relative block aspect-[3/4] overflow-hidden bg-neutral-50 dark:bg-neutral-900">
+        <Link to={`/product/${product.slug}`} className="relative block aspect-[3/4] overflow-hidden bg-neutral-50">
           
           {/* Main & Secondary Hover Images */}
           <img
@@ -83,7 +83,7 @@ export default function ProductCard({ product }) {
           {/* Wishlist Button Overlay */}
           <button
             onClick={handleWishlistClick}
-            className="absolute top-3.5 right-3.5 p-2.5 bg-white/80 dark:bg-[#181818]/80 backdrop-blur-md text-neutral-800 dark:text-primary rounded-full hover:bg-[#B68D40] hover:text-white transition-all z-10 duration-300 focus:outline-none"
+            className="absolute top-3.5 right-3.5 p-2.5 bg-white/80 backdrop-blur-md text-neutral-800 rounded-full hover:bg-[#B68D40] hover:text-white transition-all z-10 duration-300 focus:outline-none"
             aria-label={favorited ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart className={`w-3.5 h-3.5 transition-colors ${favorited ? 'fill-[#B68D40] text-[#B68D40]' : ''}`} />
@@ -134,14 +134,14 @@ export default function ProductCard({ product }) {
         </Link>
 
         {/* Text Details Description */}
-        <div className="p-4 flex-grow flex flex-col justify-between space-y-1 bg-white dark:bg-[#181818] z-10 border-t border-[#ECECEC] dark:border-neutral-800">
+        <div className="p-4 flex-grow flex flex-col justify-between space-y-1 bg-white z-10 border-t border-[#ECECEC]">
           <div className="space-y-0.5">
             <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-sans block">
               {product.designer}
             </span>
             <Link
               to={`/product/${product.slug}`}
-              className="font-serif text-[11px] uppercase tracking-wider text-neutral-800 dark:text-primary hover:text-[#B68D40] transition-colors leading-snug line-clamp-1 block"
+              className="font-serif text-[11px] uppercase tracking-wider text-neutral-800 hover:text-[#B68D40] transition-colors leading-snug line-clamp-1 block"
             >
               {product.name}
             </Link>
@@ -152,7 +152,7 @@ export default function ProductCard({ product }) {
 
           {/* Pricing Row */}
           <div className="flex items-center gap-2 pt-1 font-sans text-xs">
-            <span className="font-semibold text-neutral-900 dark:text-primary">
+            <span className="font-semibold text-neutral-900">
               ₹{activePrice.toLocaleString('en-IN')}
             </span>
             {product.discountPrice && (
