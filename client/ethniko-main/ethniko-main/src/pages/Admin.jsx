@@ -8,6 +8,7 @@ import { homepageService } from '../services/homepageService';
 import MediaLibraryDialog from '../components/admin/MediaLibraryDialog';
 import VariantsMatrixBuilder from '../components/admin/VariantsMatrixBuilder';
 import LookbookManager from '../components/admin/LookbookManager';
+import ProductEditModal from '../components/admin/ProductEditModal';
 
 // Default avatars used for testimonials when no custom image is provided.
 const DEFAULT_AVATARS = [
@@ -49,6 +50,7 @@ export default function Admin() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedCustom, setSelectedCustom] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
   // Customization sub-tab: 'customization' (product customize) vs 'tailoring' (bespoke)
   const [customReqType, setCustomReqType] = useState('customization');
   
@@ -864,6 +866,13 @@ export default function Admin() {
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
+                            onClick={() => setEditingProduct(p)}
+                            className="p-1.5 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
+                            aria-label="Edit product"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleDeleteProduct(p.id)}
                             className="p-1.5 text-neutral-400 hover:text-[#B42318] focus:outline-none"
                             aria-label="Delete product"
@@ -900,13 +909,22 @@ export default function Admin() {
                         <h3 className="font-serif text-lg tracking-wider text-neutral-900">{selectedProduct.name}</h3>
                         <span className="font-mono text-[11px] text-[#B68D40]">{selectedProduct.sku || 'SKU —'}</span>
                       </div>
-                      <button
-                        onClick={() => setSelectedProduct(null)}
-                        className="text-neutral-400 hover:text-neutral-900 text-xl leading-none"
-                        aria-label="Close"
-                      >
-                        ×
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); }}
+                          className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold flex items-center gap-1"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedProduct(null)}
+                          className="text-neutral-400 hover:text-neutral-900 text-xl leading-none"
+                          aria-label="Close"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
 
                     <div className="p-5 space-y-5">
@@ -985,6 +1003,15 @@ export default function Admin() {
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Product Edit Modal */}
+              {editingProduct && (
+                <ProductEditModal
+                  product={editingProduct}
+                  onClose={() => setEditingProduct(null)}
+                  onSaved={() => { setEditingProduct(null); loadAdminData(); }}
+                />
               )}
             </div>
           )}

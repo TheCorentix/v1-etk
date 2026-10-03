@@ -28,11 +28,16 @@ const mapProduct = (p) => {
     stock: v.stock || 0
   })) : [];
 
+  // Raw { size: stock } inventory map (null for legacy array-sized products),
+  // kept so the admin edit form can show and edit stock per size.
+  const sizeStock = sizesIsMap ? { ...p.sizes } : null;
+
   return {
     ...p,
     price,
     discountPrice,
     sizes,
+    sizeStock,
     stock,
     images,
     fabric,

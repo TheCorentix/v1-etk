@@ -59,7 +59,8 @@ export class ProductService {
   async updateProduct(
     id: string,
     updateData: Partial<ProductDocument>,
-    localImagePaths?: string[]
+    localImagePaths?: string[],
+    replacementImageUrls?: string[]
   ): Promise<ProductDocument | null> {
     try {
       const existingProduct = await this.productRepository.findById(id);
@@ -67,7 +68,20 @@ export class ProductService {
         throw new Error(`Product with ID ${id} not found.`);
       }
 
-      let imageUrls = [...(existingProduct.images || [])];
+      // Renaming regenerates the slug, so make sure it doesn't collide with another product
+      if (updateData.name) {
+        const newSlug = slugify(updateData.name);
+        if (newSlug !== existingProduct.slug) {
+          const clash = await this.productRepository.findBySlug(newSlug);
+          if (clash && clash.id !== id) {
+            throw new Error(`A product with name/slug "${updateData.name}" already exists.`);
+          }
+        }
+      }
+
+      let imageUrls = replacementImageUrls
+        ? [...replacementImageUrls]
+        : [...(existingProduct.images || [])];
 
       // Handle file uploads if new images are provided
       if (localImagePaths && localImagePaths.length > 0) {

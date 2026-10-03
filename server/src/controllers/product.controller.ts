@@ -89,6 +89,7 @@ export class ProductController {
         status,
         care,
         weight,
+        imageUrls,
       } = req.body;
 
       const files = req.files as Express.Multer.File[] || [];
@@ -111,7 +112,12 @@ export class ProductController {
       if (status) parsedFields.status = status;
       if (care !== undefined) parsedFields.care = care || null;
 
-      const product = await this.productService.updateProduct(id, parsedFields, localImagePaths);
+      // When provided, imageUrls replaces the gallery (allows removing / reordering images)
+      const parsedImageUrls = imageUrls !== undefined
+        ? (typeof imageUrls === 'string' ? JSON.parse(imageUrls) : imageUrls)
+        : undefined;
+
+      const product = await this.productService.updateProduct(id, parsedFields, localImagePaths, parsedImageUrls);
       sendSuccess(res, { product }, 'Product updated successfully.', 200);
     } catch (error) {
       next(error);
