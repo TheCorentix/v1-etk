@@ -11,15 +11,12 @@ const toFormState = (p) => ({
   category: p.category || 'WOMEN',
   subcategory: p.subcategory || '',
   price: p.price ?? '',
-  discountPrice: p.discountPrice ?? '',
   fabric: p.fabric || '',
   colors: (p.colors || []).join(', '),
   weight: p.weight ?? '',
   type: p.type || 'READY_TO_WEAR',
   status: p.status || 'DRAFT',
   description: p.description || '',
-  story: p.story || '',
-  care: p.care || '',
   images: [...(p.images || [])],
   // Legacy products store sizes as a plain array; start those at 0 stock.
   sizeRows: p.sizeStock
@@ -73,11 +70,6 @@ export default function ProductEditModal({ product, onClose, onSaved }) {
     if (!form.subcategory.trim()) errs.subcategory = 'Subcategory is required.';
     const price = parseFloat(form.price);
     if (isNaN(price) || price <= 0) errs.price = 'Enter a valid price greater than 0.';
-    if (form.discountPrice !== '' && form.discountPrice !== null) {
-      const discount = parseFloat(form.discountPrice);
-      if (isNaN(discount) || discount < 0) errs.discountPrice = 'Enter a valid discount price.';
-      else if (discount >= price) errs.discountPrice = 'Discount price must be lower than the price.';
-    }
     if (form.fabric.trim().length < 2) errs.fabric = 'Fabric must be at least 2 characters.';
     if (form.description.trim().length < 5) errs.description = 'Description must be at least 5 characters.';
     if (form.colors.split(',').map((c) => c.trim()).filter(Boolean).length === 0) {
@@ -108,16 +100,11 @@ export default function ProductEditModal({ product, onClose, onSaved }) {
       category: form.category,
       subcategory: form.subcategory.trim(),
       price: Math.round(parseFloat(form.price) * 100), // Rupees -> Paise
-      discountPrice: form.discountPrice === '' || form.discountPrice === null
-        ? null
-        : Math.round(parseFloat(form.discountPrice) * 100),
       fabric: form.fabric.trim(),
       colors: form.colors.split(',').map((c) => c.trim()).filter(Boolean),
       type: form.type,
       status: form.status,
       description: form.description.trim(),
-      story: form.story,
-      care: form.care,
       imageUrls: form.images,
     };
     if (form.weight !== '' && form.weight !== null) payload.weight = parseFloat(form.weight);
@@ -211,10 +198,6 @@ export default function ProductEditModal({ product, onClose, onSaved }) {
             <input type="number" min="0" step="0.01" value={form.price} onChange={set('price')} className={inputClass(errors.price)} />
           </div>
           <div className="space-y-1">
-            <Label>Discount Price (INR) <span className="normal-case">— leave empty for none</span></Label>
-            <input type="number" min="0" step="0.01" value={form.discountPrice} onChange={set('discountPrice')} className={inputClass(errors.discountPrice)} />
-          </div>
-          <div className="space-y-1">
             <Label>Fabric</Label>
             <input type="text" value={form.fabric} onChange={set('fabric')} className={inputClass(errors.fabric)} />
           </div>
@@ -244,14 +227,6 @@ export default function ProductEditModal({ product, onClose, onSaved }) {
           <div className="space-y-1 md:col-span-2">
             <Label>Garment Description</Label>
             <textarea rows={3} value={form.description} onChange={set('description')} className={inputClass(errors.description)} />
-          </div>
-          <div className="space-y-1 md:col-span-2">
-            <Label>Story</Label>
-            <textarea rows={2} value={form.story} onChange={set('story')} className={inputClass(false)} />
-          </div>
-          <div className="space-y-1 md:col-span-2">
-            <Label>Care Instructions</Label>
-            <textarea rows={2} value={form.care} onChange={set('care')} className={inputClass(false)} />
           </div>
 
           {/* Stock per size */}
