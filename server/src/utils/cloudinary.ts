@@ -5,6 +5,9 @@ import { logger } from '../config/logger';
 export interface CloudinaryUploadResult {
   publicId: string;
   secureUrl: string;
+  resourceType: 'image' | 'video' | 'raw';
+  format: string;
+  bytes: number;
 }
 
 /**
@@ -22,6 +25,7 @@ export const uploadToCloudinary = async (
   | 'homepage/banner'
   | 'homepage/section'
   | 'homepage/video'
+  | `library/${string}` // admin media library uploads (kept apart from product uploads)
 ): Promise<CloudinaryUploadResult> => {
   try {
     const result = await cloudinary.uploader.upload(localFilePath, {
@@ -32,6 +36,10 @@ export const uploadToCloudinary = async (
     return {
       publicId: result.public_id,
       secureUrl: result.secure_url,
+      // Cloudinary reports the detected type; its typings also allow 'auto', so narrow it
+      resourceType: result.resource_type === 'video' || result.resource_type === 'raw' ? result.resource_type : 'image',
+      format: result.format,
+      bytes: result.bytes,
     };
   } catch (error) {
     logger.error(`Cloudinary upload failed for file: ${localFilePath}`, error);
@@ -44,6 +52,16 @@ export const uploadToCloudinary = async (
       logger.warn(`Failed to clean up temporary file: ${localFilePath}`, unlinkError);
     }
   }
+};
+
+/**
+ * Extracts the public ID from a Cloudinary delivery URL
+ * (e.g. https://res.cloudinary.com/demo/image/upload/v123/etniko/products/abc.jpg -> etniko/products/abc).
+ * Returns null for non-Cloudinary URLs.
+ */
+export const publicIdFromCloudinaryUrl = (url: string): string | null => {
+  const match = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/(?:image|video)\/upload\/(?:v\d+\/)?(.+)\.[^./]+$/);
+  return match ? decodeURIComponent(match[1]) : null;
 };
 
 /**

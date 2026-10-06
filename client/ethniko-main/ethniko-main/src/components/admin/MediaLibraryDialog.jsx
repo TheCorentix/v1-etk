@@ -60,7 +60,8 @@ export default function MediaLibraryDialog({ isOpen, onClose, onSelect, activeFo
       fetchMedia();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Upload failed.');
+      // api.js rejects with { message, ... } built from the server's error response
+      toast.error(err?.message || 'Upload failed.');
     } finally {
       setUploading(false);
     }

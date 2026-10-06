@@ -109,6 +109,18 @@ export class ProductRepository {
   }
 
   /**
+   * True when a product other than `excludeId` still lists the given image URL.
+   */
+  async isImageUsedByOtherProduct(url: string, excludeId: string): Promise<boolean> {
+    const snapshot = await db
+      .collection(ProductRepository.collectionName)
+      .where('images', 'array-contains', url)
+      .limit(2)
+      .get();
+    return snapshot.docs.some((doc: { id: string }) => doc.id !== excludeId);
+  }
+
+  /**
    * Deletes a product document.
    * @param id Product document ID
    */

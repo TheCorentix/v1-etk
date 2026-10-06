@@ -25,6 +25,7 @@ import settingsRoutes from "./routes/settings.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import homepageRoutes from "./routes/homepage.routes";
 import testimonialRoutes from "./routes/testimonial.routes";
+import mediaRoutes from "./routes/media.routes";
 
 // Load environment variables
 dotenv.config();
@@ -98,6 +99,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/homepage", homepageRoutes);
 app.use("/api/v1/cms/testimonials", testimonialRoutes);
+app.use("/api/v1/cms/media", mediaRoutes);
 
 // Health Check Route
 app.get("/api/health", (req, res) => {

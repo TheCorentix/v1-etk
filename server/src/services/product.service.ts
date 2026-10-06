@@ -1,7 +1,7 @@
 import { ProductRepository, ProductDocument, ProductFilters } from '../repositories/product.repository';
 import { slugify } from '../utils/slug';
 import { generateSku } from '../utils/sku';
-import { uploadToCloudinary, deleteFromCloudinary } from '../utils/cloudinary';
+import { uploadToCloudinary, deleteFromCloudinary, publicIdFromCloudinaryUrl } from '../utils/cloudinary';
 import { getPaginationMetadata, PaginationMeta } from '../utils/pagination';
 import { logger } from '../config/logger';
 
@@ -101,10 +101,35 @@ export class ProductService {
 
       const updatedProduct = await this.productRepository.update(id, updatedFields);
       logger.info(`👗 Updated product: ${existingProduct.sku}`);
+
+      // Only after the save succeeded: clean up images the admin removed from the gallery
+      const removedImages = (existingProduct.images || []).filter((url) => !imageUrls.includes(url));
+      await this.purgeProductImages(removedImages, id);
+
       return updatedProduct;
     } catch (error) {
       logger.error(`Error in ProductService updateProduct for ID ${id}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Deletes product images from Cloudinary. Only assets uploaded straight to the
+   * `etniko/products` folder are removed, and only when no other product still uses them;
+   * media-library and external (non-Cloudinary) images are left alone.
+   * Best effort: failures are logged and never block the product update or delete.
+   */
+  private async purgeProductImages(urls: string[], productId: string): Promise<void> {
+    for (const url of urls) {
+      try {
+        const publicId = publicIdFromCloudinaryUrl(url);
+        if (!publicId || !publicId.startsWith('etniko/products/')) continue;
+        if (await this.productRepository.isImageUsedByOtherProduct(url, productId)) continue;
+        await deleteFromCloudinary(publicId);
+        logger.info(`🧹 Removed unused product image from Cloudinary: ${publicId}`);
+      } catch (error) {
+        logger.warn(`Could not clean up product image ${url}:`, error);
+      }
     }
   }
 
@@ -118,15 +143,8 @@ export class ProductService {
         throw new Error(`Product with ID ${id} not found.`);
       }
 
-      // Purge assets from Cloudinary (extracting public ID from Cloudinary secure URL)
-      for (const url of product.images) {
-        const urlParts = url.split('/');
-        const fileWithExtension = urlParts[urlParts.length - 1];
-        const publicId = `etniko/products/${fileWithExtension.split('.')[0]}`;
-        await deleteFromCloudinary(publicId);
-      }
-
       await this.productRepository.delete(id);
+      await this.purgeProductImages(product.images || [], id);
       logger.info(`👗 Deleted product catalog: ${product.name} (${product.sku})`);
     } catch (error) {
       logger.error(`Error in ProductService deleteProduct for ID ${id}:`, error);
