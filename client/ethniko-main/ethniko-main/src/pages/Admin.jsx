@@ -1252,12 +1252,12 @@ export default function Admin() {
             <div className="space-y-6">
               <div className="flex flex-wrap justify-between items-center gap-3 border-b pb-3">
                 <h3 className="font-serif text-lg tracking-wider uppercase">
-                  {customReqType === 'tailoring' ? 'Tailoring Requests' : 'Customization Requests'}
+                  {customReqType === 'tailoring' ? 'Tailoring Requests' : 'Outfit Customisation Requests'}
                 </h3>
                 {/* Sub-tab toggle: Customization vs Tailoring */}
                 <div className="inline-flex border border-[#D9C7A3] rounded-full p-1 gap-1">
                   {[
-                    { key: 'customization', label: 'Customization' },
+                    { key: 'customization', label: 'Outfit Customisation' },
                     { key: 'tailoring', label: 'Tailoring' },
                   ].map((t) => (
                     <button
@@ -1332,7 +1332,7 @@ export default function Admin() {
                     {visibleCustomizations.length === 0 && (
                       <tr>
                         <td colSpan={5} className="p-8 text-center text-neutral-400 text-xs font-sans normal-case">
-                          No {customReqType === 'tailoring' ? 'tailoring' : 'customization'} requests yet.
+                          No {customReqType === 'tailoring' ? 'tailoring' : 'outfit customisation'} requests yet.
                         </td>
                       </tr>
                     )}
@@ -1396,7 +1396,7 @@ export default function Admin() {
                           ['Phone', selectedCustom.phone],
                           ['Email', selectedCustom.email],
                           ['WhatsApp', selectedCustom.whatsappNumber],
-                          ['Garment', selectedCustom.category],
+                          ['Category', selectedCustom.category],
                           ['Request Type', selectedCustom.occasion],
                           ['Product SKU', selectedCustom.productSku],
                           ['Product ID', selectedCustom.productId],

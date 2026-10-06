@@ -37,6 +37,9 @@ export interface CustomisationFilters {
   status?: 'NEW' | 'ORDER_TAKEN' | 'SHIPPED' | 'DELIVERED';
 }
 
+const byNewestFirst = (a: CustomisationDocument, b: CustomisationDocument): number =>
+  (b.createdAt || '').localeCompare(a.createdAt || '');
+
 export class CustomisationRepository {
   private static collectionName = 'customisations';
 
@@ -105,11 +108,13 @@ export class CustomisationRepository {
       queryRef = queryRef.where('status', '==', filters.status);
     }
 
-    // Default sorting order by creation date (descending)
-    queryRef = queryRef.orderBy('createdAt', 'desc');
-
     const snapshot = await queryRef.get();
     const customisations = mapQuery<CustomisationDocument>(snapshot);
+
+    // Newest first. Sorted in memory rather than with Firestore's orderBy, which would need
+    // a composite index for every filter combination above (a missing index makes the whole
+    // query fail, so customers saw no requests on their profile).
+    customisations.sort(byNewestFirst);
 
     const total = customisations.length;
     const startIndex = (pagination.page - 1) * pagination.limit;
@@ -129,10 +134,9 @@ export class CustomisationRepository {
     const querySnapshot = await db
       .collection(CustomisationRepository.collectionName)
       .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
       .get();
 
-    return mapQuery<CustomisationDocument>(querySnapshot);
+    return mapQuery<CustomisationDocument>(querySnapshot).sort(byNewestFirst);
   }
 }
 

@@ -52,12 +52,16 @@ export default function Profile() {
         setProfileState(user);
         setSettingsForm({ name: user.name || '', email: user.email || '', phone: user.phone || '' });
         
-        // Fetch real order lists and bespoke customized requests from Firestore
-        const userOrd = await userService.getUserOrders();
-        const userCust = await userService.getUserCustomizations();
-
-        setOrders(userOrd);
-        setCustomizations(userCust);
+        // Fetch real order lists and bespoke customized requests from Firestore. Each loads on
+        // its own so one failing never hides the other.
+        const [ordersResult, requestsResult] = await Promise.allSettled([
+          userService.getUserOrders(),
+          userService.getUserCustomizations(),
+        ]);
+        if (ordersResult.status === 'fulfilled') setOrders(ordersResult.value);
+        else console.error('Error loading orders:', ordersResult.reason);
+        if (requestsResult.status === 'fulfilled') setCustomizations(requestsResult.value);
+        else console.error('Error loading styling requests:', requestsResult.reason);
       } catch (err) {
         console.error('Error syncing profile records:', err);
       } finally {
@@ -698,14 +702,16 @@ export default function Profile() {
                           )}
                           <div className="flex-grow space-y-3.5 text-xs font-sans text-neutral-600">
                             <div>
-                              <span className="text-neutral-400 block uppercase text-[9px] tracking-wider">Garment details:</span>
-                              <span className="font-semibold text-neutral-800 uppercase">{cust.category} - {cust.occasion}</span>
+                              <span className="text-neutral-400 block uppercase text-[9px] tracking-wider">Request:</span>
+                              <span className="font-semibold text-neutral-800 uppercase">
+                                {cust.occasion}{cust.category && cust.category !== 'Custom Request' ? ` - ${cust.category}` : ''}
+                              </span>
                             </div>
 
                             {/* Measurements breakdown */}
                             <div className="p-3.5 border border-[#E6DCCF] bg-[#FBF6EC] space-y-1">
-                              <span className="text-neutral-400 text-[8px] uppercase tracking-wider block font-bold">Styling Dossier values</span>
-                              <p className="font-mono text-xs text-neutral-800 whitespace-pre-wrap">{cust.notes || 'No measurement notes assigned yet.'}</p>
+                              <span className="text-neutral-400 text-[8px] uppercase tracking-wider block font-bold">Your notes</span>
+                              <p className="font-mono text-xs text-neutral-800 whitespace-pre-wrap">{cust.notes || 'No notes added.'}</p>
                             </div>
 
                             {cust.fabricPref && (
