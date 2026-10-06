@@ -15,6 +15,12 @@ const envSchema = z.object({
   FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
+  // WhatsApp Business Cloud API (Meta) for order status messages. While the token or phone
+  // number ID is unset, messages are only logged ("dry run") and nothing is sent.
+  WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+  WHATSAPP_API_VERSION: z.string().default('v23.0'),
+  WHATSAPP_TEMPLATE_LANGUAGE: z.string().default('en'),
   // Comma-separated list of emails that should be granted the ADMIN role on login/register.
   ADMIN_EMAILS: z.string().default('admin@etniko.studio'),
 });

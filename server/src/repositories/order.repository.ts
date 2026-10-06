@@ -14,6 +14,16 @@ export interface OrderItem {
   image: string; // Cloudinary secure URL
 }
 
+// One WhatsApp status message attempt for an order (kept on the order for admin visibility)
+export interface WhatsAppLogEntry {
+  status: string; // Order status the message was about
+  result: 'sent' | 'failed' | 'skipped';
+  sentAt: string;
+  to?: string; // Normalized phone number (country code, digits only)
+  messageId?: string;
+  error?: string;
+}
+
 export interface OrderDocument {
   id?: string;
   userId: string; // References `users.id` or 'GUEST'
@@ -52,6 +62,7 @@ export interface OrderDocument {
   };
   trackingNumber?: string | null;
   createdAt?: string;
+  whatsappLog?: WhatsAppLogEntry[];
   statusHistory: Array<{
     status: string;
     timestamp: string;

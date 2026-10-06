@@ -23,5 +23,6 @@ router.get('/:id/invoice', authMiddleware, controller.getInvoice);
 // Admin Fulfillment Endpoints (Protected by Admin authorization checks)
 router.put('/:id/status', authMiddleware, adminMiddleware, validate(updateStatusSchema), controller.updateStatus);
 router.put('/:id/tracking', authMiddleware, adminMiddleware, validate(addTrackingSchema), controller.addTracking);
+router.post('/:id/notify', authMiddleware, adminMiddleware, controller.resendNotification);
 
 export default router;

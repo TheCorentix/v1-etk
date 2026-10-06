@@ -1,7 +1,9 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { OrderRepository, OrderDocument, OrderItem } from '../repositories/order.repository';
+import { OrderRepository, OrderDocument, OrderItem, WhatsAppLogEntry } from '../repositories/order.repository';
 import { ProductService } from './product.service';
+import { OrderNotificationService, isNotifiableStatus } from './orderNotification.service';
+import { httpError } from '../utils/httpError';
 import { getPaginationMetadata, PaginationMeta } from '../utils/pagination';
 import { computeShipping } from '../utils/shipping';
 import { env } from '../config/env';
@@ -10,6 +12,7 @@ import { logger } from '../config/logger';
 export class OrderService {
   private orderRepository = new OrderRepository();
   private productService = new ProductService();
+  private notifications = new OrderNotificationService();
   private razorpayClient: Razorpay | null = null;
 
   constructor() {
@@ -206,6 +209,10 @@ export class OrderService {
       }
 
       logger.info(`💳 Order ${order.id} payment verified. Inventory allocated.`);
+
+      // Tell the customer their order is placed. Not awaited: checkout shouldn't wait on WhatsApp.
+      void this.sendStatusMessage(updatedOrder, 'CONFIRMED');
+
       return updatedOrder;
     } catch (error) {
       logger.error('Error in OrderService verifyPayment:', error);
@@ -214,17 +221,41 @@ export class OrderService {
   }
 
   /**
-   * Modifies an order's status pipeline (Admin only).
+   * Sends the WhatsApp message for `status` and records the outcome on the order.
+   * Never throws. Returns the refreshed order plus what happened with the message.
+   */
+  private async sendStatusMessage(
+    order: OrderDocument,
+    status: OrderDocument['orderStatus']
+  ): Promise<{ order: OrderDocument; notification: WhatsAppLogEntry }> {
+    const notification = await this.notifications.notify(order, status);
+
+    try {
+      // Keep the most recent entries only, so the order document stays small
+      const whatsappLog = [...(order.whatsappLog || []), notification].slice(-30);
+      const updated = await this.orderRepository.update(order.id as string, { whatsappLog });
+      return { order: updated || order, notification };
+    } catch (error) {
+      logger.error(`Could not save the WhatsApp log for order ${order.id}:`, error);
+      return { order, notification };
+    }
+  }
+
+  /**
+   * Modifies an order's status pipeline (Admin only) and messages the customer on WhatsApp
+   * when the status actually changes.
    */
   async updateStatus(
     orderId: string,
     status: OrderDocument['orderStatus'],
     note: string
-  ): Promise<OrderDocument | null> {
+  ): Promise<{ order: OrderDocument; notification: WhatsAppLogEntry | null }> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
-      throw new Error(`Order with ID ${orderId} not found.`);
+      throw httpError(404, `Order with ID ${orderId} not found.`);
     }
+
+    const changed = order.orderStatus !== status;
 
     const updatedHistory = [
       ...order.statusHistory,
@@ -235,20 +266,35 @@ export class OrderService {
       },
     ];
 
-    return this.orderRepository.update(orderId, {
+    const updated = await this.orderRepository.update(orderId, {
       orderStatus: status,
       statusHistory: updatedHistory,
     });
+    if (!updated) {
+      throw httpError(500, 'Failed to update the order status.');
+    }
+
+    // Re-saving the same status (e.g. just adding a note) shouldn't message the customer again
+    if (changed && isNotifiableStatus(status)) {
+      return this.sendStatusMessage(updated, status);
+    }
+    return { order: updated, notification: null };
   }
 
   /**
-   * Assigns a shipping carrier tracking airway bill number (Admin only).
+   * Assigns a shipping carrier tracking airway bill number (Admin only), marks the order
+   * shipped, and messages the customer with the tracking ID.
    */
-  async addTrackingNumber(orderId: string, trackingNumber: string): Promise<OrderDocument | null> {
+  async addTrackingNumber(
+    orderId: string,
+    trackingNumber: string
+  ): Promise<{ order: OrderDocument; notification: WhatsAppLogEntry | null }> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
-      throw new Error(`Order with ID ${orderId} not found.`);
+      throw httpError(404, `Order with ID ${orderId} not found.`);
     }
+
+    const alreadyAnnounced = order.orderStatus === 'SHIPPED' && order.trackingNumber === trackingNumber;
 
     const updatedHistory = [
       ...order.statusHistory,
@@ -259,11 +305,36 @@ export class OrderService {
       },
     ];
 
-    return this.orderRepository.update(orderId, {
+    const updated = await this.orderRepository.update(orderId, {
       trackingNumber,
       orderStatus: 'SHIPPED',
       statusHistory: updatedHistory,
     });
+    if (!updated) {
+      throw httpError(500, 'Failed to save the tracking number.');
+    }
+
+    if (alreadyAnnounced) {
+      return { order: updated, notification: null };
+    }
+    return this.sendStatusMessage(updated, 'SHIPPED');
+  }
+
+  /**
+   * Re-sends the WhatsApp message for the order's current status (Admin only),
+   * e.g. after fixing a failed send.
+   */
+  async resendStatusNotification(
+    orderId: string
+  ): Promise<{ order: OrderDocument; notification: WhatsAppLogEntry }> {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) {
+      throw httpError(404, `Order with ID ${orderId} not found.`);
+    }
+    if (!isNotifiableStatus(order.orderStatus)) {
+      throw httpError(400, `Customers aren't messaged for the "${order.orderStatus}" status.`);
+    }
+    return this.sendStatusMessage(order, order.orderStatus);
   }
 
   /**

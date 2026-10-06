@@ -285,14 +285,64 @@ export default function Admin() {
     }
   };
 
+  // Toast describing what happened with the customer's WhatsApp message
+  const announceWhatsApp = (notification) => {
+    if (!notification) return;
+    if (notification.result === 'sent') {
+      toast.success(`WhatsApp message sent to +${notification.to}`);
+    } else if (notification.result === 'failed') {
+      toast.error(`WhatsApp not sent: ${notification.error}`);
+    } else {
+      toast(`WhatsApp not sent: ${notification.error}`, { icon: 'ℹ️' });
+    }
+  };
+
   const handleUpdateOrderStatus = async (id, status) => {
+    const trackingId = trackingNumber.trim();
     try {
-      const updated = await adminService.updateOrderStatus(id, status, trackingNumber);
-      setSelectedOrder(updated);
-      setTrackingNumber("");
+      // Shipping with a tracking ID goes through the tracking endpoint so the ID is saved
+      // on the order and included in the customer's message.
+      const { order, notification } = status === 'SHIPPED' && trackingId
+        ? await adminService.addOrderTracking(id, trackingId)
+        : await adminService.updateOrderStatus(id, status);
+      setSelectedOrder(order);
+      setTrackingNumber(order.trackingNumber || "");
+      toast.success(`Order marked ${status.toLowerCase()}.`);
+      announceWhatsApp(notification);
       loadAdminData();
     } catch (err) {
       console.error(err);
+      toast.error(err?.message || 'Failed to update the order.');
+    }
+  };
+
+  const handleSaveTracking = async (id) => {
+    const trackingId = trackingNumber.trim();
+    if (!trackingId) {
+      toast.error('Enter the tracking ID first.');
+      return;
+    }
+    try {
+      const { order, notification } = await adminService.addOrderTracking(id, trackingId);
+      setSelectedOrder(order);
+      toast.success('Tracking ID saved. Order marked shipped.');
+      announceWhatsApp(notification);
+      loadAdminData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.message || 'Failed to save the tracking ID.');
+    }
+  };
+
+  const handleResendWhatsApp = async (id) => {
+    try {
+      const { order, notification } = await adminService.resendOrderNotification(id);
+      setSelectedOrder(order);
+      announceWhatsApp(notification);
+      loadAdminData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.message || 'Failed to resend the WhatsApp message.');
     }
   };
 
@@ -488,7 +538,17 @@ export default function Admin() {
     );
   }
 
-  const ORDER_STATUSES = ['New', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Returned/Cancelled'];
+  // `value` must match the backend's orderStatus enum exactly
+  const ORDER_STATUSES = [
+    { value: 'NEW', label: 'New' },
+    { value: 'CONFIRMED', label: 'Confirmed' },
+    { value: 'PACKED', label: 'Packed' },
+    { value: 'SHIPPED', label: 'Shipped' },
+    { value: 'DELIVERED', label: 'Delivered' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+  ];
+  // Moving an order to one of these messages the customer on WhatsApp
+  const WHATSAPP_STATUSES = ['CONFIRMED', 'PACKED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
   // Customisation fulfilment workflow actions (map to backend status enum).
   const CUSTOM_STATUS_ACTIONS = [
@@ -1060,7 +1120,7 @@ export default function Admin() {
                         </td>
                         <td className="p-3 text-right">
                           <button
-                            onClick={() => setSelectedOrder(ord)}
+                            onClick={() => { setSelectedOrder(ord); setTrackingNumber(ord.trackingNumber || ""); }}
                             className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none"
                           >
                             Update Status →
@@ -1098,18 +1158,22 @@ export default function Admin() {
                   <div className="flex flex-wrap gap-2">
                     {ORDER_STATUSES.map(st => (
                       <button
-                        key={st}
-                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, st)}
+                        key={st.value}
+                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, st.value)}
                         className={`px-3 py-1.5 border text-[9px] tracking-wider uppercase font-sans focus:outline-none ${
-                          selectedOrder.orderStatus === st
+                          selectedOrder.orderStatus === st.value
                             ? 'border-[#B68D40] bg-[#B68D40] text-white font-bold'
                             : 'border-neutral-200 bg-white hover:border-[#B68D40] text-neutral-600'
                         }`}
                       >
-                        {st}
+                        {st.label}
                       </button>
                     ))}
                   </div>
+                  <p className="text-[9px] font-sans text-neutral-400 normal-case leading-relaxed">
+                    The customer gets a WhatsApp message when an order moves to Confirmed, Packed, Shipped, Delivered or Cancelled.
+                    To ship with a tracking ID, enter it on the right first, then click Shipped.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -1123,12 +1187,47 @@ export default function Admin() {
                       className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans text-black"
                     />
                     <button
-                      onClick={() => handleUpdateOrderStatus(selectedOrder.id, selectedOrder.orderStatus)}
+                      onClick={() => handleSaveTracking(selectedOrder.id)}
                       className="px-4 py-2 bg-neutral-900 text-white text-[9px] font-sans font-bold uppercase tracking-widest shrink-0"
                     >
-                      Update
+                      Save &amp; Ship
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* WhatsApp updates sent to the customer */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-[10px] tracking-widest text-[#B68D40] font-sans font-semibold uppercase">WhatsApp updates to customer</h4>
+                  {WHATSAPP_STATUSES.includes(selectedOrder.orderStatus) && (
+                    <button
+                      onClick={() => handleResendWhatsApp(selectedOrder.id)}
+                      className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none"
+                    >
+                      Resend current status
+                    </button>
+                  )}
+                </div>
+                <div className="border border-neutral-200 p-4 space-y-2 max-h-44 overflow-y-auto custom-scrollbar text-[10px] font-sans">
+                  {(selectedOrder.whatsappLog || []).length === 0 && (
+                    <p className="text-neutral-400 normal-case">No WhatsApp messages sent for this order yet.</p>
+                  )}
+                  {[...(selectedOrder.whatsappLog || [])].reverse().map((entry, idx) => (
+                    <div key={idx} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b pb-1.5">
+                      <span className="font-bold uppercase text-[#B68D40] w-20">{entry.status}</span>
+                      <span className={`px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                        entry.result === 'sent' ? 'bg-green-100 text-green-700'
+                          : entry.result === 'failed' ? 'bg-red-100 text-red-600'
+                          : 'bg-neutral-100 text-neutral-500'
+                      }`}>
+                        {entry.result}
+                      </span>
+                      {entry.to && <span className="text-neutral-500">+{entry.to}</span>}
+                      {entry.error && <span className="text-neutral-400 normal-case">{entry.error}</span>}
+                      <span className="ml-auto text-neutral-400">{new Date(entry.sentAt).toLocaleString()}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

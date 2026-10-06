@@ -22,7 +22,8 @@ export const adminService = {
    */
   updateOrderStatus: async (id, status, note = '') => {
     const response = await api.put(`/orders/${id}/status`, { status, note });
-    return response.data.order;
+    // `notification` describes the customer WhatsApp message triggered by this change (or null)
+    return { order: response.data.order, notification: response.data.notification };
   },
 
   /**
@@ -30,7 +31,15 @@ export const adminService = {
    */
   addOrderTracking: async (id, trackingNumber) => {
     const response = await api.put(`/orders/${id}/tracking`, { trackingNumber });
-    return response.data.order;
+    return { order: response.data.order, notification: response.data.notification };
+  },
+
+  /**
+   * Re-sends the customer's WhatsApp message for the order's current status (Admin only).
+   */
+  resendOrderNotification: async (id) => {
+    const response = await api.post(`/orders/${id}/notify`);
+    return { order: response.data.order, notification: response.data.notification };
   },
 
   /**

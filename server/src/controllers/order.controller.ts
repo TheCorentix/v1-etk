@@ -70,8 +70,8 @@ export class OrderController {
       const { id } = req.params as { id: string };
       const { status, note } = req.body;
 
-      const order = await this.orderService.updateStatus(id, status, note || `Order transitioned to ${status}.`);
-      sendSuccess(res, { order }, 'Order status updated successfully.', 200);
+      const { order, notification } = await this.orderService.updateStatus(id, status, note || `Order transitioned to ${status}.`);
+      sendSuccess(res, { order, notification }, 'Order status updated successfully.', 200);
     } catch (error) {
       next(error);
     }
@@ -85,8 +85,21 @@ export class OrderController {
       const { id } = req.params as { id: string };
       const { trackingNumber } = req.body;
 
-      const order = await this.orderService.addTrackingNumber(id, trackingNumber);
-      sendSuccess(res, { order }, 'Tracking number assigned and order status updated.', 200);
+      const { order, notification } = await this.orderService.addTrackingNumber(id, trackingNumber);
+      sendSuccess(res, { order, notification }, 'Tracking number assigned and order status updated.', 200);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Re-sends the customer's WhatsApp message for the order's current status (Admin only).
+   */
+  resendNotification = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params as { id: string };
+      const { order, notification } = await this.orderService.resendStatusNotification(id);
+      sendSuccess(res, { order, notification }, 'WhatsApp message processed.', 200);
     } catch (error) {
       next(error);
     }
