@@ -10,23 +10,51 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+type AuthUser = NonNullable<AuthenticatedRequest['user']>;
+
+// Bearer token from the Authorization header, falling back to the auth cookie
+const extractToken = (req: AuthenticatedRequest): string => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  if (req.cookies && req.cookies.token) {
+    return req.cookies.token;
+  }
+  return '';
+};
+
+// Verifies a Firebase ID token and resolves the user's role from Firestore
+const resolveUser = async (token: string): Promise<AuthUser> => {
+  const decodedToken = await auth.verifyIdToken(token);
+
+  // Resolve the user's role from Firestore database for real-time permissions check
+  const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+  let role: AuthUser['role'] = 'CUSTOMER';
+
+  if (userDoc.exists) {
+    const userData = userDoc.data();
+    const dbRole = userData?.role;
+    if (dbRole && ['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER', 'ORDER_MANAGER', 'DESIGNER', 'CUSTOMER'].includes(dbRole)) {
+      role = dbRole as any;
+    }
+  }
+
+  return {
+    uid: decodedToken.uid,
+    email: decodedToken.email || '',
+    name: decodedToken.name || userDoc.data()?.name || 'Client',
+    role,
+  };
+};
+
 export const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    let token = '';
-
-    // 1. Extract bearer token from Authorization header
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.split(' ')[1];
-    } 
-    // 2. Fallback to cookie verification
-    else if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-    }
+    const token = extractToken(req);
 
     if (!token) {
       res.status(401).json({
@@ -37,28 +65,7 @@ export const authMiddleware = async (
       return;
     }
 
-    // 3. Verify Firebase ID Token
-    const decodedToken = await auth.verifyIdToken(token);
-
-    // 4. Resolve the user's role from Firestore database for real-time permissions check
-    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
-    let role: 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'ORDER_MANAGER' | 'DESIGNER' | 'CUSTOMER' = 'CUSTOMER';
-
-    if (userDoc.exists) {
-      const userData = userDoc.data();
-      const dbRole = userData?.role;
-      if (dbRole && ['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER', 'ORDER_MANAGER', 'DESIGNER', 'CUSTOMER'].includes(dbRole)) {
-        role = dbRole as any;
-      }
-    }
-
-    // 5. Attach decoded user details to request object
-    req.user = {
-      uid: decodedToken.uid,
-      email: decodedToken.email || '',
-      name: decodedToken.name || userDoc.data()?.name || 'Client',
-      role,
-    };
+    req.user = await resolveUser(token);
 
     next();
   } catch (error: any) {
@@ -68,6 +75,26 @@ export const authMiddleware = async (
       errors: [error.message || 'Unauthorized'],
     });
   }
+};
+
+/**
+ * Attaches req.user when a valid token is present but never rejects the request.
+ * For public endpoints that return extra data to signed-in admins.
+ */
+export const optionalAuthMiddleware = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const token = extractToken(req);
+  if (token) {
+    try {
+      req.user = await resolveUser(token);
+    } catch {
+      // Invalid or expired token: continue as an anonymous visitor
+    }
+  }
+  next();
 };
 
 export default authMiddleware;

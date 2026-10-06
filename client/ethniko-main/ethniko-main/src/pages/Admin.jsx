@@ -378,6 +378,18 @@ export default function Admin() {
     }
   };
 
+  const handleToggleTestimonial = async (item) => {
+    const status = item.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    try {
+      await adminService.updateTestimonial(item.id, { status });
+      toast.success(status === 'ACTIVE' ? "Now showing on homepage." : "Hidden from homepage.");
+      loadAdminData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update testimonial.");
+    }
+  };
+
   const handleDeleteTestimonial = async (id) => {
     if (window.confirm("Delete this testimonial?")) {
       try {
@@ -529,7 +541,7 @@ export default function Admin() {
               { id: "lookbook", label: "Look & Shop", icon: Film },
               { id: "cms", label: "Homepage CMS", icon: Sliders },
               { id: "categories", label: "Categories & Collections", icon: Layers },
-              { id: "testimonials", label: "Testimonials & Reviews", icon: Star },
+              { id: "testimonials", label: "Draped in Love (Reviews)", icon: Star },
               { id: "settings", label: "Store Settings", icon: Settings }
             ].map(tab => {
               const Icon = tab.icon;
@@ -1668,7 +1680,10 @@ export default function Admin() {
           {activeTab === 'testimonials' && (
             <div className="space-y-6 text-left">
               <div className="flex justify-between items-center border-b pb-3">
-                <h3 className="font-serif text-lg tracking-wider uppercase">Customer Testimonials</h3>
+                <div>
+                  <h3 className="font-serif text-lg tracking-wider uppercase">Draped in Love</h3>
+                  <p className="text-[10px] font-sans text-neutral-400 normal-case">Customer love notes shown on the homepage. Hidden ones stay saved here.</p>
+                </div>
                 <button
                   onClick={() => setShowAddTestimonial(!showAddTestimonial)}
                   className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none flex items-center gap-1"
@@ -1736,7 +1751,14 @@ export default function Admin() {
                       </div>
                     </div>
                     <p className="text-xs text-neutral-500 italic text-left">"{item.review}"</p>
-                    <div className="flex justify-end border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center border-t pt-2 mt-2">
+                      <button
+                        onClick={() => handleToggleTestimonial(item)}
+                        className={`p-1 flex items-center gap-1 text-[8px] uppercase tracking-wider font-bold ${item.status === 'ACTIVE' ? 'text-green-700 hover:text-black' : 'text-neutral-400 hover:text-black'}`}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{item.status === 'ACTIVE' ? 'Showing on homepage' : 'Hidden — click to show'}</span>
+                      </button>
                       <button onClick={() => handleDeleteTestimonial(item.id)} className="p-1 text-red-500 hover:text-red-750 flex items-center gap-1 text-[8px] uppercase tracking-wider font-bold">
                         <Trash2 className="w-3.5 h-3.5" />
                         <span>Delete</span>

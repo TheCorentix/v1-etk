@@ -87,6 +87,14 @@ export default function Home() {
   ]);
 
   const [categories, setCategories] = useState(EXPLORE_CATEGORIES);
+  const [testimonials, setTestimonials] = useState([]);
+
+  // Fetch customer testimonials managed from the admin panel
+  useEffect(() => {
+    homepageService.getTestimonials()
+      .then((items) => setTestimonials(items.filter((t) => t.status === 'ACTIVE')))
+      .catch((err) => console.error('Error loading testimonials:', err));
+  }, []);
 
   // Fetch dynamic hero slider banners
   useEffect(() => {
@@ -470,6 +478,60 @@ export default function Home() {
         </div>
 
       </section>
+
+      {/* 5. Draped in Love — customer testimonials (managed in Admin → Testimonials) */}
+      {testimonials.length > 0 && (
+        <section className="py-6">
+          <div className="max-w-7xl mx-auto px-6 space-y-12">
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl md:text-3xl font-serif tracking-[0.15em] text-[#181818] uppercase">
+                Draped in Love
+              </h2>
+              <p className="text-[11px] font-sans tracking-[0.2em] text-[#6E6E6E] uppercase">
+                Love notes from the ETNIKO family
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <span className="w-10 h-[1px] bg-[#B68D40]" />
+                <span className="text-[10px] text-[#D4AF37] font-sans">✦</span>
+                <span className="w-10 h-[1px] bg-[#B68D40]" />
+              </div>
+            </div>
+
+            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 md:mx-0 md:px-0 [scrollbar-width:thin]">
+              {testimonials.map((t) => (
+                <figure
+                  key={t.id}
+                  className="snap-start shrink-0 w-[85%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex flex-col justify-between gap-6 rounded-xl bg-[#FFFCF8] border border-[#E6DCCF] p-7 shadow-[0_4px_20px_-8px_rgba(24,24,24,0.12)] hover:border-[#B68D40] hover:shadow-[0_16px_40px_-12px_rgba(182,141,64,0.35)] transition-all duration-500"
+                >
+                  <div className="space-y-4">
+                    <span className="block font-serif text-5xl leading-none text-[#D4AF37]/60" aria-hidden="true">“</span>
+                    <div className="flex gap-0.5 text-[#B68D40]" aria-label={`${t.rating} out of 5 stars`}>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < t.rating ? 'fill-current' : 'opacity-25'}`} strokeWidth={1.5} />
+                      ))}
+                    </div>
+                    <blockquote className="font-serif text-[15px] leading-relaxed text-[#3A3A3A] italic">
+                      {t.review}
+                    </blockquote>
+                  </div>
+                  <figcaption className="flex items-center gap-3 pt-5 border-t border-[#E6DCCF]">
+                    {t.customerImageUrl ? (
+                      <img src={t.customerImageUrl} alt="" className="w-10 h-10 rounded-full object-cover border border-[#E6DCCF]" />
+                    ) : (
+                      <span className="w-10 h-10 rounded-full bg-gradient-to-br from-[#B68D40] to-[#D4AF37] text-white font-serif text-sm flex items-center justify-center">
+                        {(t.customerName || '?').trim().charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="text-[10px] tracking-[0.18em] font-sans font-semibold uppercase text-[#181818]">
+                      {t.customerName}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
     </div>
   );

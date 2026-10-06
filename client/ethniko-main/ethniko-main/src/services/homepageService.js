@@ -10,6 +10,14 @@ export const homepageService = {
   },
 
   /**
+   * Retrieves customer testimonials for the homepage (public callers get ACTIVE only).
+   */
+  getTestimonials: async (limit = 12) => {
+    const response = await api.get('/v1/cms/testimonials', { params: { page: 1, limit } });
+    return response.data.items || [];
+  },
+
+  /**
    * Creates a new hero slider banner (Admin only).
    */
   createHeroSlide: async (formData) => {
