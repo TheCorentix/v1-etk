@@ -116,7 +116,7 @@ export default function Navbar({ onOpenCart }) {
   return (
     <>
       <header
-        className={`w-full bg-[#F8F6F2] border-b border-[#ECECEC] text-[#181818] sticky top-0 z-40 transition-colors transition-transform duration-300 ease-out md:translate-y-0 ${
+        className={`w-full bg-[#181818] border-b border-[#B68D40]/30 text-[#F8F6F2] sticky top-0 z-40 transition-colors transition-transform duration-300 ease-out md:translate-y-0 ${
           showNavbar ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
@@ -185,7 +185,7 @@ export default function Navbar({ onOpenCart }) {
             </div>
 
             {/* Fix #9: larger click targets (p-1.5 -> p-2) */}
-            <div className="flex items-center space-x-2.5 sm:space-x-3.5 w-44 justify-end z-10 text-neutral-600">
+            <div className="flex items-center space-x-2.5 sm:space-x-3.5 w-44 justify-end z-10 text-neutral-300">
               <button
                 onClick={openSearch}
                 className="p-2 hover:text-[#B68D40] transition-colors focus:outline-none"
@@ -229,14 +229,14 @@ export default function Navbar({ onOpenCart }) {
           </div>
 
           {/* DESKTOP ROW 2: Centered Navigation Menu */}
-          <nav className="hidden md:flex w-full items-center justify-center space-x-5 text-[10px] tracking-[0.2em] font-sans font-semibold text-neutral-500 uppercase pb-6">
+          <nav className="hidden md:flex w-full items-center justify-center space-x-5 text-[10px] tracking-[0.2em] font-sans font-semibold text-neutral-300 uppercase pb-6">
             <Link
               to="/"
               className={`transition-colors duration-200 ${pathname === '/' ? 'text-[#B68D40]' : 'hover:text-[#B68D40]'}`}
             >
               HOME
             </Link>
-            <span className="text-neutral-300 font-light select-none">|</span>
+            <span className="text-neutral-600 font-light select-none">|</span>
 
             <Link
               to="/look-and-shop"
@@ -244,7 +244,7 @@ export default function Navbar({ onOpenCart }) {
             >
               LOOK & SHOP
             </Link>
-            <span className="text-neutral-300 font-light select-none">|</span>
+            <span className="text-neutral-600 font-light select-none">|</span>
 
             {/* Fix #4: mega-menu open/close scoped to trigger + panel, not the whole header */}
             <div
@@ -450,7 +450,7 @@ export default function Navbar({ onOpenCart }) {
                 </div>
               )}
             </div>
-            <span className="text-neutral-300 font-light select-none">|</span>
+            <span className="text-neutral-600 font-light select-none">|</span>
 
             <Link
               to="/customize"
@@ -458,7 +458,7 @@ export default function Navbar({ onOpenCart }) {
             >
               CUSTOMISE
             </Link>
-            <span className="text-neutral-300 font-light select-none">|</span>
+            <span className="text-neutral-600 font-light select-none">|</span>
 
             <Link
               to="/about"
@@ -466,7 +466,7 @@ export default function Navbar({ onOpenCart }) {
             >
               ABOUT
             </Link>
-            <span className="text-neutral-300 font-light select-none">|</span>
+            <span className="text-neutral-600 font-light select-none">|</span>
 
             <Link
               to="/contact"
