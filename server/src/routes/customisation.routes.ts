@@ -7,6 +7,7 @@ import {
   createCustomisationSchema,
   updateCustomisationSchema,
   addNoteSchema,
+  addCommentSchema,
   updateCustomisationStatusSchema,
 } from '../validators/customisation.validator';
 import multer from 'multer';
@@ -42,6 +43,7 @@ router.get('/:id', authMiddleware, controller.getById);
 
 // Admin Stylist Panel Endpoints (Protected by Admin authorization checking)
 router.post('/:id/notes', authMiddleware, adminMiddleware, validate(addNoteSchema), controller.addNote);
+router.post('/:id/comments', authMiddleware, adminMiddleware, validate(addCommentSchema), controller.addComment);
 router.put('/:id/status', authMiddleware, adminMiddleware, validate(updateCustomisationStatusSchema), controller.updateStatus);
 
 export default router;

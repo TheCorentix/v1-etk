@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 import api from '../api/api';
+import { friendlyAuthError } from '../utils/authErrors';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -125,10 +126,8 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error('Login failed on backend verification.');
     } catch (err) {
-      let errMsg = err.message || 'Failed to authenticate credentials.';
-      if (err.message && err.message.includes('api-key-not-valid')) {
-        errMsg = 'Firebase client API Key is invalid. Falling back to local offline mock authentication.';
-      }
+      console.error('Login failed:', err);
+      const errMsg = friendlyAuthError(err);
       setError(errMsg);
       toast.error(errMsg);
       throw err;
@@ -165,10 +164,8 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error('Registration failed on backend initialization.');
     } catch (err) {
-      let errMsg = err.message || 'Failed to complete registration.';
-      if (err.message && err.message.includes('api-key-not-valid')) {
-        errMsg = 'Firebase client API Key is invalid. Check client .env configurations.';
-      }
+      console.error('Registration failed:', err);
+      const errMsg = friendlyAuthError(err);
       setError(errMsg);
       toast.error(errMsg);
       throw err;

@@ -1,8 +1,17 @@
 import { db } from '../config/firebase';
 import { mapDoc, mapQuery } from '../utils/firebase';
-import { Query } from 'firebase-admin/firestore';
+import { Query, FieldValue } from 'firebase-admin/firestore';
 
 export interface AdminNote {
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
+// Internal comment left by the admin team (e.g. after contacting the customer).
+// Never sent to customers, unlike AdminNote which shows on their profile.
+export interface InternalComment {
+  id: string;
   author: string;
   text: string;
   timestamp: string;
@@ -28,6 +37,7 @@ export interface CustomisationDocument {
   notes?: string | null; // Measurement values and stylist summary details
   status: 'NEW' | 'ORDER_TAKEN' | 'SHIPPED' | 'DELIVERED';
   adminNotes: AdminNote[];
+  comments?: InternalComment[]; // Internal team comments, admin-only
   createdAt?: string;
   updatedAt?: string;
 }
@@ -86,6 +96,19 @@ export class CustomisationRepository {
     };
 
     await docRef.update(dataToUpdate);
+    return this.findById(id);
+  }
+
+  /**
+   * Appends an internal comment. Uses an atomic array append so two admins commenting
+   * at the same moment never overwrite each other.
+   */
+  async addComment(id: string, comment: InternalComment): Promise<CustomisationDocument | null> {
+    const docRef = db.collection(CustomisationRepository.collectionName).doc(id);
+    await docRef.update({
+      comments: FieldValue.arrayUnion(comment),
+      updatedAt: new Date().toISOString(),
+    });
     return this.findById(id);
   }
 

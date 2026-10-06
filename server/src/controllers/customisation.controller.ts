@@ -2,6 +2,23 @@ import { Response, NextFunction } from 'express';
 import { CustomisationService } from '../services/customisation.service';
 import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { CustomisationDocument } from '../repositories/customisation.repository';
+
+// Internal team comments are for admins only, so they are removed from anything a customer receives
+const forViewer = <T extends Partial<CustomisationDocument>>(request: T, isAdmin: boolean): T => {
+  if (isAdmin) return request;
+  const { comments: _internalComments, ...visible } = request;
+  return visible as T;
+};
+
+// Fields an admin may correct on a request; the optional ones can be cleared with an empty value
+const ADMIN_EDITABLE_FIELDS = [
+  'customerName', 'phone', 'email', 'whatsappNumber', 'address',
+  'fabricPref', 'colorPref', 'budgetRange', 'deliveryDate', 'notes',
+] as const;
+const CLEARABLE_FIELDS = new Set<string>([
+  'whatsappNumber', 'address', 'fabricPref', 'colorPref', 'budgetRange', 'deliveryDate', 'notes',
+]);
 
 export class CustomisationController {
   private customisationService = new CustomisationService();
@@ -53,7 +70,7 @@ export class CustomisationController {
         localImagePaths
       );
 
-      sendSuccess(res, { request }, 'Tailoring request submitted successfully.', 201);
+      sendSuccess(res, { request: forViewer(request, req.user?.role === 'ADMIN') }, 'Tailoring request submitted successfully.', 201);
     } catch (error) {
       next(error);
     }
@@ -66,6 +83,7 @@ export class CustomisationController {
     try {
       const { id } = req.params as { id: string };
       const { notes, fabricPref, colorPref, budgetRange, deliveryDate } = req.body;
+      const isAdmin = req.user!.role === 'ADMIN';
 
       // Verify request exists and validate ownership credentials
       const request = await this.customisationService.getRequestById(id);
@@ -74,20 +92,36 @@ export class CustomisationController {
         return;
       }
 
-      if (request.userId !== req.user!.uid && req.user!.role !== 'ADMIN') {
+      if (request.userId !== req.user!.uid && !isAdmin) {
         res.status(403).json({ success: false, message: 'Access denied.', errors: ['Forbidden'] });
         return;
       }
 
-      const updated = await this.customisationService.updateRequest(id, {
-        ...(notes && { notes }),
-        ...(fabricPref && { fabricPref }),
-        ...(colorPref && { colorPref }),
-        ...(budgetRange && { budgetRange }),
-        ...(deliveryDate && { deliveryDate }),
-      });
+      let changes: Partial<CustomisationDocument>;
+      if (isAdmin) {
+        // Admins can correct any detail (including contact info) and clear optional ones
+        const edits: Record<string, string | null> = {};
+        for (const field of ADMIN_EDITABLE_FIELDS) {
+          const value = req.body[field];
+          if (value === undefined) continue;
+          const text = typeof value === 'string' ? value.trim() : value;
+          edits[field] = text === '' && CLEARABLE_FIELDS.has(field) ? null : text;
+        }
+        changes = edits as Partial<CustomisationDocument>;
+      } else {
+        // Customers may only add to their own notes and preferences
+        changes = {
+          ...(notes && { notes }),
+          ...(fabricPref && { fabricPref }),
+          ...(colorPref && { colorPref }),
+          ...(budgetRange && { budgetRange }),
+          ...(deliveryDate && { deliveryDate }),
+        };
+      }
 
-      sendSuccess(res, { request: updated }, 'Custom request updated successfully.', 200);
+      const updated = await this.customisationService.updateRequest(id, changes);
+
+      sendSuccess(res, { request: updated && forViewer(updated, isAdmin) }, 'Custom request updated successfully.', 200);
     } catch (error) {
       next(error);
     }
@@ -104,6 +138,24 @@ export class CustomisationController {
 
       const request = await this.customisationService.addAdminNote(id, author, text);
       sendSuccess(res, { request }, 'Admin note appended successfully.', 200);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Adds an internal team comment, e.g. after contacting the customer (Admin only).
+   */
+  addComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params as { id: string };
+      const { text } = req.body;
+      // The name defaults to "Client" when a profile has none, which is useless in a team log
+      const name = req.user!.name && req.user!.name !== 'Client' ? req.user!.name : '';
+      const author = name || req.user!.email || 'Admin';
+
+      const request = await this.customisationService.addComment(id, author, text);
+      sendSuccess(res, { request }, 'Comment added.', 201);
     } catch (error) {
       next(error);
     }
@@ -143,7 +195,7 @@ export class CustomisationController {
         return;
       }
 
-      sendSuccess(res, { request }, 'Custom request details retrieved.', 200);
+      sendSuccess(res, { request: forViewer(request, req.user!.role === 'ADMIN') }, 'Custom request details retrieved.', 200);
     } catch (error) {
       next(error);
     }
@@ -169,7 +221,13 @@ export class CustomisationController {
       }
 
       const result = await this.customisationService.listRequests(filters, pageNum, limitNum);
-      sendSuccess(res, result, 'Customisation requests retrieved.', 200);
+      const isAdmin = req.user!.role === 'ADMIN';
+      sendSuccess(
+        res,
+        { ...result, items: result.items.map((item) => forViewer(item, isAdmin)) },
+        'Customisation requests retrieved.',
+        200
+      );
     } catch (error) {
       next(error);
     }

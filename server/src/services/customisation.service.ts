@@ -1,5 +1,7 @@
 import { CustomisationRepository, CustomisationDocument, AdminNote } from '../repositories/customisation.repository';
+import crypto from 'crypto';
 import { uploadToCloudinary } from '../utils/cloudinary';
+import { httpError } from '../utils/httpError';
 import { getPaginationMetadata, PaginationMeta } from '../utils/pagination';
 import { logger } from '../config/logger';
 
@@ -65,6 +67,24 @@ export class CustomisationService {
 
     const updatedNotes = [...(request.adminNotes || []), newNote];
     return this.customisationRepository.update(id, { adminNotes: updatedNotes });
+  }
+
+  /**
+   * Adds an internal team comment (e.g. a note after contacting the customer).
+   * Comments are admin-only and never exposed to the customer.
+   */
+  async addComment(id: string, author: string, text: string): Promise<CustomisationDocument | null> {
+    const request = await this.customisationRepository.findById(id);
+    if (!request) {
+      throw httpError(404, `Customisation request with ID ${id} not found.`);
+    }
+
+    return this.customisationRepository.addComment(id, {
+      id: crypto.randomUUID(),
+      author,
+      text,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   /**

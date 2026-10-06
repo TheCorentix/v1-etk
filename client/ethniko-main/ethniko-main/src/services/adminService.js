@@ -43,6 +43,24 @@ export const adminService = {
   },
 
   /**
+   * Edits the details of a customization / tailoring request (Admin only).
+   * Send only the fields that changed; an empty string clears an optional field.
+   */
+  updateCustomization: async (id, updates) => {
+    const response = await api.put(`/customisations/${id}`, updates);
+    return response.data.request;
+  },
+
+  /**
+   * Adds an internal team comment to a request, e.g. after contacting the customer (Admin only).
+   * Customers never see these.
+   */
+  addCustomizationComment: async (id, text) => {
+    const response = await api.post(`/customisations/${id}/comments`, { text });
+    return response.data.request;
+  },
+
+  /**
    * Transitions the status state of a customization request (Admin only).
    */
   updateCustomizationStatus: async (id, status, stylistNote) => {

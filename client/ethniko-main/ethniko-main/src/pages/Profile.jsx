@@ -168,7 +168,7 @@ export default function Profile() {
         className="py-32 text-center bg-fixed bg-no-repeat bg-cover min-h-[60vh] flex items-center justify-center"
         style={{ background: "linear-gradient(180deg, #FBE7C6 0%, #F6EFE3 40%, #E9DCC4 100%)" }}
       >
-        <span className="font-serif italic text-[#B68D40] animate-pulse">Syncing Boutique Records...</span>
+        <span className="font-serif italic text-[#B68D40] animate-pulse">Loading your account...</span>
       </div>
     );
   }
@@ -182,12 +182,12 @@ export default function Profile() {
       >
         <div className="w-full max-w-md bg-[#FBF6EC] border border-[#E6DCCF] p-8 space-y-6">
           <div className="text-center space-y-1">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-[#B68D40] font-sans font-semibold">COUTURE CLIENT PORTAL</span>
+            <span className="text-[9px] uppercase tracking-[0.25em] text-[#B68D40] font-sans font-semibold">MY ACCOUNT</span>
             <h2 className="text-2xl font-serif font-light text-[#181818] uppercase tracking-wider">
-              {isSignUp ? 'Create Account' : 'Client Sign In'}
+              {isSignUp ? 'Create Account' : 'Login'}
             </h2>
             <p className="text-[10px] font-sans text-neutral-400 uppercase tracking-widest">
-              {isSignUp ? 'Register to manage your couture orders' : 'Access your customized couture records'}
+              {isSignUp ? 'Create an account to track your orders' : 'Login to your account'}
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export default function Profile() {
               disabled={authSubmitting}
               className="btn-luxury-solid w-full mt-2 py-3.5 uppercase tracking-widest text-[10px] font-sans font-bold"
             >
-              {authSubmitting ? 'Syncing...' : (isSignUp ? 'Create Premium Account' : 'Authenticate Session')}
+              {authSubmitting ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Login')}
             </button>
           </form>
 
@@ -263,7 +263,7 @@ export default function Profile() {
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-[10px] uppercase tracking-widest text-[#B68D40] hover:underline font-semibold font-sans focus:outline-none"
             >
-              {isSignUp ? 'Already a client? Sign In' : 'New to ETNIKO? Register here'}
+              {isSignUp ? 'Already have an account? Login' : 'New to ETNIKO? Create an account'}
             </button>
           </div>
         </div>
@@ -283,15 +283,11 @@ export default function Profile() {
         {/* Profile Header card */}
         <div className="bg-[#FBF6EC] border border-[#E6DCCF] p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <span className="text-[9px] uppercase tracking-[0.25em] text-[#B68D40] font-sans font-semibold">COUTURE CLIENT PORTAL</span>
+            <span className="text-[9px] uppercase tracking-[0.25em] text-[#B68D40] font-sans font-semibold">MY ACCOUNT</span>
             <h1 className="text-3xl font-serif font-light text-[#181818] uppercase tracking-wider">{profile.name}</h1>
-            <p className="text-xs font-sans text-neutral-500 uppercase tracking-widest">
-              Client ID: {profile.id || 'N/A'} • Role: {profile.role}
-            </p>
           </div>
           <div className="text-left md:text-right text-[10px] font-sans tracking-widest text-neutral-400">
-            <p>SUPPORT ASSISTANCE: STYLIST@ETNIKO.STUDIO</p>
-            <p className="mt-1 font-semibold text-[#B68D40]">PREMIUM COUTURE SERVICE STATUS</p>
+            <p>SUPPORT: STYLIST@ETNIKO.STUDIO</p>
           </div>
         </div>
 

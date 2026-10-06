@@ -26,14 +26,30 @@ export const createCustomisationSchema = z.object({
   }),
 });
 
-// Schema for updating tailoring request details
+// Schema for updating request details. Customers can only change their own notes and
+// preferences; the contact fields (name, phone, email, WhatsApp, address) are applied for
+// admins only, which the controller enforces.
 export const updateCustomisationSchema = z.object({
   body: z.object({
+    customerName: z.string().trim().min(2, 'Name must be at least 2 characters long').optional(),
+    phone: z.string().trim().min(10, 'Phone number must be at least 10 digits long').optional(),
+    email: z.string().trim().email('Please provide a valid contact email').optional(),
+    whatsappNumber: z.string().optional().nullable(),
+    address: z.string().optional().nullable(),
     notes: z.string().optional(),
     fabricPref: z.string().optional().nullable(),
     colorPref: z.string().optional().nullable(),
     budgetRange: z.string().optional().nullable(),
     deliveryDate: z.string().optional().nullable(),
+  }),
+});
+
+// Schema for adding an internal team comment
+export const addCommentSchema = z.object({
+  body: z.object({
+    text: z.string({
+      message: 'Comment text is required',
+    }).trim().min(1, 'Comment cannot be empty').max(2000, 'Comment cannot exceed 2000 characters'),
   }),
 });
 
@@ -59,5 +75,6 @@ export default {
   createCustomisationSchema,
   updateCustomisationSchema,
   addNoteSchema,
+  addCommentSchema,
   updateCustomisationStatusSchema,
 };

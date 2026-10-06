@@ -9,6 +9,7 @@ import MediaLibraryDialog from '../components/admin/MediaLibraryDialog';
 import VariantsMatrixBuilder from '../components/admin/VariantsMatrixBuilder';
 import LookbookManager from '../components/admin/LookbookManager';
 import ProductEditModal from '../components/admin/ProductEditModal';
+import CustomisationRequestDetail from '../components/admin/CustomisationRequestDetail';
 
 // Default avatars used for testimonials when no custom image is provided.
 const DEFAULT_AVATARS = [
@@ -357,6 +358,12 @@ export default function Admin() {
       console.error(err);
       toast.error(err?.message || 'Failed to update status.');
     }
+  };
+
+  // Keep the open window and the requests table in sync after details are edited or a comment is added
+  const handleCustomRequestUpdated = (updated) => {
+    setSelectedCustom((prev) => (prev && prev.id === updated.id ? updated : prev));
+    setCustomizations((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
   };
 
   const handleCreateCategory = async (e) => {
@@ -1291,6 +1298,11 @@ export default function Admin() {
                         <td className="p-3">
                           <span className="font-bold text-neutral-800 block normal-case">{cust.customerName}</span>
                           <span className="text-[9px] text-neutral-400 block mt-0.5">{cust.phone}</span>
+                          {(cust.comments || []).length > 0 && (
+                            <span className="text-[9px] text-[#B68D40] block mt-0.5 normal-case">
+                              {cust.comments.length} comment{cust.comments.length === 1 ? '' : 's'}
+                            </span>
+                          )}
                         </td>
                         <td className="p-3 font-medium normal-case">
                           <span className="block">{cust.category || '—'}</span>
@@ -1321,7 +1333,7 @@ export default function Admin() {
                             <button
                               onClick={() => setSelectedCustom(cust)}
                               className="p-1.5 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
-                              aria-label="View request details"
+                              aria-label="View and edit request details"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -1340,107 +1352,18 @@ export default function Admin() {
                 </table>
               </div>
 
-              {/* View Details Popup */}
+              {/* View / edit request details and internal comments */}
               {selectedCustom && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                  onClick={() => setSelectedCustom(null)}
-                >
-                  <div
-                    className="bg-white border border-[#D9C7A3] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Header */}
-                    <div className="flex justify-between items-start gap-4 p-5 border-b border-neutral-200 sticky top-0 bg-white">
-                      <div>
-                        <h3 className="font-serif text-lg tracking-wider text-neutral-900">
-                          {isTailoringReq(selectedCustom) ? 'Tailoring Request' : 'Customization Request'}
-                        </h3>
-                        <span className="font-mono text-[11px] text-[#B68D40]">{selectedCustom.id}</span>
-                      </div>
-                      <button
-                        onClick={() => setSelectedCustom(null)}
-                        className="text-neutral-400 hover:text-neutral-900 text-xl leading-none"
-                        aria-label="Close"
-                      >
-                        ×
-                      </button>
-                    </div>
-
-                    <div className="p-5 space-y-5 text-xs font-sans">
-                      {/* Status + actions */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[9px] uppercase tracking-wider text-neutral-400">Status:</span>
-                        <span className="px-2 py-0.5 bg-[#B68D40] text-white text-[9px] font-bold uppercase">{STATUS_LABELS[selectedCustom.status] || selectedCustom.status}</span>
-                        <div className="flex gap-1.5 ml-auto">
-                          {CUSTOM_STATUS_ACTIONS.map((a) => (
-                            <button
-                              key={a.value}
-                              onClick={() => handleUpdateCustomStatus(selectedCustom.id, a.value)}
-                              className={`px-2.5 py-1 border text-[8px] uppercase tracking-wider font-bold ${
-                                selectedCustom.status === a.value
-                                  ? 'bg-[#B68D40] text-white border-[#B68D40]'
-                                  : 'border-neutral-300 text-neutral-500 hover:border-[#B68D40] hover:text-[#B68D40]'
-                              }`}
-                            >
-                              {a.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* All form fields */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {[
-                          ['Customer Name', selectedCustom.customerName],
-                          ['Phone', selectedCustom.phone],
-                          ['Email', selectedCustom.email],
-                          ['WhatsApp', selectedCustom.whatsappNumber],
-                          ['Category', selectedCustom.category],
-                          ['Request Type', selectedCustom.occasion],
-                          ['Product SKU', selectedCustom.productSku],
-                          ['Product ID', selectedCustom.productId],
-                          ['Fabric Details', selectedCustom.fabricPref],
-                          ['Color', selectedCustom.colorPref],
-                          ['Budget', selectedCustom.budgetRange],
-                          ['Delivery Date', selectedCustom.deliveryDate],
-                          ['Submitted', selectedCustom.createdAt ? new Date(selectedCustom.createdAt).toLocaleString() : null],
-                        ].map(([label, value]) => (
-                          <div key={label} className="space-y-0.5">
-                            <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">{label}</span>
-                            <span className="font-semibold text-neutral-800 break-words">{value || '—'}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Address */}
-                      <div className="space-y-0.5">
-                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Address</span>
-                        <p className="text-neutral-700 leading-relaxed">{selectedCustom.address || '—'}</p>
-                      </div>
-
-                      {/* Notes / measurements */}
-                      <div className="space-y-0.5">
-                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Measurements / Notes</span>
-                        <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap">{selectedCustom.notes || '—'}</p>
-                      </div>
-
-                      {/* Reference images */}
-                      {Array.isArray(selectedCustom.images) && selectedCustom.images.length > 0 && (
-                        <div className="space-y-1">
-                          <span className="text-[9px] uppercase tracking-wider text-neutral-400 block">Reference Images</span>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedCustom.images.map((img, i) => (
-                              <a key={i} href={img} target="_blank" rel="noreferrer">
-                                <img src={img} alt="" className="w-24 aspect-[3/4] object-cover border border-neutral-200" />
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <CustomisationRequestDetail
+                  key={selectedCustom.id}
+                  request={selectedCustom}
+                  isTailoring={isTailoringReq(selectedCustom)}
+                  statusActions={CUSTOM_STATUS_ACTIONS}
+                  statusLabels={STATUS_LABELS}
+                  onStatusChange={handleUpdateCustomStatus}
+                  onUpdated={handleCustomRequestUpdated}
+                  onClose={() => setSelectedCustom(null)}
+                />
               )}
             </div>
           )}
