@@ -1725,6 +1725,37 @@ export default function Admin() {
                       className="w-full bg-white border border-neutral-300 px-3 py-2 text-xs font-sans focus:outline-none text-black"
                     />
                   </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold block">
+                      Customer Photo <span className="normal-case font-normal">(optional)</span>
+                    </label>
+                    <div className="flex items-center gap-3 bg-white p-3 border">
+                      {newTestimonial.customerImageUrl ? (
+                        <div className="relative w-14 h-14">
+                          <img src={newTestimonial.customerImageUrl} alt="" className="w-full h-full rounded-full object-cover border" />
+                          <button
+                            type="button"
+                            onClick={() => setNewTestimonial({ ...newTestimonial, customerImageUrl: '' })}
+                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white flex items-center justify-center text-[8px]"
+                            aria-label="Remove photo"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => { setMediaTarget({ type: 'testimonial' }); setMediaOpen(true); }}
+                          className="w-14 h-14 rounded-full border border-dashed flex flex-col items-center justify-center text-neutral-400 hover:text-[#B68D40] hover:border-[#B68D40]"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      )}
+                      <span className="text-[10px] font-sans text-neutral-400">
+                        {newTestimonial.customerImageUrl ? 'Photo selected.' : 'Upload or pick a photo. Without one, the homepage shows the customer\'s initial.'}
+                      </span>
+                    </div>
+                  </div>
                   <div className="md:col-span-2 pt-2">
                     <button type="submit" className="btn-luxury-solid w-full font-bold">Save Testimonial</button>
                   </div>
