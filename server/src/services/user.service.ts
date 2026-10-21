@@ -2,15 +2,11 @@ import { auth } from '../config/firebase';
 import { UserRepository, UserDocument, UserAddress } from '../repositories/user.repository';
 import { generateToken } from '../utils/jwt';
 import { logger } from '../config/logger';
-import { env } from '../config/env';
+import { isOwnerEmail } from '../config/permissions';
 
-// Emails configured (via ADMIN_EMAILS) to receive the ADMIN role automatically.
-const ADMIN_EMAILS = new Set(
-  env.ADMIN_EMAILS.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
-);
-
+// Emails configured (via ADMIN_EMAILS) receive the ADMIN role automatically.
 const resolveRole = (email: string): UserDocument['role'] =>
-  ADMIN_EMAILS.has(email.toLowerCase()) ? 'ADMIN' : 'CUSTOMER';
+  isOwnerEmail(email) ? 'ADMIN' : 'CUSTOMER';
 
 export class UserService {
   private userRepository = new UserRepository();

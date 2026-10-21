@@ -231,6 +231,23 @@ export const adminService = {
     return response.data;
   },
 
+  // ---------- Roles & permissions ----------
+  /** The roles, the permissions, and which role has which. */
+  getRoleDefinitions: async () => {
+    const response = await api.get('/roles');
+    return response.data; // { roles, permissions }
+  },
+  /** Everyone with an account and their current role. */
+  getTeamUsers: async () => {
+    const response = await api.get('/roles/users');
+    return response.data.users || [];
+  },
+  /** Gives a user a different role. Returns the updated user. */
+  updateUserRole: async (uid, role) => {
+    const response = await api.put(`/roles/users/${uid}`, { role });
+    return response.data.user;
+  },
+
   // ---------- Audit Logs ----------
   getCmsAuditLogs: async (page = 1, limit = 20, search = '', module = '') => {
     const response = await api.get('/v1/cms/audit', { params: { page, limit, search, module } });

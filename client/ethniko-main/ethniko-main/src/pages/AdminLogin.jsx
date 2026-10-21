@@ -16,7 +16,7 @@ export default function AdminLogin() {
   // Redirect to admin dashboard if already logged in as admin
   useEffect(() => {
     if (user) {
-      if (user.role && user.role !== 'CUSTOMER') {
+      if ((user.permissions || []).length > 0) {
         navigate('/admin', { replace: true });
       } else {
         // If logged in as customer, redirect to access-denied
@@ -34,8 +34,8 @@ export default function AdminLogin() {
     setSubmitting(true);
     try {
       const loggedUser = await login(email, password);
-      if (loggedUser.role && loggedUser.role !== 'CUSTOMER') {
-        toast.success(`Authorized as ${loggedUser.role}! Redirecting...`);
+      if ((loggedUser.permissions || []).length > 0) {
+        toast.success(`Signed in as ${loggedUser.roleLabel || loggedUser.role}. Redirecting...`);
         navigate('/admin', { replace: true });
       } else {
         toast.error('Unauthorized role. Access denied.');

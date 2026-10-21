@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { LookbookController } from '../controllers/lookbook.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { validate } from '../middleware/validate.middleware';
 import { createLookbookSchema, updateLookbookSchema } from '../validators/lookbook.validator';
 import multer from 'multer';
@@ -30,7 +30,7 @@ router.get('/:id', controller.getById);
 router.post(
   '/',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([
     { name: 'video', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 },
@@ -42,7 +42,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([
     { name: 'video', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 },
@@ -51,6 +51,6 @@ router.put(
   controller.update
 );
 
-router.delete('/:id', authMiddleware, adminMiddleware, controller.delete);
+router.delete('/:id', authMiddleware, requirePermission('content.manage'), controller.delete);
 
 export default router;

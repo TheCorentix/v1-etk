@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CustomisationController } from '../controllers/customisation.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { validate } from '../middleware/validate.middleware';
 import {
   createCustomisationSchema,
@@ -42,8 +42,8 @@ router.get('/', authMiddleware, controller.list);
 router.get('/:id', authMiddleware, controller.getById);
 
 // Admin Stylist Panel Endpoints (Protected by Admin authorization checking)
-router.post('/:id/notes', authMiddleware, adminMiddleware, validate(addNoteSchema), controller.addNote);
-router.post('/:id/comments', authMiddleware, adminMiddleware, validate(addCommentSchema), controller.addComment);
-router.put('/:id/status', authMiddleware, adminMiddleware, validate(updateCustomisationStatusSchema), controller.updateStatus);
+router.post('/:id/notes', authMiddleware, requirePermission('customisations.manage'), validate(addNoteSchema), controller.addNote);
+router.post('/:id/comments', authMiddleware, requirePermission('customisations.manage'), validate(addCommentSchema), controller.addComment);
+router.put('/:id/status', authMiddleware, requirePermission('customisations.manage'), validate(updateCustomisationStatusSchema), controller.updateStatus);
 
 export default router;

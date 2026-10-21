@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import { hasPermission } from '../config/permissions';
 import { OrderService } from '../services/order.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -119,7 +120,7 @@ export class OrderController {
         return;
       }
 
-      if (order.userId !== req.user!.uid && req.user!.role !== 'ADMIN') {
+      if (order.userId !== req.user!.uid && !hasPermission(req.user!.role, 'orders.manage')) {
         res.status(403).json({ success: false, message: 'Access denied.', errors: ['Forbidden'] });
         return;
       }
@@ -145,7 +146,7 @@ export class OrderController {
       }
 
       // Enforce order ownership checks
-      if (order.userId !== req.user!.uid && req.user!.role !== 'ADMIN') {
+      if (order.userId !== req.user!.uid && !hasPermission(req.user!.role, 'orders.manage')) {
         res.status(403).json({ success: false, message: 'Access denied.', errors: ['Forbidden'] });
         return;
       }
@@ -172,7 +173,7 @@ export class OrderController {
       };
 
       // Restrict customers to only viewing their own order logs
-      if (req.user!.role !== 'ADMIN') {
+      if (!hasPermission(req.user!.role, 'orders.manage')) {
         filters.userId = req.user!.uid;
       }
 

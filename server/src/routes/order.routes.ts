@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { OrderController } from '../controllers/order.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { validate } from '../middleware/validate.middleware';
 import {
   createOrderSchema,
@@ -21,8 +21,8 @@ router.get('/:id', authMiddleware, controller.getById);
 router.get('/:id/invoice', authMiddleware, controller.getInvoice);
 
 // Admin Fulfillment Endpoints (Protected by Admin authorization checks)
-router.put('/:id/status', authMiddleware, adminMiddleware, validate(updateStatusSchema), controller.updateStatus);
-router.put('/:id/tracking', authMiddleware, adminMiddleware, validate(addTrackingSchema), controller.addTracking);
-router.post('/:id/notify', authMiddleware, adminMiddleware, controller.resendNotification);
+router.put('/:id/status', authMiddleware, requirePermission('orders.manage'), validate(updateStatusSchema), controller.updateStatus);
+router.put('/:id/tracking', authMiddleware, requirePermission('orders.manage'), validate(addTrackingSchema), controller.addTracking);
+router.post('/:id/notify', authMiddleware, requirePermission('orders.manage'), controller.resendNotification);
 
 export default router;

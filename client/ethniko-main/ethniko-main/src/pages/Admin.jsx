@@ -10,6 +10,9 @@ import VariantsMatrixBuilder from '../components/admin/VariantsMatrixBuilder';
 import LookbookManager from '../components/admin/LookbookManager';
 import ProductEditModal from '../components/admin/ProductEditModal';
 import CustomisationRequestDetail from '../components/admin/CustomisationRequestDetail';
+import RolesPermissions from '../components/admin/RolesPermissions';
+import { tabsFor } from '../components/admin/adminTabs';
+import { useAuth } from '../context/AuthContext';
 
 // Default avatars used for testimonials when no custom image is provided.
 const DEFAULT_AVATARS = [
@@ -19,7 +22,10 @@ const DEFAULT_AVATARS = [
 ];
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const { user, hasPermission } = useAuth();
+  // Only the tabs this person's role allows (the server enforces the same permissions)
+  const allowedTabs = tabsFor(hasPermission);
+  const [activeTab, setActiveTab] = useState(allowedTabs[0]?.id ?? "dashboard");
   const [loading, setLoading] = useState(true);
 
   // States for lists
@@ -106,10 +112,11 @@ export default function Admin() {
     const prodRes = await safe(() => productService.getProducts({ page: 1, limit: 100 }), { products: [] });
     setProducts(prodRes.products || []);
 
-    const ordRes = await safe(() => adminService.getAllOrders(), []);
+    // Skip data this role can't use (the server would only return the staff member's own, empty, lists)
+    const ordRes = hasPermission('orders.manage') ? await safe(() => adminService.getAllOrders(), []) : [];
     setOrders(ordRes || []);
 
-    const custRes = await safe(() => adminService.getAllCustomizations(), []);
+    const custRes = hasPermission('customisations.manage') ? await safe(() => adminService.getAllCustomizations(), []) : [];
     setCustomizations(custRes || []);
 
     // CMS items
@@ -579,7 +586,9 @@ export default function Admin() {
       {/* Title Header */}
       <div className="bg-[#181818] text-white p-8 border border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[#D9C7A3] font-sans font-bold">ADMINISTRATION PORTAL</span>
+          <span className="text-[9px] uppercase tracking-[0.25em] text-[#D9C7A3] font-sans font-bold">
+            ADMINISTRATION PORTAL{user?.roleLabel ? ` · ${user.roleLabel}` : ''}
+          </span>
           <h1 className="text-3xl font-serif font-light tracking-wider">ETNIKO WORKSPACE</h1>
           <p className="text-xs font-sans text-neutral-400">
             Control order tracking pipelines, list new silhouettes, and audit customization requests in real time.
@@ -600,17 +609,7 @@ export default function Admin() {
         {/* Navigation Sidebar */}
         <aside className="w-full lg:w-64 border border-border-custom shrink-0 bg-primary">
           <div className="flex flex-wrap lg:flex-col text-[10px] font-sans font-semibold tracking-widest uppercase divide-[#ECECEC] divide-x lg:divide-x-0 lg:divide-y text-neutral-500">
-            {[
-              { id: "dashboard", label: "Analytics", icon: BarChart2 },
-              { id: "products", label: "Catalog Products", icon: ShoppingBag },
-              { id: "orders", label: "Order Status", icon: FileText },
-              { id: "customizations", label: "Styling requests", icon: Scissors },
-              { id: "lookbook", label: "Look & Shop", icon: Film },
-              { id: "cms", label: "Homepage CMS", icon: Sliders },
-              { id: "categories", label: "Categories & Collections", icon: Layers },
-              { id: "testimonials", label: "Draped in Love (Reviews)", icon: Star },
-              { id: "settings", label: "Store Settings", icon: Settings }
-            ].map(tab => {
+            {allowedTabs.map(tab => {
               const Icon = tab.icon;
               return (
                 <button
@@ -1367,6 +1366,9 @@ export default function Admin() {
               )}
             </div>
           )}
+
+          {/* ROLES & PERMISSIONS (admins only) */}
+          {activeTab === 'roles' && <RolesPermissions />}
 
           {/* LOOK & SHOP WORKSPACE */}
           {activeTab === 'lookbook' && (

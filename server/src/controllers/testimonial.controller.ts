@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { hasPermission } from '../config/permissions';
 import { TestimonialService } from '../services/testimonial.service';
 import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -15,9 +16,9 @@ export class TestimonialController {
       const pageNum = page ? parseInt(page as string, 10) : 1;
       const limitNum = limit ? parseInt(limit as string, 10) : 20;
 
-      const isAdmin = req.user && req.user.role === 'ADMIN';
+      const canSeeHidden = hasPermission(req.user?.role, 'content.manage');
       const filters: any = {};
-      if (isAdmin) {
+      if (canSeeHidden) {
         if (status) filters.status = status;
       } else {
         filters.status = 'ACTIVE';

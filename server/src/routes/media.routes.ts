@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { MediaController } from '../controllers/media.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { httpError } from '../utils/httpError';
 import multer from 'multer';
 import path from 'path';
@@ -44,7 +44,7 @@ const router = Router();
 const controller = new MediaController();
 
 // The whole media library is admin-only
-router.use(authMiddleware, adminMiddleware);
+router.use(authMiddleware, requirePermission('content.manage', 'products.manage'));
 
 router.get('/', controller.list);
 router.post('/', uploadSingleFile, controller.upload);

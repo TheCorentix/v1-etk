@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { SettingsController } from '../controllers/settings.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { validate } from '../middleware/validate.middleware';
 import { updateSettingsSchema } from '../validators/settings.validator';
 import multer from 'multer';
@@ -26,7 +26,7 @@ const controller = new SettingsController();
 router.get('/', controller.get);
 
 // Admin Configuration Endpoints (Protected by role verification checks)
-router.put('/', authMiddleware, adminMiddleware, validate(updateSettingsSchema), controller.update);
-router.post('/banner', authMiddleware, adminMiddleware, upload.single('image'), controller.uploadBanner);
+router.put('/', authMiddleware, requirePermission('settings.manage'), validate(updateSettingsSchema), controller.update);
+router.post('/banner', authMiddleware, requirePermission('settings.manage'), upload.single('image'), controller.uploadBanner);
 
 export default router;

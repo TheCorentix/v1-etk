@@ -13,12 +13,17 @@ export interface UserAddress {
   country: string;
 }
 
+// SUPER_ADMIN and DESIGNER are legacy values with no permissions; they can still appear in older data
+export type UserRole = 'ADMIN' | 'CONTENT_MANAGER' | 'ORDER_MANAGER' | 'SUPER_ADMIN' | 'DESIGNER' | 'CUSTOMER';
+
 export interface UserDocument {
   id?: string;
   email: string;
   name: string;
   phone: string;
-  role: 'ADMIN' | 'CUSTOMER';
+  role: UserRole;
+  roleChangedBy?: string; // Email of the admin who last changed this user's role
+  roleChangedAt?: string;
   addresses?: UserAddress[];
   createdAt?: string;
   updatedAt?: string;
@@ -70,6 +75,36 @@ export class UserRepository {
 
     await userRef.set(dataToSave, { merge: true });
     return { id: uid, ...dataToSave };
+  }
+
+  /**
+   * Lists every user document (admin role management only).
+   */
+  async listAll(): Promise<UserDocument[]> {
+    const snapshot = await db.collection(UserRepository.collectionName).get();
+    return mapQuery<UserDocument>(snapshot);
+  }
+
+  /**
+   * Counts how many users currently have the given role.
+   */
+  async countByRole(role: UserRole): Promise<number> {
+    const snapshot = await db.collection(UserRepository.collectionName).where('role', '==', role).count().get();
+    return snapshot.data().count;
+  }
+
+  /**
+   * Sets a user's role and records who changed it and when.
+   */
+  async updateRole(uid: string, role: UserRole, changedBy: string): Promise<UserDocument | null> {
+    const now = new Date().toISOString();
+    await db.collection(UserRepository.collectionName).doc(uid).update({
+      role,
+      roleChangedBy: changedBy,
+      roleChangedAt: now,
+      updatedAt: now,
+    });
+    return this.findById(uid);
   }
 
   /**

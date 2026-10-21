@@ -195,6 +195,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // What the signed-in user's role allows, as reported by the server (e.g. 'orders.manage')
+  const permissions = user?.permissions || [];
+
   const value = {
     user,
     loading,
@@ -203,6 +206,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAdmin: user?.role === 'ADMIN',
+    permissions,
+    // Anyone with a staff role (Admin, Content Manager, Order Manager) can use the admin area
+    isStaff: permissions.length > 0,
+    hasPermission: (permission) => permissions.includes(permission),
     isAuthenticated: !!user,
   };
 

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import { validate } from '../middleware/validate.middleware';
 import { createProductSchema, updateProductSchema } from '../validators/product.validator';
 import multer from 'multer';
@@ -23,7 +23,8 @@ const router = Router();
 const controller = new ProductController();
 
 // Public Catalog Endpoints
-router.get('/', controller.list);
+// Optional auth: staff with product access also see DRAFT products, everyone else only PUBLISHED
+router.get('/', optionalAuthMiddleware, controller.list);
 router.get('/id/:id', controller.getById);
 router.get('/slug/:slug', controller.getBySlug);
 
@@ -31,7 +32,7 @@ router.get('/slug/:slug', controller.getBySlug);
 router.post(
   '/',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('products.manage'),
   upload.array('images', 5),
   validate(createProductSchema),
   controller.create
@@ -40,12 +41,12 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('products.manage'),
   upload.array('images', 5),
   validate(updateProductSchema),
   controller.update
 );
 
-router.delete('/:id', authMiddleware, adminMiddleware, controller.delete);
+router.delete('/:id', authMiddleware, requirePermission('products.manage'), controller.delete);
 
 export default router;

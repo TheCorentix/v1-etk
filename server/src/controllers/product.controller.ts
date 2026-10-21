@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { hasPermission } from '../config/permissions';
 import { ProductService } from '../services/product.service';
 import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -192,8 +193,8 @@ export class ProductController {
       const limitNum = limit ? parseInt(limit as string, 10) : 10;
 
       // Enforce status filter security: non-admins can only see PUBLISHED products
-      const isAdmin = req.user && req.user.role === 'ADMIN';
-      const resolvedStatus = isAdmin ? (status as any) : 'PUBLISHED';
+      const canSeeDrafts = hasPermission(req.user?.role, 'products.manage');
+      const resolvedStatus = canSeeDrafts ? (status as any) : 'PUBLISHED';
 
       const filters: any = {
         ...(category && { category }),

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { HomepageController } from '../controllers/homepage.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { requirePermission } from '../middleware/permission.middleware';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -61,7 +61,7 @@ router.get('/banners', (req, res, next) => {
 router.post(
   '/banners',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([{ name: 'image', maxCount: 1 }]),
   controller.createBanner
 );
@@ -69,7 +69,7 @@ router.post(
 router.put(
   '/banners/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([{ name: 'image', maxCount: 1 }]),
   controller.updateBanner
 );
@@ -77,7 +77,7 @@ router.put(
 router.delete(
   '/banners/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.deleteBanner
 );
 
@@ -93,7 +93,7 @@ router.get('/sections', (req, res, next) => {
 router.post(
   '/sections',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([{ name: 'image', maxCount: 1 }]),
   controller.createSection
 );
@@ -101,7 +101,7 @@ router.post(
 router.put(
   '/sections/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([{ name: 'image', maxCount: 1 }]),
   controller.updateSection
 );
@@ -109,7 +109,7 @@ router.put(
 router.delete(
   '/sections/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.deleteSection
 );
 
@@ -122,21 +122,21 @@ router.get('/statistics', controller.listStatistics);
 router.post(
   '/statistics',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.createStatistic
 );
 
 router.put(
   '/statistics/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.updateStatistic
 );
 
 router.delete(
   '/statistics/:id',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.deleteStatistic
 );
 
@@ -149,7 +149,7 @@ router.get('/announcement-bar', controller.getAnnouncementBar);
 router.put(
   '/announcement-bar',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   controller.updateAnnouncementBar
 );
 
@@ -162,7 +162,7 @@ router.get('/video', controller.getVideo);
 router.put(
   '/video',
   authMiddleware,
-  adminMiddleware,
+  requirePermission('content.manage'),
   upload.fields([{ name: 'video', maxCount: 1 }]),
   controller.updateVideo
 );

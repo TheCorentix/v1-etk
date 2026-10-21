@@ -36,10 +36,10 @@ export const ProtectedRoute = ({ children }) => {
 };
 
 /**
-   Restricts route to store administrators. Redirects unprivileged clients to landing page.
+   Restricts route to the store team (any staff role). Customers are sent to the access-denied page.
  */
 export const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isStaff, loading } = useAuth();
 
   if (loading) {
     return <GuardLoading />;
@@ -49,7 +49,7 @@ export const AdminRoute = ({ children }) => {
     return <AdminLogin />;
   }
 
-  if (!isAdmin) {
+  if (!isStaff) {
     return <Navigate to="/access-denied" replace />;
   }
 

@@ -3,6 +3,15 @@ import { UserService } from '../services/user.service';
 import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { env } from '../config/env';
+import { permissionsFor, roleLabel } from '../config/permissions';
+import { UserDocument } from '../repositories/user.repository';
+
+// What the app needs to know about a user: their details plus what their role lets them do
+const toClientUser = (user: UserDocument) => ({
+  ...user,
+  roleLabel: roleLabel(user.role),
+  permissions: permissionsFor(user.role),
+});
 
 export class AuthController {
   private userService = new UserService();
@@ -29,7 +38,7 @@ export class AuthController {
 
       this.setTokenCookie(res, token);
 
-      sendSuccess(res, { user, token }, 'Registration completed successfully.', 201);
+      sendSuccess(res, { user: toClientUser(user), token }, 'Registration completed successfully.', 201);
     } catch (error) {
       next(error);
     }
@@ -45,7 +54,7 @@ export class AuthController {
 
       this.setTokenCookie(res, token);
 
-      sendSuccess(res, { user, token }, 'Logged in successfully.', 200);
+      sendSuccess(res, { user: toClientUser(user), token }, 'Logged in successfully.', 200);
     } catch (error) {
       next(error);
     }
@@ -74,7 +83,7 @@ export class AuthController {
     try {
       const uid = req.user!.uid;
       const user = await this.userService.getProfile(uid);
-      sendSuccess(res, { user }, 'Profile retrieved successfully.', 200);
+      sendSuccess(res, { user: toClientUser(user) }, 'Profile retrieved successfully.', 200);
     } catch (error) {
       next(error);
     }

@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import { hasPermission } from '../config/permissions';
 import { CustomisationService } from '../services/customisation.service';
 import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -70,7 +71,7 @@ export class CustomisationController {
         localImagePaths
       );
 
-      sendSuccess(res, { request: forViewer(request, req.user?.role === 'ADMIN') }, 'Tailoring request submitted successfully.', 201);
+      sendSuccess(res, { request: forViewer(request, hasPermission(req.user?.role, 'customisations.manage')) }, 'Tailoring request submitted successfully.', 201);
     } catch (error) {
       next(error);
     }
@@ -83,7 +84,7 @@ export class CustomisationController {
     try {
       const { id } = req.params as { id: string };
       const { notes, fabricPref, colorPref, budgetRange, deliveryDate } = req.body;
-      const isAdmin = req.user!.role === 'ADMIN';
+      const isAdmin = hasPermission(req.user!.role, 'customisations.manage');
 
       // Verify request exists and validate ownership credentials
       const request = await this.customisationService.getRequestById(id);
@@ -190,12 +191,12 @@ export class CustomisationController {
       }
 
       // Enforce customisation request ownership checks
-      if (request.userId !== req.user!.uid && req.user!.role !== 'ADMIN') {
+      if (request.userId !== req.user!.uid && !hasPermission(req.user!.role, 'customisations.manage')) {
         res.status(403).json({ success: false, message: 'Access denied.', errors: ['Forbidden'] });
         return;
       }
 
-      sendSuccess(res, { request: forViewer(request, req.user!.role === 'ADMIN') }, 'Custom request details retrieved.', 200);
+      sendSuccess(res, { request: forViewer(request, hasPermission(req.user!.role, 'customisations.manage')) }, 'Custom request details retrieved.', 200);
     } catch (error) {
       next(error);
     }
@@ -216,12 +217,12 @@ export class CustomisationController {
       };
 
       // Restrict clients to only viewing their own tailoring histories
-      if (req.user!.role !== 'ADMIN') {
+      if (!hasPermission(req.user!.role, 'customisations.manage')) {
         filters.userId = req.user!.uid;
       }
 
       const result = await this.customisationService.listRequests(filters, pageNum, limitNum);
-      const isAdmin = req.user!.role === 'ADMIN';
+      const isAdmin = hasPermission(req.user!.role, 'customisations.manage');
       sendSuccess(
         res,
         { ...result, items: result.items.map((item) => forViewer(item, isAdmin)) },
