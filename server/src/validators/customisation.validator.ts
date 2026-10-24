@@ -44,6 +44,26 @@ export const updateCustomisationSchema = z.object({
   }),
 });
 
+// Schema for creating or editing a request's invoice. Amounts are whole paise; the server
+// recomputes every total, so none are accepted here.
+export const saveInvoiceSchema = z.object({
+  body: z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invoice date must look like 2026-10-24').optional(),
+    items: z
+      .array(
+        z.object({
+          name: z.string({ message: 'Item name is required' }).trim().min(1, 'Item name is required').max(200, 'Item name is too long'),
+          quantity: z.number({ message: 'Quantity is required' }).int('Quantity must be a whole number').min(1, 'Quantity must be at least 1').max(10000, 'Quantity is too large'),
+          unitPrice: z.number({ message: 'Cost is required' }).int().min(0, 'Cost cannot be negative').max(1_000_000_000, 'Cost is too large'),
+        })
+      )
+      .min(1, 'Add at least one item')
+      .max(50, 'An invoice can have at most 50 items'),
+    discount: z.number().int().min(0, 'Discount cannot be negative').default(0),
+    shipping: z.number().int().min(0, 'Shipping cannot be negative').default(0),
+  }),
+});
+
 // Schema for adding an internal team comment
 export const addCommentSchema = z.object({
   body: z.object({
@@ -76,5 +96,6 @@ export default {
   updateCustomisationSchema,
   addNoteSchema,
   addCommentSchema,
+  saveInvoiceSchema,
   updateCustomisationStatusSchema,
 };

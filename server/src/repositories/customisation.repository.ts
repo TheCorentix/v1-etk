@@ -1,6 +1,6 @@
 import { db } from '../config/firebase';
 import { mapDoc, mapQuery } from '../utils/firebase';
-import { Query, FieldValue } from 'firebase-admin/firestore';
+import { Query, FieldValue, Transaction, DocumentReference, DocumentSnapshot } from 'firebase-admin/firestore';
 
 export interface AdminNote {
   author: string;
@@ -15,6 +15,21 @@ export interface InternalComment {
   author: string;
   text: string;
   timestamp: string;
+}
+
+// A customer invoice raised by the team for a customisation request. Amounts are in paise.
+export interface CustomisationInvoice {
+  number: string; // e.g. INV-2026-0007, assigned once and kept when the invoice is edited
+  date: string; // YYYY-MM-DD shown on the invoice
+  items: { name: string; quantity: number; unitPrice: number; amount: number }[];
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  total: number;
+  createdAt: string;
+  createdBy: string;
+  updatedAt: string;
+  updatedBy: string;
 }
 
 export interface CustomisationDocument {
@@ -38,6 +53,7 @@ export interface CustomisationDocument {
   status: 'NEW' | 'ORDER_TAKEN' | 'SHIPPED' | 'DELIVERED';
   adminNotes: AdminNote[];
   comments?: InternalComment[]; // Internal team comments, admin-only
+  invoice?: CustomisationInvoice; // Invoice raised by the team, admin-only
   createdAt?: string;
   updatedAt?: string;
 }
@@ -109,6 +125,29 @@ export class CustomisationRepository {
       comments: FieldValue.arrayUnion(comment),
       updatedAt: new Date().toISOString(),
     });
+    return this.findById(id);
+  }
+
+  /**
+   * Hands out the next invoice number for a year (1, 2, 3, ...). Done in a transaction so two
+   * admins creating invoices at the same moment never get the same number.
+   */
+  async nextInvoiceSequence(year: number): Promise<number> {
+    const counterRef = db.collection('counters').doc(`invoices-${year}`) as DocumentReference;
+    return db.runTransaction(async (transaction: Transaction) => {
+      const snapshot = (await transaction.get(counterRef)) as DocumentSnapshot;
+      const next = (snapshot.exists ? (snapshot.data()?.value as number) : 0) + 1;
+      transaction.set(counterRef, { value: next, updatedAt: new Date().toISOString() });
+      return next;
+    });
+  }
+
+  /**
+   * Stores (or replaces) the invoice on a request.
+   */
+  async setInvoice(id: string, invoice: CustomisationInvoice): Promise<CustomisationDocument | null> {
+    const docRef = db.collection(CustomisationRepository.collectionName).doc(id);
+    await docRef.update({ invoice, updatedAt: new Date().toISOString() });
     return this.findById(id);
   }
 

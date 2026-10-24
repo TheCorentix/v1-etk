@@ -5,10 +5,10 @@ import { sendSuccess } from '../utils/response';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { CustomisationDocument } from '../repositories/customisation.repository';
 
-// Internal team comments are for admins only, so they are removed from anything a customer receives
+// Internal team comments and invoices are for the team only, so they are removed from anything a customer receives
 const forViewer = <T extends Partial<CustomisationDocument>>(request: T, isAdmin: boolean): T => {
   if (isAdmin) return request;
-  const { comments: _internalComments, ...visible } = request;
+  const { comments: _internalComments, invoice: _internalInvoice, ...visible } = request;
   return visible as T;
 };
 
@@ -157,6 +157,23 @@ export class CustomisationController {
 
       const request = await this.customisationService.addComment(id, author, text);
       sendSuccess(res, { request }, 'Comment added.', 201);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Creates or edits the invoice for a request (Admin only).
+   */
+  saveInvoice = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params as { id: string };
+      const { date, items, discount, shipping } = req.body;
+      const name = req.user!.name && req.user!.name !== 'Client' ? req.user!.name : '';
+      const author = name || req.user!.email || 'Admin';
+
+      const request = await this.customisationService.saveInvoice(id, { date, items, discount, shipping }, author);
+      sendSuccess(res, { request }, 'Invoice saved.', 200);
     } catch (error) {
       next(error);
     }

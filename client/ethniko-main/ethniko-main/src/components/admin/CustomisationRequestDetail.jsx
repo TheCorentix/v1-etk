@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminService } from '../../services/adminService';
+import InvoiceBuilder from './InvoiceBuilder';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -250,6 +251,13 @@ export default function CustomisationRequestDetail({
               </div>
             )}
           </section>
+
+          {/* Invoice for this request. Uses the saved customer details, so unsaved edits block it. */}
+          <InvoiceBuilder
+            request={request}
+            onUpdated={onUpdated}
+            blockedReason={dirty ? 'Save the customer details above first, so the invoice uses them.' : ''}
+          />
 
           {/* Comments: internal log, never shown to the customer */}
           <section className="space-y-3">

@@ -2,6 +2,7 @@ import { CustomisationRepository, CustomisationDocument, AdminNote } from '../re
 import crypto from 'crypto';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { httpError } from '../utils/httpError';
+import { computeInvoiceTotals, formatInvoiceNumber, InvoiceLineInput } from '../utils/invoice';
 import { getPaginationMetadata, PaginationMeta } from '../utils/pagination';
 import { logger } from '../config/logger';
 
@@ -85,6 +86,42 @@ export class CustomisationService {
       text,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Creates or updates the invoice for a request. The first save assigns the invoice number;
+   * later edits keep it. All amounts are recomputed here from the items.
+   */
+  async saveInvoice(
+    id: string,
+    input: { date?: string; items: InvoiceLineInput[]; discount: number; shipping: number },
+    author: string
+  ): Promise<CustomisationDocument | null> {
+    const request = await this.customisationRepository.findById(id);
+    if (!request) {
+      throw httpError(404, `Customisation request with ID ${id} not found.`);
+    }
+
+    const totals = computeInvoiceTotals(input.items, input.discount, input.shipping);
+    const date = input.date || new Date().toISOString().slice(0, 10);
+    const now = new Date().toISOString();
+    const existing = request.invoice;
+
+    const year = Number(date.slice(0, 4));
+    const number = existing?.number ?? formatInvoiceNumber(year, await this.customisationRepository.nextInvoiceSequence(year));
+
+    const saved = await this.customisationRepository.setInvoice(id, {
+      number,
+      date,
+      ...totals,
+      createdAt: existing?.createdAt ?? now,
+      createdBy: existing?.createdBy ?? author,
+      updatedAt: now,
+      updatedBy: author,
+    });
+
+    logger.info(`🧾 Invoice ${number} ${existing ? 'updated' : 'created'} for request ${id} by ${author}`);
+    return saved;
   }
 
   /**

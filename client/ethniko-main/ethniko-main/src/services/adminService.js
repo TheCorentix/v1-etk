@@ -61,6 +61,15 @@ export const adminService = {
   },
 
   /**
+   * Creates or updates the invoice for a request (Admin only). Amounts are whole paise and the
+   * server recomputes the totals. Returns the updated request, whose `invoice` has the number.
+   */
+  saveCustomizationInvoice: async (id, { date, items, discount, shipping }) => {
+    const response = await api.put(`/customisations/${id}/invoice`, { date, items, discount, shipping });
+    return response.data.request;
+  },
+
+  /**
    * Transitions the status state of a customization request (Admin only).
    */
   updateCustomizationStatus: async (id, status, stylistNote) => {
