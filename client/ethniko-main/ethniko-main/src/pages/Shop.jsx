@@ -121,7 +121,7 @@ export default function Shop() {
   const hasActiveFilters = categoryParam !== 'ALL' || subcategoryParam !== 'ALL' || fabricParam !== 'ALL' || colorParam !== 'ALL' || occasionParam !== 'ALL' || priceMinParam > 0 || priceMaxParam < 100000 || searchParam;
 
   return (
-    <div className="relative bg-[#F1E8D5] text-[#2B2621] min-h-screen overflow-hidden">
+    <div className="relative bg-page-beige text-[#2B2621] min-h-screen overflow-hidden">
 
       {/* Decorative background layer: warm radial glows + fine grain, sits behind all content */}
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -164,7 +164,7 @@ export default function Shop() {
           <div className="relative inline-block group/sidebar">
 
           {/* Collapsed rail: always visible, invites hover */}
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#E6DCCF] bg-[#FFFCF8]/80 backdrop-blur-sm shadow-sm cursor-pointer transition-opacity duration-200 group-hover/sidebar:opacity-0 group-hover/sidebar:pointer-events-none">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#E6DCCF] bg-[#F6EFE3]/80 backdrop-blur-sm shadow-sm cursor-pointer transition-opacity duration-200 group-hover/sidebar:opacity-0 group-hover/sidebar:pointer-events-none">
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#B68D40]" />
             <span className="text-[9px] tracking-widest text-[#B68D40] font-sans font-bold uppercase whitespace-nowrap">
               Filters
@@ -172,7 +172,7 @@ export default function Shop() {
           </div>
 
           {/* Floating panel: hidden until the rail (or panel itself) is hovered, overlays the grid rather than pushing it */}
-          <div className="absolute top-0 left-0 w-[26rem] max-h-[80vh] overflow-y-auto pr-5 pl-5 py-6 custom-scrollbar space-y-6 rounded-lg border border-[#E6DCCF] bg-[#FFFCF8]/95 backdrop-blur-md shadow-xl opacity-0 invisible pointer-events-none -translate-x-1 transition-all duration-300 ease-out group-hover/sidebar:opacity-100 group-hover/sidebar:visible group-hover/sidebar:pointer-events-auto group-hover/sidebar:translate-x-0">
+          <div className="absolute top-0 left-0 w-[26rem] max-h-[80vh] overflow-y-auto pr-5 pl-5 py-6 custom-scrollbar space-y-6 rounded-lg border border-[#E6DCCF] bg-[#F6EFE3]/95 backdrop-blur-md shadow-xl opacity-0 invisible pointer-events-none -translate-x-1 transition-all duration-300 ease-out group-hover/sidebar:opacity-100 group-hover/sidebar:visible group-hover/sidebar:pointer-events-auto group-hover/sidebar:translate-x-0">
 
           {/* Header clear */}
           {hasActiveFilters && (
@@ -334,7 +334,7 @@ export default function Shop() {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="SEARCH CATALOG..."
-                  className="w-full bg-[#FFFCF8]/80 backdrop-blur-sm rounded-md border border-[#E6DCCF] py-2 pl-3 pr-8 text-xs font-sans tracking-wider text-[#2B2621] placeholder-[#9C948A] focus:outline-none focus:border-[#B68D40] focus:ring-1 focus:ring-[#B68D40]/40 uppercase transition-colors"
+                  className="w-full bg-[#F6EFE3]/80 backdrop-blur-sm rounded-md border border-[#E6DCCF] py-2 pl-3 pr-8 text-xs font-sans tracking-wider text-[#2B2621] placeholder-[#9C948A] focus:outline-none focus:border-[#B68D40] focus:ring-1 focus:ring-[#B68D40]/40 uppercase transition-colors"
                 />
                 <button type="submit" className="absolute right-2 top-2.5 text-[#9C948A] hover:text-[#B68D40] transition-colors">
                   <SearchIcon className="w-3.5 h-3.5" />
@@ -342,7 +342,7 @@ export default function Shop() {
               </form>
 
               {/* Sorting */}
-              <div className="flex items-center gap-1 rounded-md border border-[#E6DCCF] px-3 py-2 bg-[#FFFCF8]/80 backdrop-blur-sm shrink-0">
+              <div className="flex items-center gap-1 rounded-md border border-[#E6DCCF] px-3 py-2 bg-[#F6EFE3]/80 backdrop-blur-sm shrink-0">
                 <span className="text-[9px] uppercase tracking-widest text-[#9C948A] font-sans">Sort:</span>
                 <select
                   value={sortParam}
@@ -363,7 +363,7 @@ export default function Shop() {
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-[9px] uppercase tracking-widest text-[#9C948A] font-sans mr-2">Active:</span>
               {categoryParam !== 'ALL' && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>{categoryParam}</span>
                   <button onClick={() => updateParam('category', 'ALL')} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -371,7 +371,7 @@ export default function Shop() {
                 </span>
               )}
               {fabricParam !== 'ALL' && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>Fabric: {fabricParam}</span>
                   <button onClick={() => updateParam('fabric', 'ALL')} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -379,7 +379,7 @@ export default function Shop() {
                 </span>
               )}
               {colorParam !== 'ALL' && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>Color: {colorParam}</span>
                   <button onClick={() => updateParam('color', 'ALL')} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -387,7 +387,7 @@ export default function Shop() {
                 </span>
               )}
               {occasionParam !== 'ALL' && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>Occasion: {occasionParam}</span>
                   <button onClick={() => updateParam('occasion', 'ALL')} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -395,7 +395,7 @@ export default function Shop() {
                 </span>
               )}
               {(priceMinParam > 0 || priceMaxParam < 100000) && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>₹{priceMinParam.toLocaleString()} - ₹{priceMaxParam.toLocaleString()}</span>
                   <button onClick={() => handlePriceRangeSelect(null)} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -403,7 +403,7 @@ export default function Shop() {
                 </span>
               )}
               {searchParam && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFCF8] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6EFE3] text-[10px] tracking-wide font-sans text-[#6E6E6E] border border-[#E6DCCF]">
                   <span>Search: {searchParam}</span>
                   <button onClick={() => updateParam('q', '')} className="text-[#9C948A] hover:text-[#B68D40] transition-colors">
                     <X className="w-3 h-3" />
@@ -439,7 +439,7 @@ export default function Shop() {
             </div>
           ) : (
             /* Empty state for search/filters */
-            <div className="py-20 text-center space-y-4 rounded-lg border border-[#E6DCCF] bg-[#FFFCF8]/70 backdrop-blur-sm shadow-sm">
+            <div className="py-20 text-center space-y-4 rounded-lg border border-[#E6DCCF] bg-[#F6EFE3]/70 backdrop-blur-sm shadow-sm">
               <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-[#D4AF37]/20 to-[#B68D40]/10 flex items-center justify-center">
                 <SearchIcon className="w-5 h-5 text-[#B68D40]" />
               </div>

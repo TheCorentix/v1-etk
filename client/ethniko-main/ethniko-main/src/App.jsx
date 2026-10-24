@@ -19,13 +19,13 @@ export default function App() {
         <SearchProvider>
           <BrowserRouter>
             <ScrollToTop />
-            <div className="flex flex-col min-h-screen bg-[#FFFFFF] text-[#181818] selection:bg-[#B68D40] selection:text-white transition-colors duration-300">
+            <div className="flex flex-col min-h-screen bg-[#F6EFE3] text-[#181818] selection:bg-[#B68D40] selection:text-white transition-colors duration-300">
 
               {/* Persistent navigation header */}
               <Navbar onOpenCart={() => setCartOpen(true)} />
 
               {/* Main page content area */}
-              <main className="flex-grow">
+              <main className="flex-grow bg-page-beige">
                 <AppRoutes />
               </main>
 

@@ -26,6 +26,10 @@
   }
 }
 @layer components {
+  /* The page beige: the same gradient used by Home, About, Profile and the other pages */
+  .bg-page-beige {
+    background: linear-gradient(180deg, #FBE7C6 0%, #F6EFE3 40%, #E9DCC4 100%);
+  }
   .btn-luxury {
     @apply relative inline-flex items-center justify-center px-8 py-3.5 border border-text-custom text-xs uppercase tracking-widest transition-all duration-500 bg-transparent text-text-custom hover:bg-text-custom hover:text-primary focus:outline-none overflow-hidden;
   }

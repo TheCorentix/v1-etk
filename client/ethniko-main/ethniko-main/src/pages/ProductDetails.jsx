@@ -190,7 +190,7 @@ export default function ProductDetails() {
           <div
             onMouseMove={handleZoomMove}
             onMouseLeave={handleZoomLeave}
-            className="relative aspect-[3/4] bg-neutral-50 border border-[#ECECEC] overflow-hidden cursor-crosshair group"
+            className="relative aspect-[3/4] bg-[#F3E9D8] border border-[#E6DCCF] overflow-hidden cursor-crosshair group"
           >
             <img
               src={activeImage}
@@ -496,7 +496,7 @@ export default function ProductDetails() {
                   <p>Our tailoring works off luxury body fits. Sizing represents bust widths.</p>
                   <table className="w-full border-collapse border border-neutral-200 text-left text-[10px] uppercase">
                     <thead>
-                      <tr className="bg-neutral-50 border-b border-neutral-200 font-semibold text-[#B68D40]">
+                      <tr className="bg-[#F3E9D8] border-b border-[#E6DCCF] font-semibold text-[#B68D40]">
                         <th className="p-2">SIZE</th>
                         <th className="p-2">BUST</th>
                         <th className="p-2">WAIST</th>

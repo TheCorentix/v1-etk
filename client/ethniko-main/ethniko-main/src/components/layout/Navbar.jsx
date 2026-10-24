@@ -265,7 +265,7 @@ export default function Navbar({ onOpenCart }) {
                 <div
                   onMouseEnter={openMegaMenu}
                   onMouseLeave={closeMegaMenu}
-                  className="fixed left-0 right-0 top-[8.75rem] bg-[#FFFDFC] text-[#181818] border border-[#E6DCCF] rounded-b-2xl shadow-xl p-8 z-50 transition-opacity duration-300 ease-out max-h-[calc(100vh-8.75rem)] overflow-y-auto">
+                  className="fixed left-0 right-0 top-[8.75rem] bg-[#F6EFE3] text-[#181818] border border-[#D9C7A3] rounded-b-2xl shadow-xl p-8 z-50 transition-opacity duration-300 ease-out max-h-[calc(100vh-8.75rem)] overflow-y-auto">
                   <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-8">
 
                     {/* Column 1: WOMEN */}
@@ -306,7 +306,7 @@ export default function Navbar({ onOpenCart }) {
                         </div>
                       </div>
 
-                      <div className="aspect-[2.3/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
+                      <div className="aspect-[2.3/1] rounded-xl overflow-hidden bg-[#EFE4CF] border border-[#D9C7A3]">
                         <img src={womenMaroonLehenga} alt="Women's collection" className="w-full h-full object-cover object-center" loading="lazy" />
                       </div>
                     </div>
@@ -338,7 +338,7 @@ export default function Navbar({ onOpenCart }) {
                         </div>
                       </div>
 
-                      <div className="aspect-[1.5/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
+                      <div className="aspect-[1.5/1] rounded-xl overflow-hidden bg-[#EFE4CF] border border-[#D9C7A3]">
                         <img src={menSherwaniSun} alt="Men's collection" className="w-full h-full object-cover object-top" loading="lazy" />
                       </div>
                     </div>
@@ -367,7 +367,7 @@ export default function Navbar({ onOpenCart }) {
                         </div>
                       </div>
 
-                      <div className="aspect-[1.3/1] rounded-xl overflow-hidden bg-neutral-50 border border-[#E6DCCF]">
+                      <div className="aspect-[1.3/1] rounded-xl overflow-hidden bg-[#EFE4CF] border border-[#D9C7A3]">
                         <img src={kidsEthnicWear} alt="Kids collection" className="w-full h-full object-cover object-center" loading="lazy" />
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function Navbar({ onOpenCart }) {
           onClick={() => setMobileMenuOpen(false)}
         />
         <div
-          className={`relative w-4/5 max-w-sm bg-white h-full flex flex-col p-8 transition-transform duration-300 shadow-2xl ${
+          className={`relative w-4/5 max-w-sm bg-[#F6EFE3] h-full flex flex-col p-8 transition-transform duration-300 shadow-2xl ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
