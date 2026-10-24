@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, Scissors, ShoppingBag, Plus, Edit, Trash2, Check, RefreshCw, BarChart2, Eye, Sliders, Users, FileText, Layers, Settings, Star, Globe, Truck, Heart, ArrowUp, ArrowDown, AlertCircle, Film } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -26,7 +26,11 @@ export default function Admin() {
   // Only the tabs this person's role allows (the server enforces the same permissions)
   const allowedTabs = tabsFor(hasPermission);
   const [activeTab, setActiveTab] = useState(allowedTabs[0]?.id ?? "dashboard");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // full-page loader: first load only
+  const [refreshing, setRefreshing] = useState(false); // later reloads happen quietly in the background
+  const hasLoaded = useRef(false);
+  const [updatingRequests, setUpdatingRequests] = useState({}); // request id -> true while its status is saving
+  const [updatingOrder, setUpdatingOrder] = useState(false);
 
   // States for lists
   const [products, setProducts] = useState([]);
@@ -35,7 +39,7 @@ export default function Admin() {
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
-  const [stats, setStats] = useState({ sales: 0, orders: 0, customizations: 0, customers: 0 });
+  const [stats, setStats] = useState({ sales: 0, orders: 0, customers: 0 });
 
   // Add Product Form State
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -95,10 +99,12 @@ export default function Admin() {
 
   // Load Admin Data
   const loadAdminData = async () => {
-    setLoading(true);
+    // The first load shows the full-page loader; later reloads run quietly so the page stays usable.
+    if (hasLoaded.current) setRefreshing(true);
+    else setLoading(true);
 
     // Each section loads independently so a failure in one (e.g. an orders query
-    // that needs a Firestore index) can never hide the others — like the catalog.
+    // that needs a Firestore index) can never hide the others.
     const safe = async (fn, fallback) => {
       try {
         return await fn();
@@ -108,53 +114,53 @@ export default function Admin() {
       }
     };
 
-    // Products (catalog) — always attempt first and set on its own.
-    const prodRes = await safe(() => productService.getProducts({ page: 1, limit: 100 }), { products: [] });
+    // Everything loads at the same time instead of one after another.
+    // Skip data this role can't use (the server would only return the staff member's own, empty, lists).
+    const [
+      prodRes, ordRes, custRes, catRes, colRes, testRes, bannerRes,
+      storeRes, seoRes, shipRes, footRes, socRes,
+    ] = await Promise.all([
+      safe(() => productService.getProducts({ page: 1, limit: 100 }), { products: [] }),
+      hasPermission('orders.manage') ? safe(() => adminService.getAllOrders(), []) : [],
+      hasPermission('customisations.manage') ? safe(() => adminService.getAllCustomizations(), []) : [],
+      safe(() => adminService.getCmsCategories(1, 100), { items: [] }),
+      safe(() => adminService.getCmsCollections(1, 100), { items: [] }),
+      safe(() => adminService.getCmsTestimonials(1, 100), { items: [] }),
+      safe(() => homepageService.getHeroSlides(), []),
+      safe(() => adminService.getStoreSettings(), null),
+      safe(() => adminService.getSeoSettings(), null),
+      safe(() => adminService.getShippingSettings(), null),
+      safe(() => adminService.getFooterSettings(), null),
+      safe(() => adminService.getSocialSettings(), null),
+    ]);
+
     setProducts(prodRes.products || []);
-
-    // Skip data this role can't use (the server would only return the staff member's own, empty, lists)
-    const ordRes = hasPermission('orders.manage') ? await safe(() => adminService.getAllOrders(), []) : [];
     setOrders(ordRes || []);
-
-    const custRes = hasPermission('customisations.manage') ? await safe(() => adminService.getAllCustomizations(), []) : [];
     setCustomizations(custRes || []);
-
-    // CMS items
-    const catRes = await safe(() => adminService.getCmsCategories(1, 100), { items: [] });
     setCategories(catRes.items || []);
-    const colRes = await safe(() => adminService.getCmsCollections(1, 100), { items: [] });
     setCollections(colRes.items || []);
-    const testRes = await safe(() => adminService.getCmsTestimonials(1, 100), { items: [] });
     setTestimonials(testRes.items || []);
-    const bannerRes = await safe(() => homepageService.getHeroSlides(), []);
     setBanners(bannerRes || []);
-
-    // Settings splits
-    const storeRes = await safe(() => adminService.getStoreSettings(), null);
     if (storeRes) setStoreSettings(storeRes);
-    const seoRes = await safe(() => adminService.getSeoSettings(), null);
     if (seoRes) setSeoSettings(seoRes);
-    const shipRes = await safe(() => adminService.getShippingSettings(), null);
     if (shipRes) setShippingSettings(shipRes);
-    const footRes = await safe(() => adminService.getFooterSettings(), null);
     if (footRes) setFooterSettings(footRes);
-    const socRes = await safe(() => adminService.getSocialSettings(), null);
     if (socRes) setSocialSettings(socRes);
 
-    // Stats (guard against missing order fields)
+    // Stats (guard against missing order fields). Open requests are counted from the live list below.
     const orders = ordRes || [];
-    const custs = custRes || [];
     const totalSales = orders.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + (o.total || 0), 0);
     const uniqueCustomers = new Set(orders.map(o => o.customerEmail)).size + 3; // add padding
 
     setStats({
       sales: totalSales,
       orders: orders.length,
-      customizations: custs.filter(c => c.status !== 'Delivered').length,
       customers: uniqueCustomers
     });
 
+    hasLoaded.current = true;
     setLoading(false);
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -305,65 +311,101 @@ export default function Admin() {
     }
   };
 
+  // Swap one updated order into the list and the open view (no full reload needed)
+  const applyOrderUpdate = (order) => {
+    setSelectedOrder((prev) => (prev && prev.id === order.id ? order : prev));
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
+  };
+
   const handleUpdateOrderStatus = async (id, status) => {
+    if (updatingOrder) return;
     const trackingId = trackingNumber.trim();
+    setUpdatingOrder(true);
     try {
       // Shipping with a tracking ID goes through the tracking endpoint so the ID is saved
       // on the order and included in the customer's message.
       const { order, notification } = status === 'SHIPPED' && trackingId
         ? await adminService.addOrderTracking(id, trackingId)
         : await adminService.updateOrderStatus(id, status);
-      setSelectedOrder(order);
+      applyOrderUpdate(order);
       setTrackingNumber(order.trackingNumber || "");
       toast.success(`Order marked ${status.toLowerCase()}.`);
       announceWhatsApp(notification);
-      loadAdminData();
     } catch (err) {
       console.error(err);
       toast.error(err?.message || 'Failed to update the order.');
+    } finally {
+      setUpdatingOrder(false);
     }
   };
 
   const handleSaveTracking = async (id) => {
+    if (updatingOrder) return;
     const trackingId = trackingNumber.trim();
     if (!trackingId) {
       toast.error('Enter the tracking ID first.');
       return;
     }
+    setUpdatingOrder(true);
     try {
       const { order, notification } = await adminService.addOrderTracking(id, trackingId);
-      setSelectedOrder(order);
+      applyOrderUpdate(order);
       toast.success('Tracking ID saved. Order marked shipped.');
       announceWhatsApp(notification);
-      loadAdminData();
     } catch (err) {
       console.error(err);
       toast.error(err?.message || 'Failed to save the tracking ID.');
+    } finally {
+      setUpdatingOrder(false);
     }
   };
 
   const handleResendWhatsApp = async (id) => {
+    if (updatingOrder) return;
+    setUpdatingOrder(true);
     try {
       const { order, notification } = await adminService.resendOrderNotification(id);
-      setSelectedOrder(order);
+      applyOrderUpdate(order);
       announceWhatsApp(notification);
-      loadAdminData();
     } catch (err) {
       console.error(err);
       toast.error(err?.message || 'Failed to resend the WhatsApp message.');
+    } finally {
+      setUpdatingOrder(false);
     }
   };
 
+  // Swap changes into one request in the table and the open window (no full reload needed)
+  const applyCustomUpdate = (id, changes) => {
+    setCustomizations((prev) => prev.map((c) => (c.id === id ? { ...c, ...changes } : c)));
+    setSelectedCustom((prev) => (prev && prev.id === id ? { ...prev, ...changes } : prev));
+  };
+
+  const setRequestPending = (id, pending) =>
+    setUpdatingRequests((prev) => {
+      const next = { ...prev };
+      if (pending) next[id] = true;
+      else delete next[id];
+      return next;
+    });
+
   const handleUpdateCustomStatus = async (id, status) => {
+    const before = customizations.find((c) => c.id === id);
+    if (!before || before.status === status || updatingRequests[id]) return;
+
+    // Show the new status straight away, then confirm with the server (and undo if it fails)
+    applyCustomUpdate(id, { status });
+    setRequestPending(id, true);
     try {
       const updated = await adminService.updateCustomizationStatus(id, status);
-      // Keep the view popup in sync only if it's open for this request.
-      setSelectedCustom((prev) => (prev && prev.id === id ? updated : prev));
+      applyCustomUpdate(id, updated);
       toast.success(`Marked as ${status.replace(/_/g, ' ')}.`);
-      loadAdminData();
     } catch (err) {
       console.error(err);
+      applyCustomUpdate(id, { status: before.status });
       toast.error(err?.message || 'Failed to update status.');
+    } finally {
+      setRequestPending(id, false);
     }
   };
 
@@ -596,10 +638,11 @@ export default function Admin() {
         </div>
         <button
           onClick={loadAdminData}
-          className="flex items-center gap-1.5 px-4 py-2 border border-neutral-700 hover:border-[#D9C7A3] hover:text-[#D9C7A3] transition-colors text-[10px] tracking-wider uppercase font-sans font-bold"
+          disabled={refreshing}
+          className="flex items-center gap-1.5 px-4 py-2 border border-neutral-700 hover:border-[#D9C7A3] hover:text-[#D9C7A3] transition-colors text-[10px] tracking-wider uppercase font-sans font-bold disabled:opacity-60 disabled:cursor-wait"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Data</span>
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          <span>{refreshing ? 'Refreshing…' : 'Refresh Data'}</span>
         </button>
       </div>
 
@@ -647,7 +690,7 @@ export default function Admin() {
                 </div>
                 <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">ACTIVE STYLINGS</span>
-                  <p className="text-xl font-bold font-sans text-neutral-800">{stats.customizations}</p>
+                  <p className="text-xl font-bold font-sans text-neutral-800">{customizations.filter((c) => c.status !== 'DELIVERED').length}</p>
                 </div>
                 <div className="p-6 border border-[#E5D9C3] bg-[#FBF7F0] space-y-1">
                   <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">CLIENT REACH</span>
@@ -1166,7 +1209,8 @@ export default function Admin() {
                       <button
                         key={st.value}
                         onClick={() => handleUpdateOrderStatus(selectedOrder.id, st.value)}
-                        className={`px-3 py-1.5 border text-[9px] tracking-wider uppercase font-sans focus:outline-none ${
+                        disabled={updatingOrder}
+                        className={`px-3 py-1.5 border text-[9px] tracking-wider uppercase font-sans focus:outline-none disabled:opacity-50 disabled:cursor-wait ${
                           selectedOrder.orderStatus === st.value
                             ? 'border-[#B68D40] bg-[#B68D40] text-white font-bold'
                             : 'border-neutral-200 bg-white hover:border-[#B68D40] text-neutral-600'
@@ -1176,6 +1220,11 @@ export default function Admin() {
                       </button>
                     ))}
                   </div>
+                  {updatingOrder && (
+                    <p className="text-[10px] font-sans text-[#B68D40]">
+                      Updating… this can take a few seconds while the customer's WhatsApp message is sent.
+                    </p>
+                  )}
                   <p className="text-[9px] font-sans text-neutral-400 normal-case leading-relaxed">
                     The customer gets a WhatsApp message when an order moves to Confirmed, Packed, Shipped, Delivered or Cancelled.
                     To ship with a tracking ID, enter it on the right first, then click Shipped.
@@ -1194,7 +1243,8 @@ export default function Admin() {
                     />
                     <button
                       onClick={() => handleSaveTracking(selectedOrder.id)}
-                      className="px-4 py-2 bg-neutral-900 text-white text-[9px] font-sans font-bold uppercase tracking-widest shrink-0"
+                      disabled={updatingOrder}
+                      className="px-4 py-2 bg-neutral-900 text-white text-[9px] font-sans font-bold uppercase tracking-widest shrink-0 disabled:opacity-50 disabled:cursor-wait"
                     >
                       Save &amp; Ship
                     </button>
@@ -1209,7 +1259,8 @@ export default function Admin() {
                   {WHATSAPP_STATUSES.includes(selectedOrder.orderStatus) && (
                     <button
                       onClick={() => handleResendWhatsApp(selectedOrder.id)}
-                      className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none"
+                      disabled={updatingOrder}
+                      className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none disabled:opacity-50 disabled:cursor-wait"
                     >
                       Resend current status
                     </button>
@@ -1313,6 +1364,9 @@ export default function Admin() {
                           <span className="px-2 py-0.5 bg-[#B68D40] text-white border text-[8px] font-bold whitespace-nowrap">
                             {STATUS_LABELS[cust.status] || cust.status}
                           </span>
+                          {updatingRequests[cust.id] && (
+                            <span className="ml-2 text-[9px] text-neutral-400 normal-case">Saving…</span>
+                          )}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center justify-end gap-1.5 flex-wrap">
@@ -1320,7 +1374,8 @@ export default function Admin() {
                               <button
                                 key={a.value}
                                 onClick={() => handleUpdateCustomStatus(cust.id, a.value)}
-                                className={`px-2 py-1 border text-[8px] uppercase tracking-wider font-bold transition-colors ${
+                                disabled={Boolean(updatingRequests[cust.id])}
+                                className={`px-2 py-1 border text-[8px] uppercase tracking-wider font-bold transition-colors disabled:opacity-60 disabled:cursor-wait ${
                                   cust.status === a.value
                                     ? 'bg-[#B68D40] text-white border-[#B68D40]'
                                     : 'border-neutral-300 text-neutral-500 hover:border-[#B68D40] hover:text-[#B68D40]'
@@ -1360,6 +1415,7 @@ export default function Admin() {
                   statusActions={CUSTOM_STATUS_ACTIONS}
                   statusLabels={STATUS_LABELS}
                   onStatusChange={handleUpdateCustomStatus}
+                  statusPending={Boolean(updatingRequests[selectedCustom.id])}
                   onUpdated={handleCustomRequestUpdated}
                   onClose={() => setSelectedCustom(null)}
                 />

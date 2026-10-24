@@ -59,6 +59,7 @@ export default function CustomisationRequestDetail({
   isTailoring,
   statusActions,
   statusLabels,
+  statusPending = false,
   onStatusChange,
   onUpdated,
   onClose,
@@ -158,12 +159,14 @@ export default function CustomisationRequestDetail({
             <span className="px-2 py-0.5 bg-[#B68D40] text-white text-[9px] font-bold uppercase">
               {statusLabels[request.status] || request.status}
             </span>
+            {statusPending && <span className="text-[9px] text-neutral-400">Saving…</span>}
             <div className="flex gap-1.5 ml-auto">
               {statusActions.map((a) => (
                 <button
                   key={a.value}
                   onClick={() => onStatusChange(request.id, a.value)}
-                  className={`px-2.5 py-1 border text-[8px] uppercase tracking-wider font-bold ${
+                  disabled={statusPending}
+                  className={`px-2.5 py-1 border text-[8px] uppercase tracking-wider font-bold disabled:opacity-60 disabled:cursor-wait ${
                     request.status === a.value
                       ? 'bg-[#B68D40] text-white border-[#B68D40]'
                       : 'border-neutral-300 text-neutral-500 hover:border-[#B68D40] hover:text-[#B68D40]'
