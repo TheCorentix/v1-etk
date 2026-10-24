@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Play, 
   VolumeX, 
@@ -182,7 +182,11 @@ export default function LookAndShop() {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const [activeLookIdx, setActiveLookIdx] = useState(0);
+  // The open look is remembered by its id (not its position), so it stays put when the live
+  // looks finish loading and shift the list. A link like /look-and-shop?look=<id> opens that look.
+  const [searchParams] = useSearchParams();
+  const requestedLookId = searchParams.get('look');
+  const [activeLookId, setActiveLookId] = useState(requestedLookId);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [playingVideoId, setPlayingVideoId] = useState(null);
@@ -205,8 +209,9 @@ export default function LookAndShop() {
                     if (prod) {
                       products.push({
                         id: prod.id,
+                        slug: prod.slug, // the product page is found by slug
                         name: prod.name,
-                        price: prod.price / 100, // convert Paise to INR for UI!
+                        price: prod.price, // productService already converts paise to rupees
                         fabric: prod.fabric || 'Premium Weave',
                         image: prod.images?.[0] || '',
                         sizes: prod.sizes || ['M'],
@@ -227,7 +232,8 @@ export default function LookAndShop() {
                 title: look.title,
                 description: 'Editorial Video Look',
                 duration: '0:30',
-                tags: look.tags?.map((t) => t.productId) || [],
+                // Pills on the look card: the tagged products' names (not their raw IDs)
+                tags: products.map((p) => p.name),
                 videoUrl: look.videoUrl,
                 products,
               };
@@ -244,6 +250,18 @@ export default function LookAndShop() {
 
   const combinedLooks = [...liveLooks, ...LOOKS_DATA];
 
+  // Position of the open look in the list (the first look when none was chosen or the id isn't found)
+  const activeLookIdx = Math.max(0, combinedLooks.findIndex((look) => look.id === activeLookId));
+
+  // Arriving from a link to a specific look: scroll to the looks row once that look has loaded
+  const scrolledToRequestedLook = useRef(false);
+  useEffect(() => {
+    if (!requestedLookId || scrolledToRequestedLook.current) return;
+    if (!combinedLooks.some((look) => look.id === requestedLookId)) return; // live looks may still be loading
+    scrolledToRequestedLook.current = true;
+    document.getElementById('looks-directory')?.scrollIntoView({ behavior: 'smooth' });
+  }, [requestedLookId, liveLooks]);
+
   // References for video tag triggers
   const activeLook = combinedLooks[activeLookIdx] || LOOKS_DATA[0];
 
@@ -258,7 +276,7 @@ export default function LookAndShop() {
       stock: product.stock,
       description: product.description,
       designer: product.designer,
-      slug: product.id
+      slug: product.slug || product.id
     };
     addToCart(standardProd, product.sizes[0]);
   };
@@ -273,7 +291,7 @@ export default function LookAndShop() {
       stock: product.stock,
       description: product.description,
       designer: product.designer,
-      slug: product.id,
+      slug: product.slug || product.id,
       fabric: product.fabric
     });
     setQuickViewOpen(true);
@@ -341,7 +359,7 @@ export default function LookAndShop() {
               <div
                 key={look.id}
                 onClick={() => {
-                  setActiveLookIdx(idx);
+                  setActiveLookId(look.id);
                   setPlayingVideoId(isPlaying ? null : look.id);
                 }}
                 className={`group cursor-pointer space-y-3.5 ${
@@ -428,21 +446,25 @@ export default function LookAndShop() {
         <div className="lg:col-span-6 grid grid-cols-2 gap-5">
           {activeLook.products.map((p) => {
             const inWish = isInWishlist(p.id);
+            // Real products open their own page; the sample pieces have none, so they open the shop
+            const productLink = p.slug ? `/product/${p.slug}` : '/shop';
             return (
               <div
                 key={p.id}
                 className="group relative rounded-lg border border-[#E6DCCF] flex flex-col justify-between h-full bg-[#FFFCF8] overflow-hidden shadow-[0_4px_16px_-10px_rgba(24,24,24,0.15)] hover:shadow-[0_14px_32px_-14px_rgba(182,141,64,0.4)] hover:border-[#B68D40] hover:-translate-y-1 transition-all duration-500"
               >
                 <div className="relative aspect-[3/3.8] block bg-neutral-50 overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#F3E9D8] to-[#E6DCCF]">
-                    <Heart className="w-6 h-6 text-[#B68D40]/50" strokeWidth={1.2} />
-                  </div>
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    onError={(e) => { e.currentTarget.style.opacity = '0'; }}
-                    className="relative w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
-                  />
+                  <Link to={productLink} className="absolute inset-0 block" aria-label={`View ${p.name}`}>
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#F3E9D8] to-[#E6DCCF]">
+                      <Heart className="w-6 h-6 text-[#B68D40]/50" strokeWidth={1.2} />
+                    </div>
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      onError={(e) => { e.currentTarget.style.opacity = '0'; }}
+                      className="relative w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    />
+                  </Link>
                   {/* wishlist toggle */}
                   <button
                     onClick={() => toggleWishlist({ id: p.id, name: p.name, price: p.price, images: [p.image] })}
@@ -454,7 +476,7 @@ export default function LookAndShop() {
                 <div className="p-4 space-y-2 border-t border-[#E6DCCF]">
                   <span className="text-[8px] uppercase tracking-[0.15em] text-[#6E6E6E] font-sans block">{p.designer}</span>
                   <h4 className="font-serif text-[11px] uppercase text-[#181818] line-clamp-1 tracking-wide">
-                    {p.name}
+                    <Link to={productLink} className="hover:text-[#B68D40] transition-colors">{p.name}</Link>
                   </h4>
                   <div className="flex justify-between items-center text-[11px] font-sans font-semibold pt-1">
                     <span className="text-[#B68D40]">₹{p.price.toLocaleString('en-IN')}</span>

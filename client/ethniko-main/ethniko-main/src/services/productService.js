@@ -103,7 +103,8 @@ export const productService = {
    * Retrieves a single product document by ID.
    */
   getProductById: async (id) => {
-    const response = await api.get(`/products/${id}`);
+    // The server's route for this is /products/id/:id (a bare /products/:id does not exist)
+    const response = await api.get(`/products/id/${id}`);
     return mapProduct(response.data.product);
   },
 
