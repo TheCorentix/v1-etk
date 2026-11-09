@@ -968,7 +968,7 @@ export default function Admin() {
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <span>{p.stock} units</span>
+                              <span className="whitespace-nowrap">{p.stock} units</span>
                               <button
                                 onClick={() => { setEditingProdId(p.id); setEditingStock(p.stock); }}
                                 className="text-neutral-400 hover:text-[#B68D40]"
@@ -979,7 +979,8 @@ export default function Admin() {
                             </div>
                           )}
                         </td>
-                        <td className="p-3 text-right space-x-2">
+                        <td className="p-3 text-right whitespace-nowrap w-px">
+                          <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => setSelectedProduct(p)}
                             className="p-1.5 text-neutral-400 hover:text-[#B68D40] focus:outline-none"
@@ -1001,6 +1002,7 @@ export default function Admin() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
