@@ -18,7 +18,7 @@ const REQUEST_TYPES = {
     occasion: "Outfit Customization",
     intro: "Tell us the design, colour and fabric you have in mind and we'll bring it to life.",
     notesLabel: "Tell us about your outfit",
-    notesPlaceholder: "Describe the design you'd like, the colours, the fabric, the occasion… anything that helps us picture your outfit.",
+    notesPlaceholder: "Describe the design you'd like, the colours, the fabric… anything that helps us picture your outfit.",
     done: "outfit customisation",
   },
   tailoring: {
@@ -32,7 +32,15 @@ const REQUEST_TYPES = {
   },
 };
 
-const EMPTY_FORM = { name: "", phone: "", email: "", address: "", fabricDetails: "", notes: "" };
+// What the outfit is for, and the budget bands, for the outfit customisation form
+const OCCASIONS = ["Wedding", "Birthday party", "Festive collection", "Casual", "Party / Celebration", "Other"];
+const BUDGETS = ["Under ₹10,000", "₹10,000 – ₹25,000", "₹25,000 – ₹50,000", "₹50,000 – ₹1,00,000", "Above ₹1,00,000", "Not sure yet"];
+
+const EMPTY_FORM = {
+  name: "", phone: "", email: "", address: "", fabricDetails: "", notes: "",
+  // outfit customisation only
+  eventOccasion: "", otherOccasion: "", outfitCount: "1", budget: "",
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -143,6 +151,13 @@ export default function Customize() {
     if (form.phone.replace(/\D/g, "").length < 10) next.phone = "Please enter a valid 10-digit phone number.";
     if (!EMAIL_PATTERN.test(form.email.trim())) next.email = "Please enter a valid email address.";
     if (isTailoring && !form.address.trim()) next.address = "Please enter your address.";
+    if (!isTailoring) {
+      if (!form.eventOccasion) next.eventOccasion = "Please choose the occasion.";
+      else if (form.eventOccasion === "Other" && !form.otherOccasion.trim()) next.otherOccasion = "Please tell us the occasion.";
+      const count = form.outfitCount.trim();
+      if (!/^\d+$/.test(count) || Number(count) < 1 || Number(count) > 100) next.outfitCount = "Enter how many outfits (1 to 100).";
+      if (!form.budget) next.budget = "Please choose a budget.";
+    }
     if (!form.notes.trim()) next.notes = isTailoring ? "Please tell us about the outfit you need." : "Please tell us what you have in mind.";
     return next;
   };
@@ -173,6 +188,12 @@ export default function Customize() {
         occasion: type.occasion,
         // Tailoring also collects a delivery address and a description of the fabric
         ...(isTailoring && { address: form.address.trim(), fabricPref: form.fabricDetails.trim() }),
+        // Outfit customisation also collects the occasion, how many outfits, and a budget
+        ...(!isTailoring && {
+          eventOccasion: form.eventOccasion === "Other" ? form.otherOccasion.trim() : form.eventOccasion,
+          outfitCount: Number(form.outfitCount),
+          budgetRange: form.budget,
+        }),
         notes: form.notes.trim(),
         images,
       });
@@ -250,6 +271,47 @@ export default function Customize() {
               </Field>
             )}
           </div>
+
+          {!isTailoring && (
+            <div className="space-y-5">
+              <SectionTitle>About your outfit</SectionTitle>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Occasion" required error={errors.eventOccasion}>
+                  <select value={form.eventOccasion} onChange={setField("eventOccasion")} className={inputClass(errors.eventOccasion)}>
+                    <option value="">Select an occasion</option>
+                    {OCCASIONS.map((occasion) => (
+                      <option key={occasion} value={occasion}>{occasion}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Number of outfits" required error={errors.outfitCount}>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    step="1"
+                    inputMode="numeric"
+                    value={form.outfitCount}
+                    onChange={setField("outfitCount")}
+                    className={inputClass(errors.outfitCount)}
+                  />
+                </Field>
+              </div>
+              {form.eventOccasion === "Other" && (
+                <Field label="Tell us the occasion" required error={errors.otherOccasion}>
+                  <input type="text" value={form.otherOccasion} onChange={setField("otherOccasion")} placeholder="e.g. Anniversary, baby shower" className={inputClass(errors.otherOccasion)} />
+                </Field>
+              )}
+              <Field label="Budget (approximate total)" required error={errors.budget}>
+                <select value={form.budget} onChange={setField("budget")} className={inputClass(errors.budget)}>
+                  <option value="">Select your budget</option>
+                  {BUDGETS.map((budget) => (
+                    <option key={budget} value={budget}>{budget}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          )}
 
           {isTailoring && (
             <div className="space-y-5">

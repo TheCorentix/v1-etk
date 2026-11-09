@@ -703,6 +703,18 @@ export default function Profile() {
                                 {cust.occasion}{cust.category && cust.category !== 'Custom Request' ? ` - ${cust.category}` : ''}
                               </span>
                             </div>
+                            {(cust.eventOccasion || cust.outfitCount || cust.budgetRange) && (
+                              <div>
+                                <span className="text-neutral-400 block uppercase text-[9px] tracking-wider">Details:</span>
+                                <span className="text-neutral-700">
+                                  {[
+                                    cust.eventOccasion,
+                                    cust.outfitCount ? `${cust.outfitCount} outfit${cust.outfitCount > 1 ? 's' : ''}` : null,
+                                    cust.budgetRange ? `Budget ${cust.budgetRange}` : null,
+                                  ].filter(Boolean).join(' · ')}
+                                </span>
+                              </div>
+                            )}
 
                             {/* Measurements breakdown */}
                             <div className="p-3.5 border border-[#E6DCCF] bg-[#FBF6EC] space-y-1">

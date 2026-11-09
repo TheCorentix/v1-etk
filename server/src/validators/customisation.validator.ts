@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// How many outfits. Arrives as text in a multipart form; blank means "not given".
+const outfitCountField = z.preprocess(
+  (value) => (value === '' || value === undefined || value === null ? undefined : Number(value)),
+  z
+    .number({ message: 'Number of outfits must be a number' })
+    .int('Number of outfits must be a whole number')
+    .min(1, 'Number of outfits must be at least 1')
+    .max(100, 'Number of outfits cannot be more than 100')
+    .optional()
+);
+
 // Schema for client customisation request creation
 export const createCustomisationSchema = z.object({
   body: z.object({
@@ -20,6 +31,8 @@ export const createCustomisationSchema = z.object({
     fabricPref: z.string().optional().nullable(), // For tailoring, free-text fabric details
     colorPref: z.string().optional().nullable(),
     budgetRange: z.string().optional().nullable(),
+    eventOccasion: z.string().trim().max(100, 'Occasion is too long').optional().nullable(), // e.g. Wedding, Birthday party
+    outfitCount: outfitCountField,
     address: z.string().optional().nullable(), // Sender's postal address (bespoke tailoring)
     deliveryDate: z.string().optional().nullable(),
     notes: z.string().optional().nullable(), // Stores measurement details and styling notes
@@ -40,6 +53,8 @@ export const updateCustomisationSchema = z.object({
     fabricPref: z.string().optional().nullable(),
     colorPref: z.string().optional().nullable(),
     budgetRange: z.string().optional().nullable(),
+    eventOccasion: z.string().trim().max(100, 'Occasion is too long').optional().nullable(),
+    outfitCount: outfitCountField,
     deliveryDate: z.string().optional().nullable(),
   }),
 });

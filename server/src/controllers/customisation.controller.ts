@@ -15,10 +15,10 @@ const forViewer = <T extends Partial<CustomisationDocument>>(request: T, isAdmin
 // Fields an admin may correct on a request; the optional ones can be cleared with an empty value
 const ADMIN_EDITABLE_FIELDS = [
   'customerName', 'phone', 'email', 'whatsappNumber', 'address',
-  'fabricPref', 'colorPref', 'budgetRange', 'deliveryDate', 'notes',
+  'fabricPref', 'colorPref', 'budgetRange', 'eventOccasion', 'outfitCount', 'deliveryDate', 'notes',
 ] as const;
 const CLEARABLE_FIELDS = new Set<string>([
-  'whatsappNumber', 'address', 'fabricPref', 'colorPref', 'budgetRange', 'deliveryDate', 'notes',
+  'whatsappNumber', 'address', 'fabricPref', 'colorPref', 'budgetRange', 'eventOccasion', 'deliveryDate', 'notes',
 ]);
 
 export class CustomisationController {
@@ -42,6 +42,8 @@ export class CustomisationController {
         fabricPref,
         colorPref,
         budgetRange,
+        eventOccasion,
+        outfitCount,
         address,
         deliveryDate,
         notes,
@@ -64,6 +66,8 @@ export class CustomisationController {
           fabricPref: fabricPref || null,
           colorPref: colorPref || null,
           budgetRange: budgetRange || null,
+          eventOccasion: eventOccasion || null,
+          outfitCount: outfitCount ?? null,
           address: address || null,
           deliveryDate: deliveryDate || null,
           notes: notes || null,
@@ -101,7 +105,7 @@ export class CustomisationController {
       let changes: Partial<CustomisationDocument>;
       if (isAdmin) {
         // Admins can correct any detail (including contact info) and clear optional ones
-        const edits: Record<string, string | null> = {};
+        const edits: Record<string, string | number | null> = {};
         for (const field of ADMIN_EDITABLE_FIELDS) {
           const value = req.body[field];
           if (value === undefined) continue;

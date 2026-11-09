@@ -18,13 +18,20 @@ const CONTACT_FIELDS = [
   { key: 'email', label: 'Email', required: true },
   { key: 'whatsappNumber', label: 'WhatsApp' },
 ];
+// What the customer picked on the outfit customisation form. Always shown for outfit requests,
+// and for any other request that already has a value.
+const OUTFIT_FIELDS = [
+  { key: 'eventOccasion', label: 'Occasion' },
+  { key: 'outfitCount', label: 'Number of outfits' },
+  { key: 'budgetRange', label: 'Budget' },
+];
 const LEGACY_FIELDS = [
   { key: 'colorPref', label: 'Colour' },
-  { key: 'budgetRange', label: 'Budget' },
   { key: 'deliveryDate', label: 'Delivery date' },
 ];
 const ALL_KEYS = [
-  ...CONTACT_FIELDS.map((f) => f.key), 'address', 'fabricPref', 'notes', ...LEGACY_FIELDS.map((f) => f.key),
+  ...CONTACT_FIELDS.map((f) => f.key), 'address', 'fabricPref', 'notes',
+  ...OUTFIT_FIELDS.map((f) => f.key), ...LEGACY_FIELDS.map((f) => f.key),
 ];
 
 const asText = (value) => (value === null || value === undefined ? '' : String(value));
@@ -94,6 +101,7 @@ export default function CustomisationRequestDetail({
     if ('customerName' in changes && changes.customerName.length < 2) found.customerName = 'Name must be at least 2 characters.';
     if ('phone' in changes && changes.phone.replace(/\D/g, '').length < 10) found.phone = 'Enter a valid 10-digit phone number.';
     if ('email' in changes && !EMAIL_PATTERN.test(changes.email)) found.email = 'Enter a valid email address.';
+    if ('outfitCount' in changes && !/^([1-9]\d?|100)$/.test(changes.outfitCount)) found.outfitCount = 'Enter a number from 1 to 100.';
     setErrors(found);
     if (Object.keys(found).length > 0) {
       toast.error('Please fix the highlighted fields.');
@@ -132,6 +140,7 @@ export default function CustomisationRequestDetail({
 
   const comments = [...(request.comments || [])].reverse(); // newest first
   const legacyToShow = LEGACY_FIELDS.filter((f) => asText(request[f.key]) || draft[f.key]);
+  const outfitToShow = OUTFIT_FIELDS.filter((f) => !isTailoring || asText(request[f.key]) || draft[f.key]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={requestClose}>
@@ -207,6 +216,21 @@ export default function CustomisationRequestDetail({
             <Field label={isTailoring ? 'About the outfit they need' : "Customer's idea / notes"}>
               <textarea rows={5} value={draft.notes} onChange={setField('notes')} className={inputClass(false)} />
             </Field>
+            {outfitToShow.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {outfitToShow.map((f) => (
+                  <Field key={f.key} label={f.label} error={errors[f.key]}>
+                    <input
+                      type="text"
+                      inputMode={f.key === 'outfitCount' ? 'numeric' : undefined}
+                      value={draft[f.key]}
+                      onChange={setField(f.key)}
+                      className={inputClass(errors[f.key])}
+                    />
+                  </Field>
+                ))}
+              </div>
+            )}
             {legacyToShow.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {legacyToShow.map((f) => (

@@ -46,6 +46,8 @@ export interface CustomisationDocument {
   fabricPref?: string | null; // For tailoring, stores free-text fabric details
   colorPref?: string | null;
   budgetRange?: string | null;
+  eventOccasion?: string | null; // What the outfit is for, e.g. Wedding, Birthday party (not the request type above)
+  outfitCount?: number | null; // How many outfits the customer wants
   address?: string | null; // Sender's postal address (used by bespoke tailoring requests)
   deliveryDate?: string | null;
   images: string[]; // Cloudinary secure URLs of design sketches/inspiration photos
