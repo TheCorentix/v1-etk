@@ -299,8 +299,12 @@ export default function Navbar({ onOpenCart }) {
                             <span>Pre-Draped Sarees</span>
                             <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
                           </Link>
-                          <Link to="/shop?category=WOMEN&subcategory=Anarkalis" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
-                            <span>Frocks</span>
+                          <Link to="/shop?category=WOMEN&subcategory=Dresses" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
+                            <span>Dresses</span>
+                            <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
+                          </Link>
+                          <Link to="/shop?category=WOMEN&subcategory=Blouses" className="flex justify-between items-center hover:text-[#B68D40] group py-0.5">
+                            <span>Blouses</span>
                             <span className="text-[10px] text-neutral-400 group-hover:translate-x-1 transition-transform">&gt;</span>
                           </Link>
                         </div>
@@ -552,8 +556,11 @@ export default function Navbar({ onOpenCart }) {
                   <Link to="/shop?category=WOMEN&subcategory=Sarees" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
                     Pre-Draped Sarees
                   </Link>
-                  <Link to="/shop?category=WOMEN&subcategory=Anarkalis" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
-                    Frocks
+                  <Link to="/shop?category=WOMEN&subcategory=Dresses" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
+                    Dresses
+                  </Link>
+                  <Link to="/shop?category=WOMEN&subcategory=Blouses" onClick={closeMobileMenu} className="hover:text-[#B68D40] transition-colors">
+                    Blouses
                   </Link>
 
                   <p className="pt-3 text-[#B68D40] font-bold">MEN</p>
