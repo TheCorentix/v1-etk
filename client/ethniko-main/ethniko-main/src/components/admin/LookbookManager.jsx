@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Film, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Film, AlertCircle, Pencil } from 'lucide-react';
 import { lookbookService } from '../../services/lookbookService';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ export default function LookbookManager({ products = [] }) {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null); // id of the look being edited (null = adding a new one)
 
   const [title, setTitle] = useState('');
   const [videoFile, setVideoFile] = useState(null);
@@ -38,11 +39,23 @@ export default function LookbookManager({ products = [] }) {
   }, []);
 
   const resetForm = () => {
+    setEditingId(null);
     setTitle('');
     setVideoFile(null);
     setThumbnailFile(null);
     setLinkedProducts([]);
     setProductSearch('');
+  };
+
+  const startEdit = (look) => {
+    setEditingId(look.id);
+    setTitle(look.title || '');
+    setVideoFile(null);
+    setThumbnailFile(null);
+    setProductSearch('');
+    setLinkedProducts((look.tags || []).map((t) => ({ productId: t.productId, x: t.x ?? 50, y: t.y ?? 50 })));
+    setShowAddForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleProduct = (productId) => {
@@ -61,7 +74,7 @@ export default function LookbookManager({ products = [] }) {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!videoFile) {
+    if (!editingId && !videoFile) {
       toast.error('Please select a video file.');
       return;
     }
@@ -75,17 +88,22 @@ export default function LookbookManager({ products = [] }) {
       const formData = new FormData();
       formData.append('title', title);
       formData.append('tags', JSON.stringify(linkedProducts));
-      formData.append('video', videoFile);
+      if (videoFile) formData.append('video', videoFile);
       if (thumbnailFile) formData.append('thumbnail', thumbnailFile);
 
-      await lookbookService.createLookbook(formData);
-      toast.success('Look published successfully!');
+      if (editingId) {
+        await lookbookService.updateLookbook(editingId, formData);
+        toast.success('Look updated.');
+      } else {
+        await lookbookService.createLookbook(formData);
+        toast.success('Look published successfully!');
+      }
       resetForm();
       setShowAddForm(false);
       loadLooks();
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to publish look.');
+      toast.error(err.message || (editingId ? 'Failed to update look.' : 'Failed to publish look.'));
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +139,7 @@ export default function LookbookManager({ products = [] }) {
           <span>Look &amp; Shop Videos</span>
         </h3>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => { if (showAddForm) resetForm(); setShowAddForm(!showAddForm); }}
           className="text-[9px] uppercase tracking-widest text-[#B68D40] hover:text-black font-sans font-bold focus:outline-none flex items-center gap-1"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -132,6 +150,7 @@ export default function LookbookManager({ products = [] }) {
       {/* Add Look form */}
       {showAddForm && (
         <form onSubmit={handleCreate} className="space-y-5 p-6 border border-[#D9C7A3] bg-primary rounded-lg text-left">
+          <h4 className="font-serif text-sm uppercase tracking-wider text-neutral-800">{editingId ? 'Edit Look' : 'New Look'}</h4>
           <div className="space-y-1">
             <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans font-bold block">Look Title</label>
             <input
@@ -147,17 +166,17 @@ export default function LookbookManager({ products = [] }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[9px] uppercase tracking-wider text-neutral-400 font-sans block font-bold">
-                Video File <span className="text-[#B68D40]">*</span>
+                Video File {!editingId && <span className="text-[#B68D40]">*</span>}
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <span className="bg-neutral-900 hover:bg-[#B68D40] text-white hover:text-black px-4 py-2 text-[10px] tracking-wider uppercase font-bold transition-colors">
                   Choose Video
                 </span>
-                <span className="text-[10px] text-neutral-500 font-mono line-clamp-1">{videoFile?.name || 'No file selected'}</span>
+                <span className="text-[10px] text-neutral-500 font-mono line-clamp-1">{videoFile?.name || (editingId ? 'Keep the current video' : 'No file selected')}</span>
                 <input
                   type="file"
                   accept="video/*"
-                  required
+                  required={!editingId}
                   className="hidden"
                   onChange={(e) => setVideoFile(e.target.files[0] || null)}
                 />
@@ -170,7 +189,7 @@ export default function LookbookManager({ products = [] }) {
                 <span className="bg-neutral-900 hover:bg-[#B68D40] text-white hover:text-black px-4 py-2 text-[10px] tracking-wider uppercase font-bold transition-colors">
                   Choose Image
                 </span>
-                <span className="text-[10px] text-neutral-500 font-mono line-clamp-1">{thumbnailFile?.name || 'Auto from video frame'}</span>
+                <span className="text-[10px] text-neutral-500 font-mono line-clamp-1">{thumbnailFile?.name || (editingId ? 'Keep the current thumbnail' : 'Auto from video frame')}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -245,7 +264,7 @@ export default function LookbookManager({ products = [] }) {
           </div>
 
           <button type="submit" disabled={submitting} className="btn-luxury-solid w-full font-bold">
-            {submitting ? 'Publishing...' : 'Publish Look'}
+            {submitting ? (editingId ? 'Saving...' : 'Publishing...') : (editingId ? 'Save Changes' : 'Publish Look')}
           </button>
         </form>
       )}
@@ -276,7 +295,10 @@ export default function LookbookManager({ products = [] }) {
                   );
                 })}
               </div>
-              <div className="flex justify-end pt-1">
+              <div className="flex justify-end items-center gap-1 pt-1">
+                <button onClick={() => startEdit(look)} className="p-1.5 text-neutral-400 hover:text-[#B68D40]" aria-label="Edit look">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
                 <button onClick={() => handleDelete(look.id)} className="p-1.5 text-red-500 hover:text-red-700" aria-label="Delete look">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
