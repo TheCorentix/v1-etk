@@ -20,36 +20,50 @@ import ivorySareeLook from '../assets/ivory_saree_look.png';
 import luxuryHero3 from "../assets/hero_4.png";
 
 // Consistent editorial collection imagery
+// "match" says which products feed a tile: its photo is taken from the newest published product in
+// that group, and the stock "image" is only a fallback while the group is still empty.
 const EXPLORE_CATEGORIES = [
   {
     name: "SAREES",
+    match: { category: "WOMEN", subcategory: "Sarees" },
     image: "https://images.unsplash.com/photo-1769500804057-ca1391bf4617?auto=format&fit=crop&w=800&q=80",
     path: "/shop?category=WOMEN&subcategory=Sarees"
   },
   {
     name: "LEHENGAS",
+    match: { category: "WOMEN", subcategory: "Lehengas" },
     image: "https://images.unsplash.com/photo-1645862755924-9f4e7f200b83?auto=format&fit=crop&w=800&q=80",
     path: "/shop?category=WOMEN&subcategory=Lehengas"
   },
   {
     name: "ANARKALIS",
+    match: { category: "WOMEN", subcategory: "Anarkalis" },
     image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
     path: "/shop?category=WOMEN&subcategory=Anarkalis"
   },
   {
     name: "KIDS ETHNIC",
+    match: { category: "KIDS" },
     image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80",
     path: "/shop?category=KIDS"
   },
   {
     name: "INDO-WESTERN",
+    match: { category: "WOMEN", subcategory: "Indo-Western" },
     image: "https://images.unsplash.com/photo-1741847639057-b51a25d42892?auto=format&fit=crop&w=800&q=80",
     path: "/shop?category=WOMEN&subcategory=Indo-Western"
   },
   {
-    name: "PRE-DRAPED SAREES",
-    image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80",
-    path: "/shop?category=WOMEN&subcategory=Sarees"
+    name: "DRESSES",
+    match: { category: "WOMEN", subcategory: "Dresses" },
+    image: null,
+    path: "/shop?category=WOMEN&subcategory=Dresses"
+  },
+  {
+    name: "BLOUSES",
+    match: { category: "WOMEN", subcategory: "Blouses" },
+    image: null,
+    path: "/shop?category=WOMEN&subcategory=Blouses"
   }
 ];
 
@@ -197,6 +211,29 @@ export default function Home() {
       }
     };
     fetchCategories();
+  }, []);
+
+  // Use real product photos on the collection tiles (newest published product of each group)
+  useEffect(() => {
+    let cancelled = false;
+    productService.getProducts({ page: 1, limit: 100, sort: 'newest' })
+      .then(({ products }) => {
+        if (cancelled) return;
+        const lower = (v) => String(v || '').toLowerCase();
+        setCategories((current) => current
+          .map((tile) => {
+            if (!tile.match) return tile;
+            const hit = products.find((p) =>
+              p.images?.[0] &&
+              lower(p.category) === lower(tile.match.category) &&
+              (!tile.match.subcategory || lower(p.subcategory) === lower(tile.match.subcategory)));
+            return hit ? { ...tile, image: hit.images[0] } : tile;
+          })
+          // a tile with no photo at all (no product and no stock image) is left out
+          .filter((tile) => tile.image));
+      })
+      .catch((err) => console.error('Could not load product photos for collections:', err));
+    return () => { cancelled = true; };
   }, []);
 
   // Auto scroll slides
