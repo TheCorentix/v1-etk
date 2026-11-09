@@ -11,6 +11,7 @@ import LookbookManager from '../components/admin/LookbookManager';
 import ProductEditModal from '../components/admin/ProductEditModal';
 import CustomisationRequestDetail from '../components/admin/CustomisationRequestDetail';
 import RolesPermissions from '../components/admin/RolesPermissions';
+import ReviewsAdmin from '../components/admin/ReviewsAdmin';
 import { tabsFor } from '../components/admin/adminTabs';
 import { useAuth } from '../context/AuthContext';
 
@@ -1425,6 +1426,9 @@ export default function Admin() {
 
           {/* ROLES & PERMISSIONS (admins only) */}
           {activeTab === 'roles' && <RolesPermissions />}
+
+          {/* PRODUCT REVIEWS: approve what customers write */}
+          {activeTab === 'reviews' && <ReviewsAdmin />}
 
           {/* LOOK & SHOP WORKSPACE */}
           {activeTab === 'lookbook' && (

@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Star, Check, HelpCircle, ChevronRight, Play, VolumeX, Volume2, Scissors } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { productService } from '../services/productService';
-import { mockReviews } from '../mock/reviews';
+import { reviewService } from '../services/reviewService';
+import ProductReviews from '../components/product/ProductReviews';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/common/ProductCard';
@@ -24,8 +25,9 @@ export default function ProductDetails() {
   // Tab control
   const [activeTab, setActiveTab] = useState("description");
   
-  // Custom reviews
-  const [reviews, setReviews] = useState([]);
+  // Approved customer reviews and the rating summary (loaded in the background)
+  const [reviewData, setReviewData] = useState(null);
+  const ratingSummary = reviewData?.summary || { average: 0, count: 0 };
   
   // Size, Color, Fabric pickers
   const [selectedSize, setSelectedSize] = useState("M");
@@ -60,9 +62,11 @@ export default function ProductDetails() {
           setSelectedFabric(uniqueFabrics[0] || "");
           setQty(1);
 
-          // Get reviews matching this product ID
-          const prodReviews = mockReviews.filter(r => r.productId === data.id);
-          setReviews(prodReviews);
+          // Approved reviews (the page doesn't wait for them)
+          setReviewData(null);
+          reviewService.getProductReviews(data.id, 1, 10)
+            .then(setReviewData)
+            .catch((err) => console.error('Could not load reviews:', err));
 
           // Manage recently viewed history
           trackRecentlyViewed(data);
@@ -272,13 +276,15 @@ export default function ProductDetails() {
                   <Star
                     key={i}
                     className={`w-3.5 h-3.5 ${
-                      i < Math.floor(product.rating) ? 'fill-[#B68D40]' : 'opacity-30'
+                      i < Math.round(ratingSummary.average) ? 'fill-[#B68D40]' : 'opacity-30'
                     }`}
                   />
                 ))}
               </div>
               <span className="text-[10px] font-sans text-neutral-500 uppercase tracking-wider">
-                {product.rating} Rating ({reviews.length} Client Reviews)
+                {ratingSummary.count > 0
+                  ? `${ratingSummary.average.toFixed(1)} Rating (${ratingSummary.count} Client Review${ratingSummary.count === 1 ? '' : 's'})`
+                  : 'No reviews yet'}
               </span>
             </div>
 
@@ -540,29 +546,7 @@ export default function ProductDetails() {
               )}
 
               {activeTab === 'reviews' && (
-                <div className="space-y-4 max-h-64 overflow-y-auto custom-scrollbar pr-2">
-                  {reviews.length > 0 ? (
-                    reviews.map((rev) => (
-                      <div key={rev.id} className="border-b border-[#ECECEC] pb-3 space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-neutral-800">{rev.userName}</span>
-                          <span className="text-[8px] text-neutral-400">{new Date(rev.date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex text-[#B68D40]">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-2.5 h-2.5 ${i < rev.userRating ? 'fill-[#B68D40]' : 'opacity-20'}`}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-neutral-500 italic text-[11px] leading-relaxed">"{rev.comment}"</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-neutral-400 italic">No client reviews registered for this item yet.</p>
-                  )}
-                </div>
+                <ProductReviews key={product.id} productId={product.id} initial={reviewData} />
               )}
             </div>
           </div>

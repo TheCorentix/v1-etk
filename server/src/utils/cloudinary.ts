@@ -25,6 +25,7 @@ export const uploadToCloudinary = async (
   | 'homepage/banner'
   | 'homepage/section'
   | 'homepage/video'
+  | 'reviews'
   | `library/${string}` // admin media library uploads (kept apart from product uploads)
 ): Promise<CloudinaryUploadResult> => {
   try {

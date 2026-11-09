@@ -1,4 +1,4 @@
-import { BarChart2, ShoppingBag, FileText, Scissors, Film, Sliders, Layers, Star, Settings, ShieldCheck } from 'lucide-react';
+import { BarChart2, ShoppingBag, FileText, Scissors, Film, Sliders, Layers, Star, Settings, ShieldCheck, MessageSquare } from 'lucide-react';
 
 // The admin sidebar tabs and the permission each one needs. Permission keys come from the server
 // (server/src/config/permissions.ts); the server enforces them too, so hiding a tab is only a convenience.
@@ -10,7 +10,8 @@ export const ADMIN_TABS = [
   { id: 'lookbook', label: 'Look & Shop', icon: Film, permission: 'content.manage' },
   { id: 'cms', label: 'Homepage CMS', icon: Sliders, permission: 'content.manage' },
   { id: 'categories', label: 'Categories & Collections', icon: Layers, permission: 'content.manage' },
-  { id: 'testimonials', label: 'Draped in Love (Reviews)', icon: Star, permission: 'content.manage' },
+  { id: 'testimonials', label: 'Draped in Love (Testimonials)', icon: Star, permission: 'content.manage' },
+  { id: 'reviews', label: 'Product Reviews', icon: MessageSquare, permission: 'reviews.manage' },
   { id: 'settings', label: 'Store Settings', icon: Settings, permission: 'settings.manage' },
   { id: 'roles', label: 'Roles & Permissions', icon: ShieldCheck, permission: 'roles.manage' },
 ];

@@ -11,6 +11,7 @@ export const PERMISSIONS = [
   'orders.manage',
   'customisations.manage',
   'content.manage',
+  'reviews.manage',
   'settings.manage',
   'roles.manage',
 ] as const;
@@ -36,7 +37,11 @@ export const PERMISSION_INFO: Record<Permission, { label: string; description: s
   },
   'content.manage': {
     label: 'Website content',
-    description: 'Homepage banners and sections, Look & Shop, reviews, categories and the media library.',
+    description: 'Homepage banners and sections, Look & Shop, the Draped in Love testimonials, categories and the media library.',
+  },
+  'reviews.manage': {
+    label: 'Product reviews',
+    description: 'Approve, reject or delete customer reviews of products.',
   },
   'settings.manage': {
     label: 'Store settings',
@@ -63,8 +68,8 @@ export const ROLE_INFO: Record<StaffRole, { label: string; description: string; 
   },
   CONTENT_MANAGER: {
     label: 'Content Manager',
-    description: 'Looks after the catalog and website content. No access to orders, customer requests or settings.',
-    permissions: ['products.manage', 'content.manage'],
+    description: 'Looks after the catalog, website content and product reviews. No access to orders, customer requests or settings.',
+    permissions: ['products.manage', 'content.manage', 'reviews.manage'],
   },
   ORDER_MANAGER: {
     label: 'Order Manager',
