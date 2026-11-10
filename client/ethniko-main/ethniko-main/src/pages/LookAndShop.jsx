@@ -233,7 +233,7 @@ export default function LookAndShop() {
                 description: 'Editorial Video Look',
                 duration: '0:30',
                 // Pills on the look card: the tagged products' names (not their raw IDs)
-                tags: products.map((p) => p.name),
+                tags: products.map((p) => ({ name: p.name, slug: p.slug })),
                 videoUrl: look.videoUrl,
                 products,
               };
@@ -402,11 +402,24 @@ export default function LookAndShop() {
 
                   {/* bottom tag pills */}
                   <div className="absolute bottom-2.5 inset-x-2.5 flex flex-wrap gap-1">
-                    {look.tags.map(t => (
-                      <span key={t} className="bg-white/85 backdrop-blur-sm text-[#181818] text-[8px] font-sans font-semibold px-2 py-0.5 uppercase tracking-wider rounded-sm">
-                        + {t}
-                      </span>
-                    ))}
+                    {look.tags.map((t) => {
+                      // Sample looks use plain text tags; looks from the admin carry { name, slug }
+                      const name = typeof t === 'string' ? t : t.name;
+                      const slug = typeof t === 'string' ? null : t.slug;
+                      const pill = "bg-white/85 backdrop-blur-sm text-[#181818] text-[8px] font-sans font-semibold px-2 py-0.5 uppercase tracking-wider rounded-sm";
+                      return slug ? (
+                        <Link
+                          key={name}
+                          to={`/product/${slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`${pill} hover:bg-[#B68D40] hover:text-white transition-colors`}
+                        >
+                          + {name}
+                        </Link>
+                      ) : (
+                        <span key={name} className={pill}>+ {name}</span>
+                      );
+                    })}
                   </div>
                 </div>
 
